@@ -10,4 +10,4 @@ export COOKBOOK_NAME="nmd$JOB_NAME"
 env
 
 # knife exec -E "nodes.find('$JOB_NAME:action') { |n| n.normal.$JOB_NAME.action = 'update'; n.save}"
-# knife ssh -A "$JOB_NAME:action" "sudo chef-client" --ssh-user jenkins_ac
+knife ssh -A "$COOKBOOK_NAME:action" "sudo chef-client" --ssh-user jenkins_ac
