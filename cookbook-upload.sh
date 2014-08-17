@@ -8,4 +8,4 @@ export CHEF_SERVER_URL=https://api.opscode.com/organizations/newmediadenver
 
 COOKBOK_NAME=`awk '$1=="name"{print $2}' $WORKSPACE/metadata.rb | sed "s/'//g"`
 
-knife cookbook upload $COOKBOK_NAME -o ../ --verbose
+knife cookbook upload $COOKBOK_NAME -o $JENKINS_HOME/workspace --verbose
