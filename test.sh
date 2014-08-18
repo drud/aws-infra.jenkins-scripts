@@ -9,4 +9,4 @@ export COOKBOOK_NAME=`awk '$1=="name"{print $2}' $WORKSPACE/metadata.rb | sed "s
 
 env
 
-OUTPUT=`knife ssh -A "$COOKBOOK_NAME:action" "sudo chef-client" --ssh-user jenkins_ac`
+knife ssh -A "$COOKBOOK_NAME:action" "sudo chef-client" --ssh-user jenkins_ac
