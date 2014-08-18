@@ -8,4 +8,4 @@ export CHEF_SERVER_URL=https://api.opscode.com/organizations/newmediadenver
 
 env
 
-knife ssh -A name:web003.newmediadenver.com sudo chef-client --ssh-user jenkins_ac
+knife ssh -A name:web001.newmediadenver.com sudo chef-client --ssh-user jenkins_ac
