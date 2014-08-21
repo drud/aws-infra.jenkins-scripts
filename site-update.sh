@@ -9,5 +9,17 @@ export COOKBOOK_NAME="nmd$JOB_NAME"
 
 env
 
-knife exec -E "nodes.find('$COOKBOOK_NAME:action') { |n| n.normal.$COOKBOOK_NAME.action = 'update'; n.save}"
-knife ssh -A "$COOKBOOK_NAME:action" "sudo chef-client" --ssh-user jenkins_ac
+case "$GIT_BRANCH" in
+  'origin/master')
+    CHEF_ENVIRONMENT='production'
+    ;;
+  'origin/staging')
+    CHEF_ENVIRONMENT='staging'
+    ;;
+  *)
+    CHEF_ENVIRONMENT='_default'
+    ;;
+esac
+
+knife exec -E "nodes.find('chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action') { |n| n.normal.$COOKBOOK_NAME.action = 'update'; n.save}"
+knife ssh -A "chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action" "sudo chef-client" --ssh-user jenkins_ac
