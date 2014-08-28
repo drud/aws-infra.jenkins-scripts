@@ -8,7 +8,8 @@ export CHEF_SERVER_URL=https://api.opscode.com/organizations/newmediadenver
 if [ -z "$COOKBOOK_NAME" ]; then
   export COOKBOOK_NAME="nmd$JOB_NAME"
 fi
-
+echo $COOKBOOK_NAME
+exit 0
 env
 
 case "$GIT_BRANCH" in
