@@ -1,3 +1,5 @@
+#!/bin/bash -xe
+
 export CHEF_VALIDATION_KEY=/var/jenkins_home/.chef/chef_validationkey.pem
 export CHEF_VALIDATION_CLIENT_NAME=newmediadenver-validator
 export CHEF_CLIENT_KEY=/var/jenkins_home/.chef/chef_clientkey.pem
