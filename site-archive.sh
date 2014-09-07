@@ -10,4 +10,4 @@ if [ -z "$COOKBOOK_NAME" ]; then
 fi
 env
 CHEF_ENVIRONMENT='staging'
-knife ssh -A "chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action" "sudo -E -P /home/jenkins_ac/scripts/current/site-archive-child.sh" --ssh-user jenkins_ac
+knife ssh -A "chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action" "sudo -E -P /home/jenkins_ac/scripts/current/site-archive-child.sh $SITE" --ssh-user jenkins_ac
