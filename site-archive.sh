@@ -11,5 +11,5 @@ fi
 env
 CHEF_ENVIRONMENT='staging'
 
-knife ssh -A "name:$HOSTNAME" "sudo -E -P /home/jenkins_ac/scripts/current/site-archive-child.sh $SITE" --ssh-user jenkins_ac
-scp jenkins_ac@$HOSTNAME:/tmp/$SITE.tar.gz . -i /home/jenkins_ac/.ssh/id_rsa
+ssh jenkins_ac@$HOSTNAME 'sudo -E -P /home/jenkins_ac/scripts/current/site-archive-child.sh $SITE'
+scp jenkins_ac@$HOSTNAME:/tmp/$SITE.tar.gz .
