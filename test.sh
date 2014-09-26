@@ -7,7 +7,7 @@ export CHEF_NODE_NAME=jenkins_ac
 export CHEF_SERVER_URL=https://api.opscode.com/organizations/newmediadenver
 
 env
-
+# bump
 OUTPUT=$(knife ssh -A name:web001.newmediadenver.com sudo chef-client --ssh-user jenkins_ac)
 echo "hai world."
 echo "I HAVE $OUTPUT"
