@@ -22,5 +22,5 @@ case "$GIT_BRANCH" in
     ;;
 esac
 
-knife exec -E "nodes.find('chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action') { |n| n.normal.$COOKBOOK_NAME.action = '$CHEF_ACTION'; n.save}"
-knife ssh -A "chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action" "sudo -E -P chef-client" --ssh-user jenkins_ac
+knife  --verbose --config /var/jenkins_home/workspace/jenkins-chef-client/.chef/knife.rb exec -E "nodes.find('chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action') { |n| n.normal.$COOKBOOK_NAME.action = '$CHEF_ACTION'; n.save}"
+knife  --verbose --config /var/jenkins_home/workspace/jenkins-chef-client/.chef/knife.rb ssh -A "chef_environment:$CHEF_ENVIRONMENT AND $COOKBOOK_NAME:action" "sudo -E -P chef-client" --ssh-user jenkins_ac
