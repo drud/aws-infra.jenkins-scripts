@@ -9,4 +9,4 @@ export COOKBOOK_NAME=`awk '$1=="name"{print $2}' $WORKSPACE/metadata.rb | sed "s
 
 env
 
-knife cookbook upload $COOKBOOK_NAME -o $JENKINS_HOME/workspace --verbose
+knife cookbook upload $COOKBOOK_NAME -o $JENKINS_HOME/workspace --verbose --config /var/jenkins_home/workspace/jenkins-chef-client/.chef/knife.rb
