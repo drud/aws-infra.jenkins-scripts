@@ -116,4 +116,4 @@ echo "[$(date)] $INSTANCE update /etc/chef/client.rb"
 ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'echo "ssl_verify_mode :verify_peer" >> /etc/chef/client.rb'
 echo "[$(date)] $INSTANCE apply role."
 knife node run_list add $NEWHOSTNAME "role[$NEWROLE]"
-ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'chef-client'
+ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'chef-client -l debug'
