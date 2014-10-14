@@ -32,13 +32,13 @@ MAX_TESTS=20
 SLEEP_AMOUNT=10
 OVER=0
 TESTS=0
-while [[ $OVER != 1  ]] && [[ $TESTS -le $MAX_TESTS ]]; do
-  if [ ! ping -c1 $PRIVATEIP &>/dev/null ]; then
-    OVER=0
+while [[ $OVER != 1  ]] && [[ $TESTS -le $MAX_TESTS ]]; do]
+  ping -c1 $PRIVATEIP
+  if [[ $? == 0 ]]; then
+    OVER=1
+  else
     TESTS=$(echo $(( TESTS+=1 )))
     sleep $SLEEP_AMOUNT
-  else
-    OVER=1
   fi
 done
 }
