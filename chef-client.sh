@@ -6,4 +6,4 @@ export CHEF_CLIENT_KEY=/var/jenkins_home/.chef/chef_clientkey.pem
 export CHEF_NODE_NAME=jenkins_ac
 export CHEF_SERVER_URL=https://api.opscode.com/organizations/newmediadenver
 # need ipaddress and not fqdn for internal routing.
-knife ssh -A "name:$HOSTNAME" "sudo -E -P chef-client" --ssh-user jenkins_ac -a ipaddress -i /var/jenkins_home/.ssh/id_rsa
+knife ssh -A "name:$HOSTNAME" "sudo -E -P chef-client -l debug" --ssh-user jenkins_ac -a ipaddress -i /var/jenkins_home/.ssh/id_rsa
