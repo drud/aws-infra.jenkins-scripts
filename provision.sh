@@ -1,44 +1,90 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 
-export CHEF_VALIDATION_KEY=/var/jenkins_home/.chef/chef_validationkey.pem
-export CHEF_VALIDATION_CLIENT_NAME=newmediadenver-validator
-export CHEF_CLIENT_KEY=/var/jenkins_home/.chef/chef_clientkey.pem
-export CHEF_NODE_NAME=jenkins_ac
-export CHEF_SERVER_URL=https://api.opscode.com/organizations/newmediadenver
-export AWS_ACCESS_KEY='AKIAJXWDNYTONJLIGLYQ'
-export AWS_SECRET_KEY='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'
-export EC2_HOME='/var/jenkins_home/workspace/jenkins-scripts/ec2-api-tools'
-export JAVA_HOME='/usr/lib/jvm/java-7-openjdk-amd64'
-export EC2_URL='https://ec2.us-west-2.amazonaws.com'
-export EC2_REGION='us-west-2'
-export KEYNAME=cyberswat
 env
-# This will validate everything is connected.
-ec2-api-tools/bin/ec2-describe-regions
-INSTANCE=$(ec2-api-tools/bin/ec2-run-instances $IMAGE --subnet $SUBNET --key $KEYNAME --group $SECURITYGROUPS --instance-type $INSTANCE_TYPE --block-device-mapping "/dev/sda=:${DISKSIZE}:true:gp2" | sed -n '2p' | awk '{print $2}')
-if [ -z "$INSTANCE" ]; then
-  echo "Could not get an instance id."
-  exit 1
-fi
 
-ec2-api-tools/bin/ec2-describe-instances ${INSTANCE}
-
+wait_state_running ()
+{
 echo "[$(date)] Waiting for running state ..."
-STATE=''
-while [ "$STATE" != 'running' ]
-do
+MAX_TESTS=20
+SLEEP_AMOUNT=10
+OVER=0
+TESTS=0
+while [[ $OVER != 1 ]] && [[ $TESTS -le $MAX_TESTS ]]; do
   DESCRIPTION=$(ec2-api-tools/bin/ec2-describe-instances ${INSTANCE})
   PRIVATEIP=$(echo "$DESCRIPTION" | awk '{printf $15}')
   STATE_RAW=$(echo "$DESCRIPTION" | awk '{print $5}' | head -2)
   STATE=$(echo $STATE_RAW | sed 's/^\s*//')
   echo "[$(date)] $STATE"
-  x=$(( $x + 1 ))
+  if [[ "$STATE" != "running" ]]; then
+    OVER=0
+    TESTS=$(echo $(( TESTS+=1 )))
+    sleep $SLEEP_AMOUNT
+  else
+    OVER=1
+  fi
 done
+}
 
+wait_ping ()
+{
 echo "[$(date)] Waiting for ping ..."
-while ! ping -c1 $PRIVATEIP &>/dev/null; do :; done
-echo "[$(date)] $INSTANCE is $STATE on $PRIVATEIP"
-sleep 30
+MAX_TESTS=20
+SLEEP_AMOUNT=10
+OVER=0
+TESTS=0
+while [[ $OVER != 1  ]] && [[ $TESTS -le $MAX_TESTS ]]; do
+  if [ ! ping -c1 $PRIVATEIP &>/dev/null ]; then
+    OVER=0
+    TESTS=$(echo $(( TESTS+=1 )))
+    sleep $SLEEP_AMOUNT
+  else
+    OVER=1
+  fi
+done
+}
+
+wait_ssh ()
+{
+MAX_TESTS=20
+SLEEP_AMOUNT=10
+OVER=0
+TESTS=0
+echo "[$(date)] Waiting for ssh ..."
+while [[ $OVER != 1 ]] && [[ $TESTS -le $MAX_TESTS ]]; do
+    ssh -q -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/aws.pem root@$PRIVATEIP exit
+    if [[ $? != 255 ]]; then
+        OVER=1
+    else
+        TESTS=$(echo $(( TESTS+=1 )))
+        sleep $SLEEP_AMOUNT
+    fi
+done
+}
+
+SECURITYGROUPS=$(echo $SECURITYGROUPS | sed 's/ .*//')
+IMAGE=$(echo $IMAGE | sed 's/ .*//')
+INSTANCE_TYPE=$(echo $INSTANCE_TYPE | sed 's/ .*//')
+NEWROLE=$(echo $NEWROLE | sed 's/ .*//')
+SECURITYGROUPS=$(echo $SECURITYGROUPS | sed 's/ .*//')
+SUBNET=$(echo $SUBNET | sed 's/ .*//')
+TARGETENVIRONMENT=$(echo $TARGETENVIRONMENT | sed 's/ .*//')
+
+# This will validate everything is connected.
+ec2-api-tools/bin/ec2-describe-regions
+
+export INSTANCE=$(ec2-api-tools/bin/ec2-run-instances $IMAGE --subnet $SUBNET --key $KEYNAME --group $SECURITYGROUPS --instance-type $INSTANCE_TYPE --block-device-mapping "/dev/sda=:${DISKSIZE}:true:gp2" | sed -n '2p' | awk '{print $2}')
+if [[ -z "$INSTANCE" ]]; then
+  echo "Could not get an instance id."
+  exit 1
+fi
+echo $INSTANCE > /var/jenkins_home/workspace/provision-teardown/INSTANCE
+
+ec2-api-tools/bin/ec2-describe-instances ${INSTANCE}
+
+wait_state_running
+wait_ping
+wait_ssh
+
 echo "[$(date)] $INSTANCE resizing disk."
 ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP "resize2fs /dev/xvde"
 echo "[$(date)] $INSTANCE update /etc/sysconfig/network"
@@ -55,22 +101,11 @@ ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PR
 echo "[$(date)] $INSTANCE yum update"
 ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'yum update -y && reboot'
 echo "[$(date)] $INSTANCE rebooting."
-echo "[$(date)] Waiting for running state ..."
-STATE=''
-while [ "$STATE" != 'running' ]
-do
-  DESCRIPTION=$(ec2-api-tools/bin/ec2-describe-instances ${INSTANCE})
-  PRIVATEIP=$(echo "$DESCRIPTION" | awk '{printf $15}')
-  STATE_RAW=$(echo "$DESCRIPTION" | awk '{print $5}' | head -2)
-  STATE=$(echo $STATE_RAW | sed 's/^\s*//')
-  echo "[$(date)] $STATE"
-  x=$(( $x + 1 ))
-done
-echo "[$(date)] Waiting for ping ..."
-while ! ping -c1 $PRIVATEIP &>/dev/null; do :; done
-sleep 30
-echo "[$(date)] $INSTANCE ssh availability check"
-ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'hostname && date'
+
+wait_state_running
+wait_ping
+wait_ssh
+
 echo "[$(date)] delete node from chef if it exists"
 knife node $NEWHOSTNAME delete -y
 echo "[$(date)] delete client from chef if it exists"
@@ -79,5 +114,6 @@ echo "[$(date)] bootstrap the instance"
 knife bootstrap $PRIVATEIP -u root -N $NEWHOSTNAME -E $TARGETENVIRONMENT -i /var/jenkins_home/.ssh/aws.pem --no-host-key-verify
 echo "[$(date)] $INSTANCE update /etc/chef/client.rb"
 ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'echo "ssl_verify_mode :verify_peer" >> /etc/chef/client.rb'
-echo "[$(date)] chef-client"
+echo "[$(date)] $INSTANCE apply role."
+knife node run_list add $NEWHOSTNAME "role[$NEWROLE]"
 ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -t -t root@$PRIVATEIP 'chef-client'
