@@ -14,6 +14,12 @@ while [[ $OVER != 1 ]] && [[ $TESTS -le $MAX_TESTS ]]; do
   PRIVATEIP=$(echo "$DESCRIPTION" | awk '{printf $15}')
   STATE_RAW=$(echo "$DESCRIPTION" | awk '{print $5}' | head -2)
   STATE=$(echo $STATE_RAW | sed 's/^\s*//')
+
+  if [[ "$STATE" == ip-* ]]; then
+    STATE_RAW=$(echo "$DESCRIPTION" | awk '{print $6}' | head -2)
+    STATE=$(echo $STATE_RAW | sed 's/^\s*//')
+  fi
+
   echo "[$(date)] $STATE"
   if [[ "$STATE" != "running" ]]; then
     OVER=0
