@@ -17,16 +17,7 @@ mkdir -p archive/var
 
 DESCRIPTION=$(ec2-api-tools/bin/ec2-describe-instances $INSTANCE --filter "image-id=$IMAGE" --filter "instance.group-id=$SECURITYGROUPS" --filter "instance-type=$INSTANCE_TYPE")
 export INSTANCE=$(echo "$DESCRIPTION" | sed -n '2p' | awk '{print $2}')
-PRIVATEIP=$(echo "$DESCRIPTION" | awk '{printf $15}')
-
-if [[ "$PRIVATEIP" != 10.* ]]; then
-  PRIVATEIP=$(echo "$DESCRIPTION" | awk '{printf $17}')
-fi
-
-if [[ "$PRIVATEIP" != 10.* ]]; then
-  echo "Could not get a private ip address."
-  exit 1
-fi
+PRIVATEIP=$(echo "$DESCRIPTION" | sed -n -e '/^PRIVATEIPADDRESS/p' | awk '{print $2}')
 
 if [[ -z "$DESCRIPTION" ]]; then
   echo "Could not get an instance id."

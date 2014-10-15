@@ -2,6 +2,21 @@
 
 env
 
+getprivateip ()
+{
+  DESCRIPTION=$(ec2-api-tools/bin/ec2-describe-instances ${INSTANCE})
+  PRIVATEIP=$(echo "$DESCRIPTION" | sed -n -e '/^PRIVATEIPADDRESS/p' | awk '{print $2}')
+}
+
+getstate ()
+{
+  DESCRIPTION=$(ec2-api-tools/bin/ec2-describe-instances ${INSTANCE})
+  STATE=$(echo "$DESCRIPTION" | sed -n -e '/^INSTANCE/p' | awk '{print $5}')
+  if [[ "$STATE" == ip-* ]]; then
+    STATE=$(echo "$DESCRIPTION" | sed -n -e '/^INSTANCE/p' | awk '{print $6}')
+  fi
+}
+
 wait_state_running ()
 {
 echo "[$(date)] Waiting for running state ..."
@@ -10,16 +25,7 @@ SLEEP_AMOUNT=10
 OVER=0
 TESTS=0
 while [[ $OVER != 1 ]] && [[ $TESTS -le $MAX_TESTS ]]; do
-  DESCRIPTION=$(ec2-api-tools/bin/ec2-describe-instances ${INSTANCE})
-  PRIVATEIP=$(echo "$DESCRIPTION" | awk '{printf $15}')
-  STATE_RAW=$(echo "$DESCRIPTION" | awk '{print $5}' | head -2)
-  STATE=$(echo $STATE_RAW | sed 's/^\s*//')
-
-  if [[ "$STATE" == ip-* ]]; then
-    STATE_RAW=$(echo "$DESCRIPTION" | awk '{print $6}' | head -2)
-    STATE=$(echo $STATE_RAW | sed 's/^\s*//')
-  fi
-
+  getstate
   echo "[$(date)] $STATE"
   if [[ "$STATE" != "running" ]]; then
     OVER=0
@@ -38,6 +44,7 @@ MAX_TESTS=20
 SLEEP_AMOUNT=10
 OVER=0
 TESTS=0
+getprivateip
 while [[ $OVER != 1  ]] && [[ $TESTS -le $MAX_TESTS ]]; do
   ping -c1 $PRIVATEIP
   if [[ $? == 0 ]]; then
@@ -55,6 +62,7 @@ MAX_TESTS=20
 SLEEP_AMOUNT=10
 OVER=0
 TESTS=0
+getprivateip
 echo "[$(date)] Waiting for ssh ..."
 while [[ $OVER != 1 ]] && [[ $TESTS -le $MAX_TESTS ]]; do
     ssh -q -o StrictHostKeyChecking=no -i /var/jenkins_home/.ssh/aws.pem root@$PRIVATEIP exit
@@ -75,17 +83,12 @@ SECURITYGROUPS=$(echo $SECURITYGROUPS | sed 's/ .*//')
 SUBNET=$(echo $SUBNET | sed 's/ .*//')
 TARGETENVIRONMENT=$(echo $TARGETENVIRONMENT | sed 's/ .*//')
 
-# This will validate everything is connected.
-ec2-api-tools/bin/ec2-describe-regions
-
 export INSTANCE=$(ec2-api-tools/bin/ec2-run-instances $IMAGE --subnet $SUBNET --key $KEYNAME --group $SECURITYGROUPS --instance-type $INSTANCE_TYPE --block-device-mapping "/dev/sda=:${DISKSIZE}:true:gp2" | sed -n '2p' | awk '{print $2}')
 if [[ -z "$INSTANCE" ]]; then
   echo "Could not get an instance id."
   exit 1
 fi
 echo $INSTANCE > /var/jenkins_home/workspace/provision-teardown/INSTANCE
-
-ec2-api-tools/bin/ec2-describe-instances ${INSTANCE}
 
 wait_state_running
 wait_ping
