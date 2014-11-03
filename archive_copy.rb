@@ -31,7 +31,7 @@ end
 puts "Copying #{latest.key} to #{latest.key.gsub(args['from'], args['to'])}"
 objects[latest.key.gsub(args['from'], args['to'])].copy_from(latest.key, options) 
 
-difference = objects.with_prefix("#{args['sitename']}/#{args['from']}-").count - args['aws_s3_backups']
+difference = objects.with_prefix("#{args['sitename']}/#{args['from']}-").count - args['aws_s3_backups'].to_i
 if difference > 0
   i = 0
   objects.with_prefix("#{args['sitename']}/#{args['from']}-").each do |obj|
