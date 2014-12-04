@@ -21,15 +21,13 @@ raise "There is no file to copy from." if latest.nil?
 puts latest.inspect
 if latest.content_length < 5000000000
   options = { 
-    :server_side_encryption => :aes256,
-    :client_side_encrypted => true
+    :server_side_encryption => :aes256
   }
 else
   options = { 
     :server_side_encryption => :aes256,
     :use_multipart_copy => true,
     :content_length => latest.content_length,
-    :client_side_encrypted => true,
     :content_type => 'application/x-gzip'
   }
 end
