@@ -27,7 +27,7 @@ else
   options = { 
     :server_side_encryption => :aes256,
     :use_multipart_copy => true,
-    :content_length => latest.content_length
+    :content_length => latest.content_length,
     :client_side_encrypted => true
   }
 end
