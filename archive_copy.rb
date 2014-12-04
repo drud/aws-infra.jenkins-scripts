@@ -18,6 +18,7 @@ end
 raise "There is no file to copy from." if latest.nil?
 
 # Can only do an object copy if file size is less than 5gb.
+
 if latest.content_length < 5000000000
   options = { 
     :server_side_encryption => :aes256
@@ -25,7 +26,8 @@ if latest.content_length < 5000000000
 else
   options = { 
     :server_side_encryption => :aes256,
-    :use_multipart_copy => true
+    :use_multipart_copy => true,
+    :content_length => latest.content_length
   }
 end
 puts "Copying #{latest.key} to #{latest.key.gsub(args['from'], args['to'])}"
