@@ -21,7 +21,7 @@ raise "There is no file to copy from." if latest.nil?
 
 if latest.content_length < 5000000000
   options = { 
-    :server_side_encryption => :aes256
+    :server_side_encryption => :aes256,
     :client_side_encrypted => true
   }
 else
