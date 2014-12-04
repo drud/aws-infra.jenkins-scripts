@@ -18,7 +18,7 @@ end
 raise "There is no file to copy from." if latest.nil?
 
 # Can only do an object copy if file size is less than 5gb.
-
+puts latest.inspect
 if latest.content_length < 5000000000
   options = { 
     :server_side_encryption => :aes256,
