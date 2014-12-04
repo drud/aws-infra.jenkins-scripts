@@ -27,7 +27,7 @@ else
   options = { 
     :server_side_encryption => :aes256,
     :use_multipart_copy => true,
-    :estimated_content_length => latest.content_length
+    :content_length => latest.content_length
   }
 end
 puts "Copying #{latest.key} to #{latest.key.gsub(args['from'], args['to'])}"
