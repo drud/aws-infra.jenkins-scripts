@@ -7,11 +7,11 @@ require 'chef/encrypted_data_bag_item'
 bagname = 'encrypted'
 appname = 'example'
 
-environment = ARGV[2]
-sitename = ARGV[3]
+environment = ARGV[4]
+sitename = ARGV[5]
 # Get just the subdomain of source/destination arguments
-source = /^([^.]*)/.match(ARGV[4]).to_s
-destination = /^([^.]*)/.match(ARGV[5]).to_s
+source = /^([^.]*)/.match(ARGV[6]).to_s
+destination = /^([^.]*)/.match(ARGV[7]).to_s
 
 puts environment
 puts sitename
