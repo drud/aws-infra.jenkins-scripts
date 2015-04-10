@@ -4,8 +4,8 @@ require 'chef/config'
 require 'chef/data_bag'
 require 'chef/encrypted_data_bag_item'
 
-bagname = 'encrypted'
-appname = 'example'
+bagname = 'nmdproxy'
+appname = 'upstream'
 
 environment = ARGV[4]
 sitename = ARGV[5]
