@@ -13,6 +13,11 @@ sitename = ARGV[3]
 source = /^([^.]*)/.match(ARGV[4]).to_s
 destination = /^([^.]*)/.match(ARGV[5]).to_s
 
+puts environment
+puts sitename
+puts source
+puts destination
+
 # Use the same config as knife uses
 Chef::Config.from_file("/var/jenkins_home/workspace/jenkins-chef-client/.chef/knife.rb")
 
