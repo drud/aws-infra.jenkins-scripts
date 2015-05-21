@@ -8,10 +8,12 @@ bagname = 'nmdproxy'
 appname = 'upstream'
 
 environment = ARGV[4]
-sitename = ARGV[5]
-action = ARGV[6]
+server = /^([^.]*)/.match(ARGV[5]).to_s
+sitename = ARGV[6]
+action = ARGV[7]
 
 puts environment
+puts server
 puts sitename
 puts action
 
@@ -33,8 +35,7 @@ update = item[environment]
 
 if action == 'add'
     aliases.each do |key|
-        server = update.find{key}.first
-        puts server
+        puts update[server]['apps'][key]
         if update[server]['apps'][key].nil?
             update[server]['apps'][key] = {"maintenance" => true}
         else
@@ -44,8 +45,7 @@ if action == 'add'
     end
 elsif action == 'remove'
     aliases.each do |key|
-        server = update.find{key}.first
-        puts server
+        puts update[server]['apps'][key]
         update[server]['apps'][key].delete("maintenance")
         puts update[server]['apps'][key]
     end
