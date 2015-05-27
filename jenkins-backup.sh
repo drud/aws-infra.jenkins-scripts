@@ -7,7 +7,7 @@ if [ -d $JENKINS_HOME/.git ]; then
 else
   cd $JENKINS_HOME
   git init
-  git remote add origin git@bitbucket.org:hdscode/jenkins.git
+  git remote add origin git@github.com:newmediadenver/jenkins.git
 fi;
 
 # Move into the jenkins directory
