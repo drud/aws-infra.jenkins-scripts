@@ -25,6 +25,9 @@ git add users/*/config.xml
 # Add all user content files.
 git add userContent/*
 
+# Add all plugins.
+git add plugins/*
+
 # Remove files from the remote repo that have been removed locally.
 COUNT=`git log --pretty=format: --name-only --diff-filter=D | wc -l`
 if [ $COUNT -ne 0 ]
