@@ -18,6 +18,7 @@ git add *.xml
 
 # Add all job config.xml files.
 git add jobs/*/config.xml
+git add jobs/*/nextBuildNumber
 
 # Add all user config.xml files.
 git add users/*/config.xml
