@@ -13,7 +13,7 @@ fi;
 # Move into the jenkins directory
 cd $JENKINS_HOME
 git fetch --all
-git checkout 'users/root@292261-web5.www.travelagentcentral.com/config.xml'
+
 #Add all top level xml files.
 git add *.xml
 
@@ -31,6 +31,7 @@ git add userContent/*
 git add plugins/*.hpi
 
 # Remove files from the remote repo that have been removed locally.
+git log --pretty=format: --name-only --diff-filter=D
 COUNT=`git log --pretty=format: --name-only --diff-filter=D | wc -l`
 if [ $COUNT -ne 0 ]
   then git log --pretty=format: --name-only --diff-filter=D | xargs git rm
