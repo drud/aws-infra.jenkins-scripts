@@ -3,7 +3,6 @@ env
 
 if [ -d $JENKINS_HOME/.git ]; then
   cd $JENKINS_HOME
-  git status
 else
   cd $JENKINS_HOME
   git init
@@ -11,7 +10,6 @@ else
 fi;
 
 # Move into the jenkins directory
-cd $JENKINS_HOME
 git fetch --all
 
 #Add all top level xml files.
@@ -31,6 +29,7 @@ git add userContent/*
 git add plugins/*.hpi
 
 # Commit the differences
+git status
 git commit -a -m "Automated commit of jenkins chaos"
 git merge -s ours origin/master
 git push origin master
@@ -38,7 +37,7 @@ git push origin master
 git log --pretty=format: --name-only --diff-filter=D
 COUNT=`git log --pretty=format: --name-only --diff-filter=D | wc -l`
 if [ $COUNT -ne 0 ]; then
-  git log --pretty=format: --name-only --diff-filter=D | xargs git rm
+  git log --pretty=format: --name-only --diff-filter=D | xargs git rm -f
   git commit -a -m "Automated removal of files."
 fi
 
