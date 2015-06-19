@@ -12,6 +12,7 @@ fi;
 
 # Move into the jenkins directory
 cd $JENKINS_HOME
+git rebase --abort
 git fetch --all
 
 #Add all top level xml files.
