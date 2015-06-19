@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -xe
 env
 
 if [ -d $JENKINS_HOME/.git ]; then
@@ -40,7 +40,7 @@ git commit -a -m "Automated commit of jenkins chaos"
 
 git fetch --all
 
-git rebase origin master
+git rebase origin/master
 
 # Push the commit up to the remote repository.
 git push origin master
