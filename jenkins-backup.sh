@@ -38,5 +38,9 @@ fi
 # Commit the differences
 git commit -a -m "Automated commit of jenkins chaos"
 
+git fetch --all
+
+git rebase
+
 # Push the commit up to the remote repository.
 git push origin master
