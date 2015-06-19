@@ -13,4 +13,4 @@ fi;
 # Move into the jenkins directory
 cd $JENKINS_HOME
 git fetch --all
-git rebase
+git rebase origin/master
