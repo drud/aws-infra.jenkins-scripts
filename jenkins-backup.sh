@@ -12,7 +12,7 @@ fi;
 
 # Move into the jenkins directory
 cd $JENKINS_HOME
-
+git checkout 'users/root@292261-web5.www.travelagentcentral.com/config.xml'
 #Add all top level xml files.
 git add *.xml
 
