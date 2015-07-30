@@ -13,19 +13,19 @@ env.roledefs = {
 
 deploydir = '/var/www/vhosts/iaals.du.edu'
 docroot = '/var/www/vhosts/iaals.du.edu/httpdocs'
-giturl = 'git@github.com:newmediadenver/iaals.git'
+giturl = os.environ['GIT_URL']
 gitbranch = 'master'
 destination = deploydir + '/releases/' + str(int(time.time()))
 archive = 'production-iaals-1438274510.tar.gz'
-mysql_user = 'admin_iaalsd7'
-mysql_pass = '71V&p^O&lWRaRZ12'
-mysql_db = 'iaalsd7_db'
+mysql_user = os.environ['db_user']
+mysql_pass = os.environ['db_pass']
+mysql_db = os.environ['db_name']
 
 # Sub-tasks
 def foo():
     #print os.environ['NMDLAMP_VERSION']
     run('mkdir /var/archives')
-    put(archive, '/var/archives/%s' % archive)
+    #put(archive, '/var/archives/%s' % archive)
 
 def envprep():
     run('mkdir %s/releases' % deploydir)
