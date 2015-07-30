@@ -31,14 +31,14 @@ def envprep():
     run('mkdir %s/releases' % deploydir)
     run('mkdir %s/shared' % deploydir)
     run('mkdir %s/shared/files' % deploydir)
-    run('mkdir /var/archives')
+    #run('mkdir /var/archives')
     
 
 def gitclone():
     run('git clone %s -b %s %s' % (giturl, gitbranch, destination))
 
 def symlink_switch():
-    run('rm %s/current && ln -s %s %s/current')
+    run('rm %s/current && ln -s %s %s/current' % (deploydir, destination, deploydir))
 
 def hostname():
     run('hostname')
