@@ -145,7 +145,7 @@ end
 
 # Construct a new data bag
 bag_item = Chef::DataBagItem.new
-bag_item.data_bag('example')
+bag_item.data_bag('nmdhosting')
 bag_item['id'] = sitename
 bag_item['_default'] = [common, default, type_keys_default].reduce(:merge)
 bag_item['staging'] = [common, staging, type_keys_staging].reduce(:merge)
@@ -155,7 +155,7 @@ bag_item['production'] = [common, production, type_keys_production].reduce(:merg
 # Encrypt and save new data bag
 enc_hash = Chef::EncryptedDataBagItem.encrypt_data_bag_item(bag_item, secret)
 ebag_item = Chef::DataBagItem.from_hash(enc_hash)
-ebag_item.data_bag('example')
+ebag_item.data_bag('nmdhosting')
 ebag_item.save
 
 exit 0
