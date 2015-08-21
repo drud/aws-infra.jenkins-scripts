@@ -15,8 +15,9 @@ wp_active_theme = ARGV[11]
 
 foo = 'moo'
 
+
 # Use the same config as knife uses
-Chef::Config.from_file("/var/jenkins_home/workspace/jenkins-chef-client/.chef/knife.rb")
+Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/knife.rb")
 
 # Get the encrypted data secret
 secret = Chef::EncryptedDataBagItem.load_secret(ENV['NMDCHEF_SECRET_FILE'])
@@ -135,6 +136,10 @@ elsif type == 'drupal'
         :cmi_staging => '/var/www/' + sitename + '/current/staging',
         :docroot =>'/var/www/' + sitename + '/current/docroot',
     }
+else
+    type_keys_default = {}
+    type_keys_staging = {}
+    type_keys_production = {}
 end
     
 
