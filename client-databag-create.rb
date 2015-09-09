@@ -28,10 +28,6 @@ common = {
     :type => type,
     :apache_owner => 'nginx',
     :apache_group => 'nginx',
-    :aws_utf_symmetric_key => foo,
-    :aws_access_key => foo,
-    :aws_bucket => foo,
-    :aws_secret_key => foo,
     :admin_mail => 'accounts@newmediadenver.com',
     :db_name => sitename,
     :db_username => sitename + '_db',
@@ -88,7 +84,7 @@ if type == 'wp'
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
         :docroot => '/var/www/' + sitename + '/current/htdocs',
-        :url => 'localhost:1025',
+        :url => 'http://localhost:1025',
         :active_theme => wp_active_theme,
     }
     type_keys_staging = {
@@ -101,7 +97,7 @@ if type == 'wp'
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
         :docroot => '/var/www/' + sitename + '/current/htdocs',
-        :url => sitename + '.nmdev.us',
+        :url => 'http://' + sitename + '.nmdev.us',
         :active_theme => wp_active_theme,
     }
     type_keys_production = {
@@ -114,7 +110,7 @@ if type == 'wp'
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
         :docroot => '/var/www/' + sitename + '/current/htdocs',
-        :url => production_domain,
+        :url => 'http://' + production_domain,
         :active_theme => wp_active_theme,
     }
 elsif type == 'drupal'
