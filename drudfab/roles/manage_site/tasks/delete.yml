@@ -1,0 +1,41 @@
+---
+# tasks file for update
+
+- name: check if '{webroot}/shared/s3archive.sh' exists (delete.yml)
+  stat: path="{{ webroot }}/shared/s3archive.sh"
+  register: s3archive
+
+#- name: S3 archive
+#  shell: "{{ archive_cmd }}"
+#  when: s3archive.stat.exists
+
+- name: Delete db (delete.yml)
+  mysql_db: >
+    name="{{ nmdhosting['db_name'] }}"
+    login_user="{{ nmddb['dbcreate_user'] }}"
+    login_password="{{ nmddb['dbcreate_user_password'] }}"
+    login_host="{{ nmdhosting['db_host'] }}"
+    state=absent
+
+- name: Delete db user (delete.yml)
+  mysql_user: >
+    name="{{ nmdhosting['db_username'] }}"
+    password="{{ nmdhosting['db_user_password'] }}"
+    login_user="{{ nmddb['dbcreate_user'] }}"
+    login_password="{{ nmddb['dbcreate_user_password'] }}"
+    login_host="{{ nmdhosting['db_host'] }}"
+    state=absent
+
+- name: Remove nginx conf (delete.yml)
+  file: path={{ item }} state=absent
+  with_items:
+    - "/etc/nginx/sites-enabled/{{ name }}.conf"
+    - "/etc/nginx/sites-available/{{ name }}.conf"
+  when: server_type == 'nginx'
+  notify:
+    - reload nginx
+
+- name: Remove webroot (delete.yml)
+  file: >
+    path="{{ webroot }}"
+    state=absent

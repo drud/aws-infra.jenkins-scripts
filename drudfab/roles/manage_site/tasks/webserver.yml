@@ -1,0 +1,45 @@
+---
+
+- name: start nginx if server_type is nginx (webserver.yml)
+  service: name=nginx state=started
+  when: server_type == 'nginx'
+
+#Wordpress
+
+- name: WP - Push nginx conf to sites-available (webserver.yml)
+  template: >
+    src=wordpress_nginx_server.conf.j2
+    dest="/etc/nginx/sites-available/{{ name }}.conf"
+    mode=0755
+    owner="{{ nmdhosting['apache_owner'] }}"
+    group="{{ nmdhosting['apache_group'] }}"
+  when: site_type == 'wordpress' and server_type == 'nginx'
+
+- name: WP - link nginx conf (webserver.yml)
+  file: >
+    src="/etc/nginx/sites-available/{{ name }}.conf"
+    dest="/etc/nginx/sites-enabled/{{ name }}.conf"
+    state=link
+  when: site_type == 'wordpress' and server_type == 'nginx'
+  notify:
+    - reload nginx
+
+#Drupal
+
+- name: Drupal - Push nginx conf to sites-available (webserver.yml)
+  template: >
+    src=nginx_server.conf.j2
+    dest="/etc/nginx/sites-available/{{ name }}.conf"
+    mode=0755
+    owner="{{ nmdhosting['apache_owner'] }}"
+    group="{{ nmdhosting['apache_group'] }}"
+  when: site_type == 'drupal' and server_type == 'nginx'
+
+- name: Drupal - link nginx conf (webserver.yml)
+  file: >
+    src="/etc/nginx/sites-available/{{ name }}.conf"
+    dest="/etc/nginx/sites-enabled/{{ name }}.conf"
+    state=link
+  when: site_type == 'drupal' and server_type == 'nginx'
+  notify:
+    - reload nginx

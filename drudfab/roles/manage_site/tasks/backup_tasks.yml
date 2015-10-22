@@ -1,0 +1,8 @@
+---
+  #rebuild templates
+- include: templating.yml
+
+  #run s3archive script
+- name: S3 archive
+  shell: "{{ archive_cmd }}"
+  when: action == 'backup'

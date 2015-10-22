@@ -1,0 +1,6 @@
+---
+# defaults file for create
+deploy_env: '_default'
+releases_dir: "{{ webroot }}/releases"
+git_cache_path: "{{ releases_dir }}/.git_cache"
+ansible_pkg_mgr: yum

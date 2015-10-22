@@ -1,0 +1,9 @@
+#!/bin/bash -xe
+{% for d in nmdhosting['perms_directories'] %}
+chown -R {{ nmdhosting['apache_owner'] }}:{{ nmdhosting['apache_group'] }} {{ d }}
+find {{ d }} -type d -exec chmod 755 {} \;
+find {{ d }} -type f -exec chmod 644 {} \;
+{% if deploy_env == '_default' %}
+setfacl -R -m d:u:{{ nmdhosting['apache_group'] }}:rwx,u:{{ nmdhosting['apache_group'] }}:rwx,d:u:vagrant:rwx,u:vagrant:rwx {{ d }}
+{% endif %}
+{% endfor %}

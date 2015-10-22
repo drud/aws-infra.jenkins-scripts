@@ -1,0 +1,201 @@
+<?php
+/**
+ * The base configurations of the WordPress.
+ *
+ * This file has the following configurations: MySQL settings, Table Prefix,
+ * Secret Keys, and ABSPATH. You can find more information by visiting
+ * {@link http://codex.wordpress.org/Editing_wp-config.php Editing wp-config.php}
+ * Codex page. You can get the MySQL settings from your web host.
+ *
+ * This file is used by the wp-config.php creation script during the
+ * installation. You don't have to use the web site, you can just copy this file
+ * to "wp-config.php" and fill in the values.
+ *
+ * @package WordPress
+ */
+
+// ============================
+// Production database settings
+// ============================
+if ( ! defined( 'DB_NAME' ) )
+    define( 'DB_NAME', '{{ nmdhosting['db_name'] }}' );
+if ( ! defined( 'DB_USER' ) )
+    define( 'DB_USER', '{{ nmdhosting['db_username'] }}' );
+if ( ! defined( 'DB_PASSWORD' ) )
+    define( 'DB_PASSWORD', '{{ nmdhosting['db_user_password'] }}' );
+if ( ! defined( 'DB_HOST' ) )
+    define( 'DB_HOST', '{{ nmdhosting['db_host'] }}' );
+
+// ======================================================
+// Additonal DB settings, you do not want to change these
+// ======================================================
+define( 'DB_CHARSET', 'utf8' );
+define( 'DB_COLLATE', '' );
+
+// =================
+// Site and WP URL's
+// =================
+if ( ! defined( 'WP_SITEURL' ) ) {
+  // define( 'WP_SITEURL', 'http://' . $_SERVER['HTTP_HOST'] . '/wp' );
+  {% if wp_generic %}
+  define( 'WP_SITEURL', '{{ nmdhosting['url'] }}' );
+  {% else %}
+  define( 'WP_SITEURL', '{{ nmdhosting['url'] }}/wp' );
+  {% endif %}
+}
+if ( ! defined( 'WP_HOME' ) ) {
+  // define( 'WP_HOME', 'http://' . $_SERVER['HTTP_HOST'] );
+  define( 'WP_HOME', '{{ nmdhosting['url'] }}' );
+}
+// ============================================
+// Custom Content Directory.
+// Can also change them in local/dev-config.php
+// ============================================
+if ( ! defined( 'WP_CONTENT_DIR' ) ) {
+  {% if wp_generic %}
+  define( 'WP_CONTENT_DIR', dirname( __FILE__ ) . '/wp-content' );
+  {% else %}
+  define( 'WP_CONTENT_DIR', dirname( __FILE__ ) . '/content' );
+  {% endif -%}
+  //define( 'WP_CONTENT_DIR', '{{ docroot }}/content' );
+}
+if ( ! defined( 'WP_CONTENT_URL' ) )
+  {% if wp_generic %}
+  define( 'WP_CONTENT_URL', WP_HOME . '/wp-content' );
+  {% else %}
+  define( 'WP_CONTENT_URL', WP_HOME . '/content' );
+  {% endif %}
+
+// Allows for WP to work behind an reverse proxy with HTTPS
+if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+       $_SERVER['HTTPS']='on';
+
+
+
+// ==============================================================
+// Salts, for security
+// Grab these from: https://api.wordpress.org/secret-key/1.1/salt
+// ==============================================================
+define( 'AUTH_KEY',         '{{ nmdhosting['auth_key'] }}' );
+define( 'SECURE_AUTH_KEY',  '{{ nmdhosting['secure_auth_key'] }}' );
+define( 'LOGGED_IN_KEY',    '{{ nmdhosting['logged_in_key'] }}' );
+define( 'NONCE_KEY',        '{{ nmdhosting['nonce_key'] }}' );
+define( 'AUTH_SALT',        '{{ nmdhosting['auth_salt'] }}' );
+define( 'SECURE_AUTH_SALT', '{{ nmdhosting['secure_auth_salt'] }}' );
+define( 'LOGGED_IN_SALT',   '{{ nmdhosting['logged_in_salt'] }}' );
+define( 'NONCE_SALT',       '{{ nmdhosting['nonce_salt'] }}' );
+
+
+// ==============================================================
+// Table prefix
+// Change this if you have multiple installs in the same database
+// ==============================================================
+$table_prefix  = '{{ wp_prefix }}';
+
+// ================================
+// Language
+// Leave blank for American English
+// ================================
+if ( !defined( 'WPLANG' ) )
+  define( 'WPLANG', '' );
+
+// ===========
+// Hide errors
+// ===========
+ini_set( 'display_errors', 0 );
+if ( !defined( 'WP_DEBUG_DISPLAY' ) )
+  define( 'WP_DEBUG_DISPLAY', false );
+
+// ============================================
+// Debug mode
+// Can also enable them in local/dev-config.php
+// ============================================
+{% if deploy_env == '_default' %}
+define( 'WP_DEBUG', true );
+if ( !defined( 'SAVEQUERIES' ) )
+  define( 'SAVEQUERIES', true );
+if ( !defined( 'SCRIPT_DEBUG' ) )
+  define('SCRIPT_DEBUG', true);
+if ( !defined( 'WP_ENV' ) )
+  define('WP_ENV', 'development');
+{% else %}
+define( 'WP_DEBUG', false );
+if ( !defined( 'SAVEQUERIES' ) )
+  define( 'SAVEQUERIES', false );
+if ( !defined( 'SCRIPT_DEBUG' ) )
+  define('SCRIPT_DEBUG', false);
+if ( !defined( 'WP_ENV' ) )
+  define('WP_ENV', 'production');
+{% endif %}
+
+// =====================================
+// Change Autosave Interval - in seconds
+// =====================================
+if ( !defined( 'AUTOSAVE_INTERVAL' ) )
+  define('AUTOSAVE_INTERVAL', 240 );
+
+// ==============================================================
+// Configure Post Revisions - false if you don't want to save any
+// ==============================================================
+if ( !defined( 'WP_POST_REVISIONS' ) )
+  define( 'WP_POST_REVISIONS', 3 ); // or false
+
+// ========================================
+// Remove Trash - In days, WP default is 30
+// ========================================
+define( 'EMPTY_TRASH_DAYS', 60 );
+
+// =========================
+// Increase PHP Memory Limit
+// =========================
+if ( !defined( 'WP_MEMORY_LIMIT' ) )
+  define( 'WP_MEMORY_LIMIT', '128M' );
+
+// =============================================
+// Dis-Allow Plugin / Theme - Editing / Updating
+// =============================================
+if ( !defined( 'DISALLOW_FILE_EDIT' ) ) // editor
+  define('DISALLOW_FILE_EDIT', true);
+if ( !defined( 'DISALLOW_FILE_MODS' ) ) // updates
+  define( 'DISALLOW_FILE_MODS', true );
+
+// =====================================
+// WP - Core only updates the core files
+// No Akisemet or Hello Dolly
+// =====================================
+if ( !defined( 'CORE_UPGRADE_SKIP_NEW_BUNDLED' ) )
+  define( 'CORE_UPGRADE_SKIP_NEW_BUNDLED', true );
+
+// ===========================================
+// Override default permissions
+// If you want allow direct plugin downloading
+// ===========================================
+if ( !defined( 'FS_CHMOD_DIR' ) )
+  define( 'FS_CHMOD_DIR', ( 0755 & ~ umask() ) );
+if ( !defined( 'FS_CHMOD_FILE' ) )
+  define( 'FS_CHMOD_FILE', ( 0644 & ~ umask() ) );
+
+// ======================================
+// Load a Memcached config if we have one
+// ======================================
+if ( file_exists( dirname( __FILE__ ) . '/memcached.php' ) )
+  $memcached_servers = include( dirname( __FILE__ ) . '/memcached.php' );
+
+// ===========================================================================================
+// This can be used to programatically set the stage when deploying (e.g. production, staging)
+// ===========================================================================================
+define( 'WP_STAGE', 'xxxx' );
+define( 'STAGING_DOMAIN', 'xxxx' ); // Does magic in WP Stack to handle staging domain rewriting
+
+// ========================================
+// Absolute path to the WordPress directory
+// ========================================
+if ( !defined( 'ABSPATH' ) ) {
+  // define( 'ABSPATH', dirname( __FILE__ ) . '/wp/' );
+  define( 'ABSPATH', '{{ docroot }}' . '/wp/' );
+}
+
+// ====================
+// Bootstraps WordPress
+// ====================
+require_once( ABSPATH . 'wp-settings.php' );

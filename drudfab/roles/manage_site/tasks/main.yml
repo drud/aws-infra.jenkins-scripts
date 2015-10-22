@@ -1,0 +1,10 @@
+---
+# tasks file for manage_site
+
+- name: Install packages
+  with_items: package_list
+  action: "{{ ansible_pkg_mgr }} state=present name=MySQL-python"
+
+#conditionally load tasks based on action
+- include: "{{ action }}_tasks.yml"
+

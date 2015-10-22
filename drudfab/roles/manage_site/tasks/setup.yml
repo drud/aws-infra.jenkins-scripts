@@ -1,0 +1,72 @@
+---
+
+- debug: msg="{{ name }}"
+- debug: msg="{{ deploy_env }}"
+
+- name: Clean Archive (setup.yml)
+  command: "s3trim -k {{ nmddrupal['aws_access_key'] }} -sk {{ nmddrupal['aws_secret_key' ]}} -c 5 nmdarchive {{ name }}/{{ deploy_env }}-"
+
+- name: Ensure webroot exists (setup.yml)
+  file: >
+    path="{{ webroot }}"
+    state=directory
+
+- name: Check if gluster exists (setup.yml)
+  stat: path=/mnt/gluster
+  register: gluster
+
+- name: Ensure /mnt/gluster/{{ name }} exists if gluster (setup.yml)
+  file: >
+    path="/mnt/gluster/{{ name }}"
+    state=directory
+  when: gluster.stat.exists
+
+- name: Ensure /mnt/gluster/{{ name }} sym exists in webroot/ if gluster (setup.yml)
+  file: >
+    src="/mnt/gluster/{{ name }}"
+    dest="{{ webroot }}/shared"
+    state=link
+  when: gluster.stat.exists
+
+- name: Ensure these directories exist (setup.yml)
+  file: path={{ item }} state=directory
+  with_items:
+    - "{{ webroot }}/shared/node_modules"
+    - "{{ webroot }}/shared/bower_components"
+
+#Wordpress
+
+- name: Ensure wordpress uploads dir exists (setup.yml)
+  file: >
+    path="{{ webroot }}/shared/uploads"
+    state=directory
+  when: site_type == 'wordpress'
+
+#Drupal
+
+- name: Ensure these directories exist (setup.yml)
+  file: path={{ item }} state=directory owner={{ nmdhosting['apache_owner'] }} group={{ nmdhosting['apache_group'] }}
+  with_items:
+    - "{{ webroot }}/shared/files"
+    - "{{ webroot }}/shared/private"
+  when: site_type == 'drupal'
+
+#Both
+
+- name: Create db (setup.yml)
+  mysql_db: >
+    name="{{ nmdhosting['db_name'] }}"
+    state=present
+    login_user="{{ nmddb['dbcreate_user'] }}"
+    login_password="{{ nmddb['dbcreate_user_password'] }}"
+    login_host="{{ nmdhosting['db_host'] }}"
+
+- name: Create db user (setup.yml)
+  mysql_user: >
+    name="{{ nmdhosting['db_username'] }}"
+    password="{{ nmdhosting['db_user_password'] }}"
+    priv={{ nmdhosting['db_name'] }}.*:SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,INDEX,ALTER,"CREATE TEMPORARY TABLES"
+    login_user="{{ nmddb['dbcreate_user'] }}"
+    login_password="{{ nmddb['dbcreate_user_password'] }}"
+    login_host="{{ nmdhosting['db_host'] }}"
+    state=present

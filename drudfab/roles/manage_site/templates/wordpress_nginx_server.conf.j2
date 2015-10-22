@@ -1,0 +1,80 @@
+server {
+
+  listen {{ vhost['port'] }};
+{% if vhost['server_aliases'] %}
+  server_name {{ vhost['server_aliases']|join(' ') }};
+{% endif %}
+{% if charset | default('') %}
+  charset {{ charset }};
+{% endif %}
+
+  root {{ docroot }};
+
+  client_max_body_size {{ max_upload_size }};
+  ## This should be in your http block and if it is, it's not needed here.
+  index index.php;
+
+  # access_log /var/log/nginx/{{ name }}.access.log;
+  error_log /var/log/nginx/{{ name }}.error.log;
+
+  location = /favicon.ico {
+    log_not_found off;
+    access_log off;
+  }
+
+  location = /robots.txt {
+    allow all;
+    log_not_found off;
+    access_log off;
+  }
+
+  # Deny all attempts to access hidden files such as .htaccess, .htpasswd, .DS_Store (Mac).
+  # Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
+  location ~ /\. {
+    deny all;
+  }
+
+  # Deny access to any files with a .php extension in the uploads directory
+  # Works in sub-directory installs and also in multisite network
+  # Keep logging the requests to parse later (or to pass to firewall utilities such as fail2ban)
+  location ~* /(?:uploads|files)/.*\.php$ {
+    deny all;
+  }
+
+  location / {
+    # This is cool because no php is touched for static content.
+    # include the "?$args" part so non-default permalinks doesn't break when using query string
+    try_files $uri $uri/ /index.php?$args;
+  }
+
+  location /wp/ {
+    # This is cool because no php is touched for static content.
+    # include the "?$args" part so non-default permalinks doesn't break when using query string
+    try_files $uri $uri/ /wp/index.php?$args;
+  }
+
+  location ~ \.php$ {
+    #NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
+    include fastcgi_params;
+    fastcgi_buffer_size 8k;
+    fastcgi_buffers 64 4k;
+    fastcgi_busy_buffers_size 224k;
+    fastcgi_pass   unix:/var/run/{% if vhost['php_sock'] -%}{{ vhost['php_sock'] }}{% endif -%};
+    fastcgi_param SCRIPT_FILENAME $request_filename;
+    fastcgi_intercept_errors on;
+  }
+
+  location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+    expires max;
+    log_not_found off;
+  }
+
+  # Add trailing slash to */wp-admin requests.
+  rewrite /wp-admin$ $scheme://$host$uri/ permanent;
+
+  # Directives to send expires headers and turn off 404 error logging.
+  location ~* ^.+\.(ogg|ogv|svg|svgz|eot|otf|woff|mp4|ttf|rss|atom|jpg|jpeg|gif|png|ico|zip|tgz|gz|rar|bz2|doc|xls|exe|ppt|tar|mid|midi|wav|bmp|rtf)$ {
+    access_log off; log_not_found off; expires max;
+  }
+
+}
