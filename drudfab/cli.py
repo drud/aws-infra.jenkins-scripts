@@ -230,8 +230,8 @@ def get_env_data(name, action):
     commands = []
     for key, ins in inputs.iteritems():
 
-        bag_path = '/opt/.chef/nmd_encrypted_data_bag_secret'
-        command = 'knife data bag show {input} --secret-file {path} -F yaml'.format(
+        bag_path = '/var/jenkins_home/.chef/nmd_encrypted_data_bag_secret'
+        command = 'knife data bag show {input} --secret-file {path} -F yaml -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb'.format(
             input=' '.join(ins),
             path=bag_path,
         )
