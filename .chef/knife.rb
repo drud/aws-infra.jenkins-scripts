@@ -12,3 +12,4 @@ chef_server_url "https://api.opscode.com/organizations/newmediadenver"
 cache_type 'BasicFile'
 cache_options('path' =>  "#{ENV['HOME']}/.chef/checksums")
 syntax_check_cache_path  "#{ENV['HOME']}/.chef/syntax_check_cache"
+secret_file "/var/jenkins_home/.chef/nmd_encrypted_data_bag_secret"
