@@ -21,7 +21,8 @@ os.system('export ANSIBLE_CONFIG=' + confpath)
 # get path to nmd chef repo or assume it is in the user's home
 #chef_local_path = os.getenv('NMDCHEF_REPO_LOCAL', '{}/cookbooks/chef'.format(HOME_DIR))
 # also set in roles/create/defaults as deploy_env because deploy_env cant be a ansible var name
-deploy_env = '_default'
+#deploy_env = '_default'
+deploy_env = 'staging'
 if deploy_env == '_default':
     port = 2222
     user = 'vagrant'
@@ -62,7 +63,9 @@ def ansible_run(roles, hosts='localhost', variables={}, local=False, sudo=True, 
         tmpf.flush()
 
         # Run the playbook
-        cmd = ['ansible-playbook', '-i', 'hosts']
+        #server = variables['staging']['hosts']
+        #print server
+        cmd = ['ansible-playbook', '-i', '/etc/ansible/hosts', 'web03.nmdev.us']
         if debug:
             logger.info(playbook)
             cmd += ['-vvvv']
@@ -74,7 +77,7 @@ def ansible_run(roles, hosts='localhost', variables={}, local=False, sudo=True, 
         #print resp
         pb = ansible.playbook.PlayBook(
             playbook=tmpf.name,
-            host_list='hosts',
+            host_list='/etc/ansible/hosts',
             stats=stats,
             callbacks=playbook_cb,
             runner_callbacks=runner_cb,
@@ -296,7 +299,7 @@ def get_env_data(name, action):
             search_replace += " && wp -p5.5 search-replace '{0}' '{1}' --all-tables --quiet --allow-root".format(nmdhosting_staging['url'], nmdhosting['url'])
 
         outputs['search_replace'] = search_replace
-        
+
     # drupal specific
     else:
         if outputs['action'] == 'create':
