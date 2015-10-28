@@ -1,6 +1,17 @@
 ---
 # tasks file for project
 
+- name: Check if docroot exists
+  stat: path="{{ webroot }}/current/docroot"
+  register: droot
+
+- name: Make symlink from docroot to htdocs
+  file: >
+    src="/var/www/{{ name }}/current/htdocs"
+    dest="{{ webroot }}/current/docroot"
+    state=link
+  when: not droot.stat.exists
+
 - name: "Ensure files symlink exists in webroot/"
   file: >
     src="/var/www/{{ name }}/shared/uploads"

@@ -11,7 +11,9 @@ Symlink roles/manage_site into /etc/ansible/roles/
 Create:
 
 ```
-python cli.py create --client 1fee
+python cli.py create --client 1fee --env staging
+# or
+python cli.py create --client 1fee --local
 ```
 
 Update:

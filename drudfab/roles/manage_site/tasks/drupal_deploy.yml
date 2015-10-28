@@ -68,7 +68,7 @@
   command: "npm install --unsafe-perm"
   args:
     chdir: "{{ webroot }}/current"
-  when: action == 'create' or action == 'update' and package.stat.exists
+  when: (action == 'create' or action == 'update') and package.stat.exists
 
 - name: run permissions.sh
   shell: "{{ webroot }}/shared/permissions.sh"
