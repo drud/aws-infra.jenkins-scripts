@@ -2,6 +2,7 @@
 
 import yaml
 import os
+import sys
 import logging
 import tempfile
 from subprocess import Popen, PIPE
@@ -81,7 +82,16 @@ def ansible_run(roles, hosts='localhost', variables={}, local=False, sudo=True, 
 
         results = pb.run()  # This runs the playbook
         playbook_cb.on_stats(pb.stats)
+
+        
+        failed = False
+        for k, v in results.iteritems():
+            if 'failures' in v and not failed:
+                failed = v['failures']
         print results
+
+        if failed:
+            sys.exit(1)
 
 
 def ansible_build_playbook(roles, hosts, variables=[], local=False, sudo=False, debug=False):

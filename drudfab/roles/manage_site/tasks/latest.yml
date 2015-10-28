@@ -4,6 +4,7 @@
   file: >
     path="{{ archivedir }}"
     state=directory
+    follow=true
 
 - name: Ensure this site's archive dir exists (latest.yml)
   file: >
