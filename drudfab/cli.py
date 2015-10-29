@@ -2,6 +2,7 @@
 
 import yaml
 import os
+import sys
 import logging
 import tempfile
 from subprocess import Popen, PIPE
@@ -15,16 +16,9 @@ from ansible import utils
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 HOME_DIR = os.path.expanduser("~")
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-# add path to ansible.cfg
-confpath = os.path.join(CURRENT_DIR, 'ansible.cfg')
-os.system('export ANSIBLE_CONFIG=' + confpath)
+
 # get path to nmd chef repo or assume it is in the user's home
 #chef_local_path = os.getenv('NMDCHEF_REPO_LOCAL', '{}/cookbooks/chef'.format(HOME_DIR))
-# also set in roles/create/defaults as deploy_env because deploy_env cant be a ansible var name
-deploy_env = '_default'
-if deploy_env == '_default':
-    port = 2222
-    user = 'vagrant'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -54,6 +48,11 @@ def ansible_run(roles, hosts='localhost', variables={}, local=False, sudo=True, 
     :param sudo: Add 'sudo: yes' to playbook or not
     :param debug: Enable debug output
     """
+    #if variables['deploy_env'] == '_default':
+        # add path to ansible.cfg
+        #confpath = os.path.join(CURRENT_DIR, 'ansible.cfg')
+        #os.system('export ANSIBLE_CONFIG=' + confpath)
+
     playbook = ansible_build_playbook(roles, hosts, variables, local, sudo)
 
     # Create a temp playbook file
@@ -74,7 +73,7 @@ def ansible_run(roles, hosts='localhost', variables={}, local=False, sudo=True, 
         #print resp
         pb = ansible.playbook.PlayBook(
             playbook=tmpf.name,
-            host_list='hosts',
+            host_list=variables['nmdhosting']['hosts'],
             stats=stats,
             callbacks=playbook_cb,
             runner_callbacks=runner_cb,
@@ -83,7 +82,16 @@ def ansible_run(roles, hosts='localhost', variables={}, local=False, sudo=True, 
 
         results = pb.run()  # This runs the playbook
         playbook_cb.on_stats(pb.stats)
+
+        
+        failed = False
+        for k, v in results.iteritems():
+            if 'failures' in v and not failed:
+                failed = v['failures']
         print results
+
+        if failed:
+            sys.exit(1)
 
 
 def ansible_build_playbook(roles, hosts, variables=[], local=False, sudo=False, debug=False):
@@ -99,6 +107,9 @@ def ansible_build_playbook(roles, hosts, variables=[], local=False, sudo=False, 
 
     if not isinstance(roles, list):
         roles = [roles]
+
+    # add abs path to site manage_site role (and the rest too so be careful what roles you add)
+    roles = [CURRENT_DIR + '/roles/' + x for x in roles]
 
     playbook.update({'gather_facts': 'no'})
     playbook.update({'roles': roles})
@@ -138,7 +149,7 @@ def generate_vhost(data):
     fastcgi_buffers = nmdhosting['fastcgi']['fastcgi_buffers'] if 'fastcgi' in nmdhosting else '64 4k'
     fastcgi_busy_buffers_size = nmdhosting['fastcgi']['fastcgi_busy_buffers_size'] if 'fastcgi' in nmdhosting else '224k'
 
-    if deploy_env in ['nmdhosting', 'ldap']:
+    if data['deploy_env'] in ['nmdhosting', 'ldap']:
         ldap = data['ldap']
         directories = {
             docroot: {
@@ -201,7 +212,7 @@ def generate_vhost(data):
     return vhost
 
 
-def get_env_data(name, action):
+def get_env_data(name, action, deploy_env):
     """
     Use Chef Knife to get json about hosting and databases
 
@@ -381,8 +392,9 @@ def siteman():
 @click.option('--client')
 @click.option('--debug', is_flag=True)
 @click.option('--local', is_flag=True)
-def create(client, debug, local):
-    vars = get_env_data(client, action='create')
+@click.option('--env', default='_default')
+def create(client, debug, local, env):
+    vars = get_env_data(client, action='create', deploy_env=str(env))
     ansible_run(['manage_site'], hosts='all', variables=vars, local=local, sudo=True, debug=debug)
 
 
@@ -390,8 +402,9 @@ def create(client, debug, local):
 @click.option('--client')
 @click.option('--debug', is_flag=True)
 @click.option('--local', is_flag=True)
-def update(client, debug, local):
-    vars = get_env_data(client, action='update')
+@click.option('--env', default='_default')
+def update(client, debug, local, env):
+    vars = get_env_data(client, action='update', deploy_env=str(env))
     ansible_run(['manage_site'], hosts='all', variables=vars, local=local, sudo=True, debug=debug)
 
 
@@ -399,8 +412,9 @@ def update(client, debug, local):
 @click.option('--client')
 @click.option('--debug', is_flag=True)
 @click.option('--local', is_flag=True)
-def backup(client, debug, local):
-    vars = get_env_data(client, action='backup')
+@click.option('--env', default='_default')
+def backup(client, debug, local, env):
+    vars = get_env_data(client, action='backup', deploy_env=str(env))
     ansible_run(['manage_site'], hosts='all', variables=vars, local=local, sudo=True, debug=debug)
 
 
@@ -408,10 +422,10 @@ def backup(client, debug, local):
 @click.option('--client')
 @click.option('--debug', is_flag=True)
 @click.option('--local', is_flag=True)
-def delete(client, debug, local):
-    vars = get_env_data(client, action='delete')
+@click.option('--env', default='_default')
+def delete(client, debug, local, env):
+    vars = get_env_data(client, action='delete', deploy_env=str(env))
     ansible_run(['manage_site'], hosts='all', variables=vars, local=local, sudo=True, debug=debug)
-
 
 
 if __name__ == '__main__':
