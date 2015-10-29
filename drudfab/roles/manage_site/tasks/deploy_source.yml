@@ -11,12 +11,16 @@
     path="{{ webroot }}/releases/.git_cache"
     state=directory
 
+- name: add remote host publick key
+  command: ssh-keyscan -H github.com >> /etc/ssh/ssh_known_hosts
+
 - name: Fetch repo updates (deploy_source.yml)
   git: >
     repo="{{ nmdhosting['repository'] }}"
     dest="{{ webroot }}/releases/.git_cache"
     version="{{ nmdhosting['revision'] }}"
     accept_hostkey=yes
+    ssh_opts="-o StrictHostKeyChecking=no"
 
 - name: Get release timestamp (deploy_source.yml)
   command: date +%Y%m%d%H%M%S
