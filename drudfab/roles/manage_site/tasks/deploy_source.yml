@@ -12,7 +12,7 @@
     state=directory
 
 - name: add remote host publick key
-  command: ssh-keyscan -H github.com >> /etc/ssh/ssh_known_hosts
+  command: ssh-keyscan -H github.com > /etc/ssh/ssh_known_hosts
 
 - name: Fetch repo updates (deploy_source.yml)
   git: >
