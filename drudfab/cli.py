@@ -281,6 +281,7 @@ def get_env_data(name, action, deploy_env):
 
     # determine whether site is imported or installed
     outputs['new_site'] = nmdhosting['new_site'] if 'new_site' in nmdhosting else False
+    outputs['install_profile'] = nmdhosting['install_profile'] if 'install_profile' in nmdhosting else False
 
     outputs['webroot'] = '/var/www/{0}'.format(name)
     outputs['docroot'] = nmdhosting['docroot'] if 'docroot' in nmdhosting else outputs['webroot'] + '/current'
