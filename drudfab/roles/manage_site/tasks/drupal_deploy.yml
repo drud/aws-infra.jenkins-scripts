@@ -56,6 +56,12 @@
     target="{{ archivedir }}/{{ name }}/{{ name }}.sql"
   when: action == 'create' and not new_site
 
+- name: Drush site-install
+  command: "{{ si_cmd }}"
+  args:
+    chdir: "{{ webroot }}/current/docroot"
+  when: new_site
+
 - name: ensure user/pass are set
   command: "drush -p5.5 upwd --password='{{ nmdhosting['admin_password'] }}' {{ nmdhosting['admin_username'] }}"
   args:
@@ -75,12 +81,6 @@
 - name: run permissions.sh
   shell: "{{ webroot }}/shared/permissions.sh"
   when: action == 'create' or action == 'update'
-
-- name: Drush site-install
-  command: "{{ si_cmd }}"
-  args:
-    chdir: "{{ webroot }}/current/docroot"
-  when: new_site
 
 - name: drush updb
   command: "drush -p5.5 updb -y"
