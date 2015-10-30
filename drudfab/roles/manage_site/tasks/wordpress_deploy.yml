@@ -46,8 +46,8 @@
   mysql_db: >
     name="{{ nmdhosting['db_name'] }}"
     state=absent
-    login_user="{{ nmdhosting['db_username'] }}"
-    login_password="{{ nmdhosting['db_user_password'] }}"
+    login_user="{{ nmddb['dbcreate_user'] }}"
+    login_password="{{ nmddb['dbcreate_user_password'] }}"
     login_host="{{ nmdhosting['db_host'] }}"
   when: action == 'create'
 
@@ -55,8 +55,8 @@
   mysql_db: >
     name="{{ nmdhosting['db_name'] }}"
     state=present
-    login_user="{{ nmdhosting['db_username'] }}"
-    login_password="{{ nmdhosting['db_user_password'] }}"
+    login_user="{{ nmddb['dbcreate_user'] }}"
+    login_password="{{ nmddb['dbcreate_user_password'] }}"
     login_host="{{ nmdhosting['db_host'] }}"
   when: action == 'create'
 
