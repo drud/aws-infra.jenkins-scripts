@@ -318,7 +318,7 @@ def get_env_data(name, action, deploy_env):
             si_cmd += "install_configure_form.date_default_timezone='America/Denver'"
             outputs['si_cmd'] = si_cmd
 
-    if outputs['action'] in ['update', 'delete']:
+    if outputs['action'] in ['update', 'delete', 'backup']:
         update_cmd = "export AWS_ACCESS_KEY='{0}' ".format(nmddrupal['aws_access_key'])
         update_cmd += "&& export AWS_SECRET_KEY='{0}' ".format(nmddrupal['aws_secret_key'])
         update_cmd += "&& export AWS_UTF_SYMMETRIC_KEY='{0}' ".format(nmddrupal['aws_utf_symmetric_key'])

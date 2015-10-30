@@ -2,7 +2,6 @@
 # tasks file for create
 
 - include: setup.yml
-- include: latest.yml
 - include: templating.yml
 - include: webserver.yml
 - include: deploy_source.yml
