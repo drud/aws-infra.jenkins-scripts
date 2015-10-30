@@ -311,7 +311,7 @@ def get_env_data(name, action, deploy_env):
     # drupal specific
     else:
         if outputs['action'] == 'create':
-            si_cmd = "drush si -y {1} --clean-url=1 --site-name='{1}' ".format(outputs['webroot'], outputs['name'])
+            si_cmd = "drush si -y {2} --clean-url=1 --site-name='{1}' ".format(outputs['webroot'], outputs['name'], outputs['install_profile'])
             si_cmd += "--account-name='{0}' ".format(nmdhosting['admin_username'])
             si_cmd += "--account-pass='{0}' ".format(nmdhosting['admin_password'])
             si_cmd += "install_configure_form.update_status_module='array(FALSE,FALSE)' "
