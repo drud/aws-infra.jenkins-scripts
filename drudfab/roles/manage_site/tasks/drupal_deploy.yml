@@ -14,11 +14,13 @@
   file: >
     path="{{ webroot }}/shared/files"
     state=absent
+  when: not new_site
 
 - name: move archived files
   shell: "mv {{ archivedir }}/{{ name }}/*/sites/default/files {{ webroot }}/shared/"
   args:
     creates: "{{ webroot }}/shared/files"
+  when: not new_site
 
 - name: "Drupal - Ensure files symlink exists in webroot/"
   file: >
