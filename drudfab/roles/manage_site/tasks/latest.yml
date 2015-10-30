@@ -36,13 +36,16 @@
     dest="{{ archivedir }}/{{ name }}"
     copy=no
   register: unarchived
+  when: not new_site
 
 - name: unarchive retry
   command: "tar -xzf {{ archivedir }}/{{ latest.stdout | basename }}  -C {{ archivedir }}/{{ name }}"
-  when: unarchived|failed
+  when: not new_site and unarchived|failed
 
 - name: Clean Archive (latest.yml)
-  command: "s3trim -k {{ nmddrupal['aws_access_key'] }} -sk {{ nmddrupal['aws_secret_key' ]}} -c {{ nmddrupal['archive_copy_count'] }} {{ nmddrupal['aws_bucket'] }} {{ name }}/{{ deploy_env }}-{{ name }}-"
+  command: "s3trim -k {{ nmddrupal['aws_access_key'] }} -sk {{ nmddrupal['aws_secret_key' ]}} -c {{ nmddrupal['archive_copy_count'] }} {{ nmddrupal['aws_bucket'] }} {{ name }}/{{ deploy_env }}-{{ name }}-"  
+  when: not new_site
+
 
 #@todo validate this even works
 #- name: Clean Archive
