@@ -2,7 +2,7 @@
 
 env
 
-declare -a arr=("web01.newmediadenver.com" "web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmddev.us" "web03.nmdev.us" "web04.nmdev.us" "overlayweb01.nmdev.us") 
+declare -a arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmddev.us" "web03.nmdev.us" "web04.nmdev.us" "overlayweb01.nmdev.us") 
 
 for i in "${arr[@]}"
 do
