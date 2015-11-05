@@ -2,7 +2,7 @@
 
 env
 
-if [[ "$HOSTNAME" -eq "All" ]]
+if [[ "$HOSTNAME" == "All" ]]
 
 then
 
