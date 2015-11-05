@@ -4,10 +4,9 @@ env
 
 if [[ $HOSTNAME == "All" ]]
 then
-  declare -a arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
+  arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
 else 
-  declare -a arr=('$HOSTNAME')
-  echo 'test'
+  arr=($HOSTNAME)
 fi
 
 for i in "${arr[@]}"
