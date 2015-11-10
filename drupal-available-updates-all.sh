@@ -20,11 +20,12 @@ do
       version_current=$(drush -p5.5 -r /var/www/$d/current st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
 
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
-        then echo "Drupal $version_docroot $version_current Site: $d"; 
+        then echo "Drupal $version_docroot$version_current Site: $d"; 
           if [[ -n "$version_docroot" ]]; 
-            then drush -p5.5 -r /var/www/$d/current/docroot ups; 
-            else  drush -p5.5 -r /var/www/$d/current ups; 
-          fi; 
+            then UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)"; 
+            else UPS="$(drush -p5.5 -r /var/www/$d/current ups)"; 
+          fi;
+        echo "$(UPS)" 
       fi; 
     done'
 
