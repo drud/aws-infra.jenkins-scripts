@@ -22,10 +22,9 @@ do
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
         then echo "Drupal $version_docroot$version_current Site: $d"; 
           if [[ -n "$version_docroot" ]]; 
-            then UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)"; 
-            else UPS="$(drush -p5.5 -r /var/www/$d/current ups)"; 
-          fi;
-        echo "$(UPS)" 
+            then drush -p5.5 -r /var/www/$d/current/docroot ups; 
+            else drush -p5.5 -r /var/www/$d/current ups; 
+          fi; 
       fi; 
     done'
 
