@@ -43,5 +43,3 @@ done
 for key in ${!sites[@]}; do
   echo ${key} ${sites[${key}]}
 done
-
-site=$(echo $d | sed 's:/*$::')
