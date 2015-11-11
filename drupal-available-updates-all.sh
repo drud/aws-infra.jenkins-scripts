@@ -33,6 +33,7 @@ do
               UPS="$(drush -p5.5 -r /var/www/$d/current ups)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+       
               sites[$d]=$errors
           fi; 
       fi; 
