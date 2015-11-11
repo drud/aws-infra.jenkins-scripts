@@ -2,6 +2,8 @@
 
 env
 
+sites=('SITE','# UPDATES');
+
 if [[ $HOSTNAME == "All" ]]
 then
   arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
@@ -22,10 +24,21 @@ do
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
         then echo "Drupal $version_docroot$version_current Site: $d"; 
           if [[ -n "$version_docroot" ]]; 
-            then drush -p5.5 -r /var/www/$d/current/docroot ups; 
-            else drush -p5.5 -r /var/www/$d/current ups; 
+            then 
+              UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)"; 
+              echo "${UPS}" > /var/tmp/tmp.txt
+              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])"
+              arr[$d]=$errors
+            else 
+              UPS="$(drush -p5.5 -r /var/www/$d/current ups)"; 
+              echo "${UPS}" > /var/tmp/tmp.txt
+              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])"
+              arr[$d]=$errors
           fi; 
       fi; 
     done'
+done
 
+for key in ${!sites[@]}; do
+    echo ${key} ${sites[${key}]}
 done
