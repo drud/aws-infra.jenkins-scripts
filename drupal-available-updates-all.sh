@@ -37,9 +37,9 @@ do
               sites[$site]=$errors
           fi; 
       fi; 
-    done'
-done
-
-for key in ${!sites[@]}; do
-  echo ${key} ${sites[${key}]}
+    done
+    for key in ${!sites[@]}; do
+      echo ${key} ${sites[${key}]}
+    done
+    '
 done
