@@ -2,7 +2,7 @@
 
 env
 
-declare -A sites
+declare -A allsites
 
 if [[ $HOSTNAME == "All" ]]
 then
@@ -16,6 +16,7 @@ do
   echo -e "\nSERVER: $i\n"
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
+    declare -A sites
     cd /var/www/ && for d in */ ; 
     do 
       site=$(echo $d | sed 's:/*$::')
@@ -37,11 +38,10 @@ do
               sites[$site]=$errors
           fi; 
       fi; 
-    done'
-done
-
-echo 'DONE!'
-
-for key in ${!sites[@]}; do
-  echo ${key} ${sites[${key}]}
+    done
+    echo "\nsites needing updates on SERVER $i\n"
+    for key in ${!sites[@]}; do
+      echo ${key} ${sites[${key}]}
+    done
+    '
 done
