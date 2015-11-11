@@ -18,22 +18,23 @@ do
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
     cd /var/www/ && for d in */ ; 
     do 
+      site=$(echo $d | sed 's:/*$::')
       version_docroot=$(drush -p5.5 -r /var/www/$d/current/docroot st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       version_current=$(drush -p5.5 -r /var/www/$d/current st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
 
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
-        then echo "Drupal $version_docroot$version_current Site: $d"; 
+        then echo "Drupal $version_docroot$version_current Site: $site"; 
           if [[ -n "$version_docroot" ]]; 
             then 
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites[$d]=$errors
+              sites[$site]=$errors
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites[test]=$errors
+              sites[$site]=$errors
           fi; 
       fi; 
     done'
@@ -42,3 +43,5 @@ done
 for key in ${!sites[@]}; do
   echo ${key} ${sites[${key}]}
 done
+
+site=$(echo $d | sed 's:/*$::')
