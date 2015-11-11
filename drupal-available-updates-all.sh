@@ -2,6 +2,8 @@
 
 env
 
+declare -A sites
+
 if [[ $HOSTNAME == "All" ]]
 then
   arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
@@ -15,7 +17,6 @@ do
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
     cd /var/www/ && for d in */ ; 
-    declare -A sites
     do 
       site=$(echo $d | sed 's:/*$::')
       version_docroot=$(drush -p5.5 -r /var/www/$d/current/docroot st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
@@ -36,9 +37,11 @@ do
               sites[$site]=$errors
           fi; 
       fi; 
-    done
-    for key in ${!sites[@]}; do
-      echo ${key} ${sites[${key}]}
-    done
-    '
+    done'
+done
+
+echo 'DONE!'
+
+for key in ${!sites[@]}; do
+  echo ${key} ${sites[${key}]}
 done
