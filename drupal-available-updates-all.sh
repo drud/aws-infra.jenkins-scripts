@@ -2,7 +2,7 @@
 
 env
 
-sites=('SITE','# UPDATES');
+declare -A sites
 
 if [[ $HOSTNAME == "All" ]]
 then
@@ -28,17 +28,17 @@ do
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)"; 
               echo "${UPS}" > /var/tmp/tmp.txt
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])"
-              arr[$d]=$errors
+              sites[$d]=$errors
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups)"; 
               echo "${UPS}" > /var/tmp/tmp.txt
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])"
-              arr[$d]=$errors
+              sites[$d]=$errors
           fi; 
       fi; 
     done'
 done
 
 for key in ${!sites[@]}; do
-    echo ${key} ${sites[${key}]}
+  echo ${key} ${sites[${key}]}
 done
