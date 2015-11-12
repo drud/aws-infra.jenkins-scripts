@@ -22,14 +22,19 @@ do
       site=$(echo $d | sed 's:/*$::')
       version_docroot=$(drush -p5.5 -r /var/www/$d/current/docroot st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       version_current=$(drush -p5.5 -r /var/www/$d/current st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
-
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
         then echo "Drupal $version_docroot$version_current Site: $site"; 
           if [[ -n "$version_docroot" ]]; 
             then 
-              sites[$site]=$version_docroot
+              UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)" &&
+              echo "${UPS}" > /var/tmp/tmp.txt && 
+              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+              sites[$site]=$errors
             else 
-              sites[$site]=$version_current
+              UPS="$(drush -p5.5 -r /var/www/$d/current ups)" &&
+              echo "${UPS}" > /var/tmp/tmp.txt && 
+              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+              sites[$site]=$errors
           fi; 
       fi; 
     done
