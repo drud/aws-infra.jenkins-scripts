@@ -17,6 +17,9 @@ do
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
     declare -A sites
+    declare -A sites_version
+    declare -A sites_updates
+
     cd /var/www/ && for d in */ ; 
     do 
       site=$(echo $d | sed 's:/*$::')
@@ -30,19 +33,22 @@ do
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null)" &&
               #echo "${UPS}" > /var/tmp/tmp.txt && 
               #errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites["Drupal $version_docroot$version_current Site: $site"]="${UPS}"
+              sites[$site]="${UPS}"
+              sites_version[$site]="Drupal $version_docroot"
             else 
               #drush -p5.5 -r /var/www/$d/current ups
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               #echo "${UPS}" > /var/tmp/tmp.txt && 
               #errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites["Drupal $version_docroot$version_current Site: $site"]="${UPS}"
+              sites[$site]="${UPS}"
+              sites_version[$site]="Drupal $version_current"
           fi; 
       fi; 
     done
     
     for key in ${!sites[@]}; do
-      echo -e "\n\n" ${key} "\n" "${sites[${key}]}"
+      echo -e "\n\n" ${key} " " ${sites_version[${key}]} "\n" 
+      echo "${sites[${key}]}"
     done
     '
 done
