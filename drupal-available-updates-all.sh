@@ -3,7 +3,7 @@
 env
 
 declare -A allsites
-
+allsites[Sites]=Updates
 if [[ $HOSTNAME == "All" ]]
 then
   arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
