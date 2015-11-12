@@ -47,7 +47,7 @@ do
     done
     
     for key in ${!sites[@]}; do
-      printf  "Site: %-20s Drupal version: %-20s Available updates: ${sites_updates[${key}]}\n" ${key} ${sites_version[${key}]} ${sites_updates[${key}]}
+      printf  "Site: %-20s Drupal version: %-20s Available updates: %-20s\n" ${key} ${sites_version[${key}]} ${sites_updates[${key}]}
       #echo "${sites[${key}]}"
     done
     '
