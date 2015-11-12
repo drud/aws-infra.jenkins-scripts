@@ -23,7 +23,7 @@ do
       version_current=$(drush -p5.5 -r /var/www/$d/current st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
         then
-          rm /var/www/tmp.txt
+          cat /dev/null > /var/www/tmp.txt
           if [[ -n "$version_docroot" ]]; 
             then 
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null)" &&
