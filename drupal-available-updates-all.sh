@@ -2,7 +2,7 @@
 
 env
 
-declare -A allsites=('test' 'asdf')
+declare -A allsites
 
 if [[ $HOSTNAME == "All" ]]
 then
