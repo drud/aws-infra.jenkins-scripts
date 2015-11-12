@@ -30,19 +30,19 @@ do
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null)" &&
               #echo "${UPS}" > /var/tmp/tmp.txt && 
               #errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites[$site]="${UPS}"
+              sites["Drupal $version_docroot$version_current Site: $site"]="${UPS}"
             else 
               #drush -p5.5 -r /var/www/$d/current ups
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               #echo "${UPS}" > /var/tmp/tmp.txt && 
               #errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites[$site]="${UPS}"
+              sites["Drupal $version_docroot$version_current Site: $site"]="${UPS}"
           fi; 
       fi; 
     done
     
     for key in ${!sites[@]}; do
-      echo ${key} ${sites[${key}]}
+      echo -e ${key} "\n" "${sites[${key}]}"
     done
     '
 done
