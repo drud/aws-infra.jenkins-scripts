@@ -2,7 +2,7 @@
 
 env
 
-declare -A allsites
+declare -A allsites=('test' 'asdf')
 
 if [[ $HOSTNAME == "All" ]]
 then
@@ -40,7 +40,6 @@ do
       fi; 
     done
     for key in ${!sites[@]}; do
-      echo ${key} ${sites[${key}]}
       allsites+=([${key}]=${sites[${key}]})
     done
     '
