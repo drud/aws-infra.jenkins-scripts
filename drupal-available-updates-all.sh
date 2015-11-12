@@ -42,7 +42,7 @@ do
     done
     
     for key in ${!sites[@]}; do
-      echo -e ${key} "\n" "${sites[${key}]}"
+      echo -e "\n\n" ${key} "\n" "${sites[${key}]}"
     done
     '
 done
