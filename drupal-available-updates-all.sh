@@ -39,9 +39,13 @@ do
           fi; 
       fi; 
     done
-    echo "\nsites needing updates on SERVER $i\n"
     for key in ${!sites[@]}; do
       echo ${key} ${sites[${key}]}
+      allsites+=([${key}]=${sites[${key}]})
     done
     '
+done
+
+for key in ${!allsites[@]}; do
+  echo ${key} ${a;;sites[${key}]}
 done
