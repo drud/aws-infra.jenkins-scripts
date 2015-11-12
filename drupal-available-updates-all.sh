@@ -31,16 +31,16 @@ do
             then 
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
-              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              echo "Checking Drupal $version_docroot site: $site has $errors errors"
+              updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+              echo "Checking Drupal $version_docroot site: $site has $updates updates available"
               #sites[$site]="${UPS}"
               #sites_version[$site]=$version_docroot
               #sites_updates[$site]=$errors
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
-              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              echo "Checking Drupal $version_current site: $site has $errors errors"
+              updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+              echo "Checking Drupal $version_current site: $site has $updates updates"
               #sites[$site]="${UPS}"
               #sites_version[$site]=$version_current
               #sites_updates[$site]=$errors
