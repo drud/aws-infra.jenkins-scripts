@@ -22,17 +22,21 @@ do
       version_docroot=$(drush -p5.5 -r /var/www/$d/current/docroot st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       version_current=$(drush -p5.5 -r /var/www/$d/current st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
-        then echo "Checking Drupal $version_docroot$version_current site: $site"; 
+        then
+          rm /var/www/tmp.txt
           if [[ -n "$version_docroot" ]]; 
             then 
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+              updates=$((updates-1)) &&
+              #updates="drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null) | sed -n "p;$="
               echo "Checking Drupal $version_docroot site: $site has $updates updates available"
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+              updates=$((updates-1)) &&
               echo "Checking Drupal $version_current site: $site has $updates updates"
           fi; 
       fi; 
