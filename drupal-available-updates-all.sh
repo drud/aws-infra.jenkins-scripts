@@ -14,8 +14,8 @@ do
   echo -e "\n Checking server: $i\n"
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS" '
+    echo $DETAILS;
     cd /var/www/ && for d in */ ; 
-    echo $DETAILS
     do 
       site=$(echo $d | sed 's:/*$::')
       version_docroot=$(drush -p5.5 -r /var/www/$d/current/docroot st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
