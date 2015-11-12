@@ -47,5 +47,5 @@ do
 done
 
 for key in ${!allsites[@]}; do
-  echo ${key} ${a;;sites[${key}]}
+  echo ${key} ${allsites[${key}]}
 done
