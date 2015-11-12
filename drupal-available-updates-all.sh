@@ -33,14 +33,14 @@ do
               echo "${UPS}" > /var/tmp/tmp.txt && 
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               sites[$site]="${UPS}"
-              sites_version[$site]="Drupal $version_docroot"
+              sites_version[$site]=$version_docroot
               sites_updates[$site]=$errors
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               sites[$site]="${UPS}"
-              sites_version[$site]="Drupal $version_current"
+              sites_version[$site]=$version_current
               sites_updates[$site]=$errors
           fi; 
       fi; 
