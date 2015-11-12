@@ -26,7 +26,7 @@ do
       version_docroot=$(drush -p5.5 -r /var/www/$d/current/docroot st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       version_current=$(drush -p5.5 -r /var/www/$d/current st | grep "Drupal version" | grep -o [678][.] | grep -o [678]); 
       if [[ -n "$version_docroot" || -n "$version_current" ]]; 
-        then echo "Drupal $version_docroot$version_current Site: $site"; 
+        then echo "Checking Drupal $version_docroot$version_current site: $site"; 
           if [[ -n "$version_docroot" ]]; 
             then 
               #drush -p5.5 -r /var/www/$d/current/docroot ups
@@ -47,7 +47,7 @@ do
     done
     
     for key in ${!sites[@]}; do
-      echo -e "\n\n" "Site: "${key} " Version:" ${sites_version[${key}]}
+      echo -e "\n\n" "Site: "${key} "        Version:" ${sites_version[${key}]}
       echo "${sites[${key}]}"
     done
     '
