@@ -27,20 +27,15 @@ do
         then echo "Drupal $version_docroot$version_current Site: $site"; 
           if [[ -n "$version_docroot" ]]; 
             then 
-              UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)" &&
-              echo "${UPS}" > /var/tmp/tmp.txt && 
-              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites[$site]=$errors
+              sites[$site]=$version_docroot
             else 
-              UPS="$(drush -p5.5 -r /var/www/$d/current ups)" &&
-              echo "${UPS}" > /var/tmp/tmp.txt && 
-              errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              sites[$site]=$errors
+              sites[$site]=$version_current
           fi; 
       fi; 
     done
     echo -e "\n"
     for key in ${!sites[@]}; do
+      echo ${key} ${sites[${key}]}
       allsites+=([${key}]=${sites[${key}]})
     done
     '
@@ -50,3 +45,19 @@ echo -e "\n allsites:"
 for key in ${!allsites[@]}; do
   echo ${key} ${allsites[${key}]}
 done
+
+      # if [[ -n "$version_docroot" || -n "$version_current" ]]; 
+      #   then echo "Drupal $version_docroot$version_current Site: $site"; 
+      #     if [[ -n "$version_docroot" ]]; 
+      #       then 
+      #         UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)" &&
+      #         echo "${UPS}" > /var/tmp/tmp.txt && 
+      #         errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+      #         sites[$site]=$errors
+      #       else 
+      #         UPS="$(drush -p5.5 -r /var/www/$d/current ups)" &&
+      #         echo "${UPS}" > /var/tmp/tmp.txt && 
+      #         errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
+      #         sites[$site]=$errors
+      #     fi; 
+      # fi; 
