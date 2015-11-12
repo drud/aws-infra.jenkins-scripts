@@ -1,9 +1,7 @@
-#!/bin/bash -xe
+#!/bin/bash +x-e
 
 env
 
-# declare -A allsites
-# allsites[Sites]=Updates
 if [[ $HOSTNAME == "All" ]]
 then
   arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
@@ -37,7 +35,7 @@ do
               echo "${UPS}" > /var/tmp/tmp.txt && 
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               updates=$((updates-1)) &&
-              echo "Checking Drupal $version_current site: $site has $updates updates"
+              echo "Checking Drupal $version_current site: $site has $updates updates available"
           fi; 
       fi; 
     done'
