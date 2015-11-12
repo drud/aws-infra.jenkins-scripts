@@ -2,8 +2,8 @@
 
 env
 
-declare -A allsites
-allsites[Sites]=Updates
+# declare -A allsites
+# allsites[Sites]=Updates
 if [[ $HOSTNAME == "All" ]]
 then
   arr=("web02.newmediadenver.com" "web03.newmediadenver.com" "web04.newmediadenver.com" "web05.newmediadenver.com" "web01.nmdev.us" "web03.nmdev.us" "web04.nmdev.us") 
@@ -17,6 +17,7 @@ do
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
     declare -A sites
+    sites["Sites on $i"]=Updates
     cd /var/www/ && for d in */ ; 
     do 
       site=$(echo $d | sed 's:/*$::')
@@ -41,15 +42,16 @@ do
     echo -e "\n"
     for key in ${!sites[@]}; do
       echo ${key} ${sites[${key}]}
-      allsites+=([${key}]=${sites[${key}]})
     done
     '
 done
 
-echo -e "\n allsites:"
-for key in ${!allsites[@]}; do
-  echo ${key} ${allsites[${key}]}
-done
+# allsites+=([${key}]=${sites[${key}]})
+
+# echo -e "\n allsites:"
+# for key in ${!allsites[@]}; do
+#   echo ${key} ${allsites[${key}]}
+# done
 
       # if [[ -n "$version_docroot" || -n "$version_current" ]]; 
       #   then echo "Drupal $version_docroot$version_current Site: $site"; 
