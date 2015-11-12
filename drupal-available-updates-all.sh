@@ -47,31 +47,8 @@ do
     done
     
     for key in ${!sites[@]}; do
-      echo -e "\n\n" "Site: "${key} "        Version:" ${sites_version[${key}]} "      Updates: ${sites_updates[${key}]}"
+      printf  "Site: %-20s Drupal version: %-20s Available updates: ${sites_updates[${key}]}\n" ${key} ${sites_version[${key}]} ${sites_updates[${key}]}
       #echo "${sites[${key}]}"
     done
     '
 done
-
-# allsites+=([${key}]=${sites[${key}]})
-
-# echo -e "\n allsites:"
-# for key in ${!allsites[@]}; do
-#   echo ${key} ${allsites[${key}]}
-# done
-
-      # if [[ -n "$version_docroot" || -n "$version_current" ]]; 
-      #   then echo "Drupal $version_docroot$version_current Site: $site"; 
-      #     if [[ -n "$version_docroot" ]]; 
-      #       then 
-      #         UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups)" &&
-      #         echo "${UPS}" > /var/tmp/tmp.txt && 
-      #         errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-      #         sites[$site]=$errors
-      #       else 
-      #         UPS="$(drush -p5.5 -r /var/www/$d/current ups)" &&
-      #         echo "${UPS}" > /var/tmp/tmp.txt && 
-      #         errors="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-      #         sites[$site]=$errors
-      #     fi; 
-      # fi; 
