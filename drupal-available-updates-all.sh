@@ -39,12 +39,14 @@ do
           fi; 
       fi; 
     done
+    echo -e "\n"
     for key in ${!sites[@]}; do
       allsites+=([${key}]=${sites[${key}]})
     done
     '
 done
 
+echo -e "\n allsites:"
 for key in ${!allsites[@]}; do
   echo ${key} ${allsites[${key}]}
 done
