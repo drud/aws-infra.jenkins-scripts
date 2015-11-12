@@ -13,7 +13,7 @@ fi
 
 for i in "${arr[@]}"
 do
-  echo -e "\nSERVER: $i\n"
+  echo -e "\n Checking server: $i\n"
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
     declare -A sites
@@ -47,7 +47,7 @@ do
     done
     
     for key in ${!sites[@]}; do
-      echo -e "\n\n" ${key} " " ${sites_version[${key}]} "\n" 
+      echo -e "\n\n" "Site: "${key} " Version:" ${sites_version[${key}]}
       echo "${sites[${key}]}"
     done
     '
