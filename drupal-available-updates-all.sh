@@ -13,7 +13,7 @@ for i in "${arr[@]}"
 do
   echo -e "\n Checking server: $i\n"
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
-  ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP DETAILS=$DETAILS '
+  ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS" '
     cd /var/www/ && for d in */ ; 
     echo $DETAILS
     do 
