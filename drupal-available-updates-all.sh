@@ -16,10 +16,6 @@ do
   echo -e "\n Checking server: $i\n"
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
   ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP '
-    #declare -A sites
-    #declare -A sites_version
-    #declare -A sites_updates
-
     cd /var/www/ && for d in */ ; 
     do 
       site=$(echo $d | sed 's:/*$::')
@@ -33,24 +29,12 @@ do
               echo "${UPS}" > /var/tmp/tmp.txt && 
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               echo "Checking Drupal $version_docroot site: $site has $updates updates available"
-              #sites[$site]="${UPS}"
-              #sites_version[$site]=$version_docroot
-              #sites_updates[$site]=$errors
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               echo "Checking Drupal $version_current site: $site has $updates updates"
-              #sites[$site]="${UPS}"
-              #sites_version[$site]=$version_current
-              #sites_updates[$site]=$errors
           fi; 
       fi; 
-    done
-    
-    #for key in ${!sites[@]}; do
-      #printf  "Site: %-20s Drupal version: %-20s Available updates: %-20s\n" ${key} ${sites_version[${key}]} ${sites_updates[${key}]}
-      #echo "${sites[${key}]}"
-    #done
-    '
+    done'
 done
