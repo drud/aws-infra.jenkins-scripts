@@ -30,14 +30,14 @@ do
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               updates=$((updates-1)) &&
               echo "Checking Drupal $version_docroot site: $site has $updates updates available" &&
-              if [[ $DETAILS = true ]]; then echo "${UPS}"; fi;
+              if [[ $DETAILS = true ]]; then echo -e "${UPS}" "\n"; fi;
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               echo "${UPS}" > /var/tmp/tmp.txt && 
               updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
               updates=$((updates-1)) &&
               echo "Checking Drupal $version_current site: $site has $updates updates available" &&
-              if [[ $DETAILS = true ]]; then echo "${UPS}"; fi;
+              if [[ $DETAILS = true ]]; then echo "${UPS}" "\n"; fi;
           fi; 
       fi; 
     done'
