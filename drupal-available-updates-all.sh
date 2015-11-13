@@ -31,7 +31,7 @@ do
           fi;
           updates=$(grep -ci "update" <<< "$UPS") &&
           echo "Checking Drupal $version site: $site on server: $SERVER has $updates updates available" &&
-          if [[ $DETAILS = true ]]; then echo "${UPS}" "\n"; fi;
+          if [[ $DETAILS = true ]]; then echo -e "${UPS}" "\n"; fi;
       fi; 
     done'
 done
