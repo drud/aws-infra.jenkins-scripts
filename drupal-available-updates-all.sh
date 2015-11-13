@@ -29,8 +29,7 @@ do
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
               version=$version_current 
           fi;
-          updates=$(wc -l <<< "$UPS" | colrm 3) &&
-          updates=$((updates-1)) &&
+          updates=$(grep -ci "update" <<< "$UPS") &&
           echo "Checking Drupal $version site: $site on server: $SERVER has $updates updates available" &&
           if [[ $DETAILS = true ]]; then echo "${UPS}" "\n"; fi;
       fi; 
