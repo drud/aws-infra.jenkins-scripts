@@ -13,8 +13,7 @@ for i in "${arr[@]}"
 do
   echo -e "\n Checking server: $i\n"
   PRIVATEIP=$(knife search node "name:$i" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
-  ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS" '
-    echo $DETAILS;
+  ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS SERVER=$i" '
     cd /var/www/ && for d in */ ; 
     do 
       site=$(echo $d | sed 's:/*$::')
@@ -26,19 +25,15 @@ do
           if [[ -n "$version_docroot" ]]; 
             then 
               UPS="$(drush -p5.5 -r /var/www/$d/current/docroot ups 2>/dev/null)" &&
-              echo "${UPS}" > /var/tmp/tmp.txt && 
-              updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              updates=$((updates-1)) &&
-              echo "Checking Drupal $version_docroot site: $site has $updates updates available" &&
-              if [[ $DETAILS = true ]]; then echo -e "${UPS}" "\n"; fi;
+              version=$version_docroot
             else 
               UPS="$(drush -p5.5 -r /var/www/$d/current ups 2>/dev/null)" &&
-              echo "${UPS}" > /var/tmp/tmp.txt && 
-              updates="$(wc -l /var/tmp/tmp.txt | grep -o [0-9][0-9])" &&
-              updates=$((updates-1)) &&
-              echo "Checking Drupal $version_current site: $site has $updates updates available" &&
-              if [[ $DETAILS = true ]]; then echo "${UPS}" "\n"; fi;
-          fi; 
+              version=$version_current 
+          fi;
+          updates=$(wc -l <<< "$UPS") &&
+          updates=$((updates-1)) &&
+          echo "Checking Drupal $version site: $site on server: $SERVER has $updates updates available" &&
+          if [[ $DETAILS = true ]]; then echo "${UPS}" "\n"; fi;
       fi; 
     done'
 done
