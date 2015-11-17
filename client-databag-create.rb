@@ -41,6 +41,7 @@ common = {
     :php => {
       :version => "5.5"
     },
+    :docroot => '/var/www/' + sitename + '/current/docroot'
 }
 
 # values that are different per environment
@@ -99,7 +100,6 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :docroot => '/var/www/' + sitename + '/current/htdocs',
         :url => 'http://localhost:1025',
         :active_theme => wp_active_theme,
     }
@@ -112,7 +112,6 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :docroot => '/var/www/' + sitename + '/current/htdocs',
         :url => 'http://' + sitename + '.nmdev.us',
         :active_theme => wp_active_theme,
     }
@@ -125,28 +124,21 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :docroot => '/var/www/' + sitename + '/current/htdocs',
         :url => 'http://' + production_domain,
         :active_theme => wp_active_theme,
     }
 elsif type == 'drupal'
     type_keys_default = {
         :hash_salt => SecureRandom.base64(48).to_s,
-        :cmi_active => '/var/www/' + sitename + '/current/active',
-        :cmi_staging => '/var/www/' + sitename + '/current/staging',
-        :docroot => '/var/www/' + sitename + '/current/docroot',
+        :cmi_sync => '/var/www/' + sitename + '/current/sync',
     }
     type_keys_staging = {
         :hash_salt => SecureRandom.base64(48).to_s,
-        :cmi_active => '/var/www/' + sitename + '/current/active',
-        :cmi_staging => '/var/www/' + sitename + '/current/staging',
-        :docroot => '/var/www/' + sitename + '/current/docroot',
+        :cmi_sync => '/var/www/' + sitename + '/current/sync',
     }
     type_keys_production = {
         :hash_salt => SecureRandom.base64(48).to_s,
-        :cmi_active => '/var/www/' + sitename + '/current/active',
-        :cmi_staging => '/var/www/' + sitename + '/current/staging',
-        :docroot =>'/var/www/' + sitename + '/current/docroot',
+        :cmi_sync => '/var/www/' + sitename + '/current/sync',
     }
 else
     type_keys_default = {}
