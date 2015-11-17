@@ -4,6 +4,10 @@ require 'chef/config'
 require 'chef/data_bag'
 require 'chef/encrypted_data_bag_item'
 
+def to_boolean(str)
+  str == 'true'
+end
+
 sitename = ARGV[4]
 type = ARGV[5]
 db_server_local = ARGV[6]
@@ -12,8 +16,11 @@ db_server_production = ARGV[8]
 admin_username = ARGV[9]
 production_domain = ARGV[10]
 wp_active_theme = ARGV[11]
+new_site = to_boolean(ARGV[12])
+web_server_staging = ARGV[13]
+web_server_prod = ARGV[14]
 
-foo = 'moo'
+
 
 
 # Use the same config as knife uses
@@ -46,6 +53,9 @@ default = {
     :db_user_password => SecureRandom.hex.to_s,
     :server_aliases => [
       "localhost"
+    ],
+    :hosts => [
+        "localhost"
     ]
 }
 staging = {
@@ -57,6 +67,9 @@ staging = {
     :db_user_password => SecureRandom.hex.to_s,
     :server_aliases => [
       sitename + '.nmdev.us'
+    ],
+    :hosts => [
+        web_server_staging
     ]
 }
 production = {
@@ -69,6 +82,9 @@ production = {
     :server_aliases => [
       sitename + 'prod.nmdev.us',
       production_domain
+    ],
+    :hosts => [
+        web_server_prod
     ]
 }
 
