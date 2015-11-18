@@ -1,8 +1,0 @@
----
-# tasks file for create
-
-- include: setup.yml
-- include: templating.yml
-- include: webserver.yml
-- include: deploy_source.yml
-- include: "{{ site_type }}_deploy.yml"
