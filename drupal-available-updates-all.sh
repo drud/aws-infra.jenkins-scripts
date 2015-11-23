@@ -13,7 +13,7 @@ if [[ -n "$SINGLE_SITE_NAME" ]];
   CHEF_ENVIRONMENT=$SINGLE_SITE_ENVIRONMENT
   then
     PRIVATEIP=$(knife search node "chef_environment:$CHEF_ENVIRONMENT AND nmd$SINGLE_SITE_NAME:action" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
-    ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS SITE_NAME=$SINGLE_SITE_NAME" '
+    ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS SITE_NAME=$SINGLE_SITE_NAME CHEF_ENVIRONMENT=$CHEF_ENVIRONMENT" '
       cd /var/www/$SITE_NAME
       site=$SITE_NAME
       d=$SITE_NAME
@@ -30,7 +30,7 @@ if [[ -n "$SINGLE_SITE_NAME" ]];
               version=$version_current 
           fi;
           updates=$(grep -ci "update" <<< "$UPS") &&
-          echo "Checking Drupal $version site: $site has $updates updates available" &&
+          echo "Checking Drupal $version site: $site in $CHEF_ENVIRONMENT $has $updates updates available" &&
           if [[ $DETAILS = true ]]; then echo -e "${UPS}" "\n"; fi;
       fi; 
     '
