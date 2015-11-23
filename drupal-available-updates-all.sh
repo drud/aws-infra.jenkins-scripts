@@ -9,7 +9,7 @@ else
   arr=($HOSTNAME)
 fi
 
-if [[ -n "$SINGLE_SITE_NAME" ]];
+if [[ $SINGLE_SITE_NAME -ge 1 ]];
   CHEF_ENVIRONMENT=$SINGLE_SITE_ENVIRONMENT
   then
     PRIVATEIP=$(knife search node "chef_environment:$CHEF_ENVIRONMENT AND nmd$SINGLE_SITE_NAME:action" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
