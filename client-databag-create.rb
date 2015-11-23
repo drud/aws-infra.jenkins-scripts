@@ -4,6 +4,10 @@ require 'chef/config'
 require 'chef/data_bag'
 require 'chef/encrypted_data_bag_item'
 
+def to_boolean(str)
+  str == 'true'
+end
+
 sitename = ARGV[4]
 type = ARGV[5]
 db_server_local = ARGV[6]
@@ -12,8 +16,11 @@ db_server_production = ARGV[8]
 admin_username = ARGV[9]
 production_domain = ARGV[10]
 wp_active_theme = ARGV[11]
+new_site = to_boolean(ARGV[12])
+web_server_staging = ARGV[13]
+web_server_prod = ARGV[14]
 
-foo = 'moo'
+
 
 
 # Use the same config as knife uses
@@ -34,6 +41,7 @@ common = {
     :php => {
       :version => "5.5"
     },
+    :docroot => '/var/www/' + sitename + '/current/docroot'
 }
 
 # values that are different per environment
@@ -46,6 +54,9 @@ default = {
     :db_user_password => SecureRandom.hex.to_s,
     :server_aliases => [
       "localhost"
+    ],
+    :hosts => [
+        "localhost"
     ]
 }
 staging = {
@@ -57,6 +68,9 @@ staging = {
     :db_user_password => SecureRandom.hex.to_s,
     :server_aliases => [
       sitename + '.nmdev.us'
+    ],
+    :hosts => [
+        web_server_staging
     ]
 }
 production = {
@@ -69,6 +83,9 @@ production = {
     :server_aliases => [
       sitename + 'prod.nmdev.us',
       production_domain
+    ],
+    :hosts => [
+        web_server_prod
     ]
 }
 
@@ -83,7 +100,6 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :docroot => '/var/www/' + sitename + '/current/htdocs',
         :url => 'http://localhost:1025',
         :active_theme => wp_active_theme,
     }
@@ -96,7 +112,6 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :docroot => '/var/www/' + sitename + '/current/htdocs',
         :url => 'http://' + sitename + '.nmdev.us',
         :active_theme => wp_active_theme,
     }
@@ -109,28 +124,21 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :docroot => '/var/www/' + sitename + '/current/htdocs',
         :url => 'http://' + production_domain,
         :active_theme => wp_active_theme,
     }
 elsif type == 'drupal'
     type_keys_default = {
         :hash_salt => SecureRandom.base64(48).to_s,
-        :cmi_active => '/var/www/' + sitename + '/current/active',
-        :cmi_staging => '/var/www/' + sitename + '/current/staging',
-        :docroot => '/var/www/' + sitename + '/current/docroot',
+        :cmi_sync => '/var/www/' + sitename + '/current/sync',
     }
     type_keys_staging = {
         :hash_salt => SecureRandom.base64(48).to_s,
-        :cmi_active => '/var/www/' + sitename + '/current/active',
-        :cmi_staging => '/var/www/' + sitename + '/current/staging',
-        :docroot => '/var/www/' + sitename + '/current/docroot',
+        :cmi_sync => '/var/www/' + sitename + '/current/sync',
     }
     type_keys_production = {
         :hash_salt => SecureRandom.base64(48).to_s,
-        :cmi_active => '/var/www/' + sitename + '/current/active',
-        :cmi_staging => '/var/www/' + sitename + '/current/staging',
-        :docroot =>'/var/www/' + sitename + '/current/docroot',
+        :cmi_sync => '/var/www/' + sitename + '/current/sync',
     }
 else
     type_keys_default = {}
