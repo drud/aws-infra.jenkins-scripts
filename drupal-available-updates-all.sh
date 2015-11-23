@@ -9,11 +9,11 @@ else
   arr=($HOSTNAME)
 fi
 
-CHEF_ENVIRONMENT='staging'
-if [[ -n "$SITE_NAME" ]];
+if [[ -n "$SINGLE_SITE_NAME" ]];
+  CHEF_ENVIRONMENT=$SINGLE_SITE_ENVIRONMENT
   then
-    PRIVATEIP=$(knife search node "chef_environment:$CHEF_ENVIRONMENT AND nmd$SITE_NAME:action" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
-    ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS SITE_NAME=$SITE_NAME" '
+    PRIVATEIP=$(knife search node "chef_environment:$CHEF_ENVIRONMENT AND nmd$SINGLE_SITE_NAME:action" -c ${JENKINS_HOME}/workspace/jenkins-scripts/.chef/knife.rb | sed -n '4p' | awk '{print $2}')
+    ssh -A -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no root@$PRIVATEIP "DETAILS=$DETAILS SITE_NAME=$SINGLE_SITE_NAME" '
       cd /var/www/$SITE_NAME
       site=$SITE_NAME
       d=$SITE_NAME
