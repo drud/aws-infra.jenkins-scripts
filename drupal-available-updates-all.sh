@@ -30,7 +30,7 @@ if [[ -n "$SINGLE_SITE_NAME" ]];
               version=$version_current 
           fi;
           updates=$(grep -ci "update" <<< "$UPS") &&
-          echo "Checking Drupal $version site: $site in $CHEF_ENVIRONMENT $has $updates updates available" &&
+          echo "Checking Drupal $version site: $site in $CHEF_ENVIRONMENT has $updates updates available" &&
           if [[ $DETAILS = true ]]; then echo -e "${UPS}" "\n"; fi;
       fi; 
     '
