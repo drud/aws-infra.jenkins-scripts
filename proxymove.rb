@@ -19,7 +19,7 @@ puts source
 puts destination
 
 # Use the same config as knife uses
-Chef::Config.from_file("/var/jenkins_home/workspace/jenkins-chef-client/.chef/knife.rb")
+Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/knife.rb")
 
 # Get the encrypted data secret
 secret = Chef::EncryptedDataBagItem.load_secret(ENV['NMDCHEF_SECRET_FILE'])
