@@ -89,6 +89,16 @@ production = {
     ]
 }
 
+# xtradb specifics
+if db_server_production == 'mysql.newmediadenver.com'
+    xtradb = {
+        :db_port => '3307',
+        :custom_port => 'enabled'
+    }
+else
+    xtradb = {}
+end
+
 # values that are different per platform
 if type == 'wp'
     type_keys_default = {
@@ -153,7 +163,7 @@ bag_item.data_bag('nmdhosting')
 bag_item['id'] = sitename
 bag_item['_default'] = [common, default, type_keys_default].reduce(:merge)
 bag_item['staging'] = [common, staging, type_keys_staging].reduce(:merge)
-bag_item['production'] = [common, production, type_keys_production].reduce(:merge)
+bag_item['production'] = [common, production, xtradb, type_keys_production].reduce(:merge)
 
 
 # Encrypt and save new data bag
