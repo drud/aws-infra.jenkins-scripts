@@ -99,6 +99,15 @@ else
     xtradb = {}
 end
 
+# new site
+if new_site == true
+    new_site = {
+        :new_site => true
+    }
+else
+    new_site = {}
+end
+
 # values that are different per platform
 if type == 'wp'
     type_keys_default = {
@@ -161,7 +170,7 @@ end
 bag_item = Chef::DataBagItem.new
 bag_item.data_bag('nmdhosting')
 bag_item['id'] = sitename
-bag_item['_default'] = [common, default, type_keys_default].reduce(:merge)
+bag_item['_default'] = [common, default, new_site, type_keys_default].reduce(:merge)
 bag_item['staging'] = [common, staging, type_keys_staging].reduce(:merge)
 bag_item['production'] = [common, production, xtradb, type_keys_production].reduce(:merge)
 
