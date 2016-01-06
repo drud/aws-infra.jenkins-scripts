@@ -15,7 +15,7 @@ do
   for i in `ls -t /var/www/$dir/releases --ignore='.[^.]' --ignore='$current'`;
   do
     a=`expr $a + 1`;
-      if [ $a -gt $COUNT ]; then
+      if [[ $a -gt $COUNT ]]; then
         b=`expr $b + 1`;
         echo "Deleting: '/var/www/$dir/releases/$i";
         # rm -rf /var/www/$dir/releases/$i
