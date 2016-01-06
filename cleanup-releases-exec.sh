@@ -1,5 +1,5 @@
 #!/bin/bash
-$COUNT=$1
+$COUNT="$1"
 
 cd  /var/www/;
 for dir in `ls` ;
