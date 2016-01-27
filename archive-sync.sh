@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 env
-if [ $direction = "up" ]; then
+if [ "$direction" = "UP" ]; then
    from="_default"
    to="production"
 else
