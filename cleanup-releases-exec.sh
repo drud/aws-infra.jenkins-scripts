@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sudo -i
 echo "Free Disk Space Before:"
 echo "$(df -h)"
 echo '----------------------------';
