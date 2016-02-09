@@ -19,9 +19,13 @@ wp_active_theme = ARGV[10]
 new_site = to_boolean(ARGV[11])
 web_server_staging = ARGV[12]
 web_server_prod = ARGV[13]
-
-
-
+if web_server_prod == 'webcluster01':
+    web_server_prod = {
+        'web01.newmediadenver.com',
+        'web02.newmediadenver.com',
+        'web04.newmediadenver.com'
+    }
+end
 
 # Use the same config as knife uses
 Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/knife.rb")
