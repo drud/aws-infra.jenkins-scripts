@@ -20,15 +20,6 @@ web_server_staging = ARGV[11]
 web_server_prod = ARGV[12]
 wp_active_theme = ARGV[13]
 
-
-if web_server_prod == 'webcluster01'
-    web_server_prod = [
-        'web01.newmediadenver.com',
-        'web02.newmediadenver.com',
-        'web04.newmediadenver.com'
-    ]
-end
-
 # Use the same config as knife uses
 Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/knife.rb")
 
@@ -93,6 +84,15 @@ production = {
         web_server_prod
     ]
 }
+
+# Override the production hosts directive if we need to expand a group
+if web_server_prod == 'webcluster01'
+    production[:hosts] = [
+        'web01.newmediadenver.com',
+        'web02.newmediadenver.com',
+        'web04.newmediadenver.com'
+    ]
+end
 
 # xtradb specifics
 if db_server_production == 'mysql.newmediadenver.com'
