@@ -14,11 +14,11 @@ db_server_local = ARGV[6]
 db_server_staging = ARGV[7]
 db_server_production = ARGV[8]
 admin_username = ARGV[9]
-production_domain = ARGV[10]
-wp_active_theme = ARGV[11]
-new_site = to_boolean(ARGV[12])
-web_server_staging = ARGV[13]
-web_server_prod = ARGV[14]
+#production_domain = ARGV[10]
+wp_active_theme = ARGV[10]
+new_site = to_boolean(ARGV[11])
+web_server_staging = ARGV[12]
+web_server_prod = ARGV[13]
 
 
 
@@ -39,7 +39,7 @@ common = {
     :db_name => sitename,
     :db_username => sitename + '_db',
     :php => {
-      :version => "5.5"
+      :version => "5.6"
     },
     :docroot => '/var/www/' + sitename + '/current/docroot'
 }
@@ -81,8 +81,7 @@ production = {
     :db_host => db_server_production,
     :db_user_password => SecureRandom.hex.to_s,
     :server_aliases => [
-      sitename + 'prod.nmdev.us',
-      production_domain
+      sitename + 'prod.nmdev.us'
     ],
     :hosts => [
         web_server_prod
@@ -102,7 +101,8 @@ end
 # new site
 if new_site == true
     new_site = {
-        :new_site => true
+        :new_site => true,
+        :install_profile => sitename
     }
 else
     new_site = {}
@@ -110,6 +110,8 @@ end
 
 # values that are different per platform
 if type == 'wp'
+    # Only need to set new_site vals in _default
+    default = [default, new_site].reduce(:merge)
     type_keys_default = {
         :auth_key => SecureRandom.base64(48).to_s,
         :secure_auth_key => SecureRandom.base64(48).to_s,
@@ -147,6 +149,8 @@ if type == 'wp'
         :active_theme => wp_active_theme,
     }
 elsif type == 'drupal'
+    # Need to set new_site in all envs - add to common
+    common = [common, new_site].reduce(:merge)
     type_keys_default = {
         :hash_salt => SecureRandom.base64(48).to_s,
         :cmi_sync => '/var/www/' + sitename + '/current/sync',
@@ -170,7 +174,7 @@ end
 bag_item = Chef::DataBagItem.new
 bag_item.data_bag('nmdhosting')
 bag_item['id'] = sitename
-bag_item['_default'] = [common, default, new_site, type_keys_default].reduce(:merge)
+bag_item['_default'] = [common, default, type_keys_default].reduce(:merge)
 bag_item['staging'] = [common, staging, type_keys_staging].reduce(:merge)
 bag_item['production'] = [common, production, xtradb, type_keys_production].reduce(:merge)
 
