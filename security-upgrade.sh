@@ -20,8 +20,7 @@ if [ $? -eq 0 ]; then
 	  apt-get -y install unattended-upgrades &&
 	  dpkg-reconfigure -f noninteractive unattended-upgrades;
 	fi"
-	INSTALL_FUNCTION="# Usage apt_package_exists PKG_NAME
-function apt_package_exists() {
+	INSTALL_FUNCTION="function apt_package_exists() {
 	return dpkg -l "\$1" &> /dev/null
 }"
 else
@@ -31,15 +30,15 @@ else
   INSTALL_CMD="typeset -f | if ! yum_package_exists yum-plugin-security ; then
     yum install -y yum-plugin-security
 	fi"
-		INSTALL_FUNCTION="# Usage yum_package_exists PKG_NAME
-function yum_package_exists() {
-  if yum list installed "\$1" >/dev/null 2>&1; then
+		INSTALL_FUNCTION="function yum_package_exists() {
+  if yum list installed "\$1" &>/dev/null; then
     true
   else
     false
   fi
 }"
 fi
+echo $INSTALL_FUNCTION
 ssh -T -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no $USER@$HOSTNAME<<EOF
   $(echo $INSTALL_FUNCTION)
   $(echo $INSTALL_CMD)
@@ -47,4 +46,6 @@ ssh -T -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no $USER@$HOST
   echo "The previous commands ran on $( uname -a )"
   exit
 EOF
+STATUS=$?
 unset IFS
+exit $STATUS
