@@ -4,18 +4,6 @@
 
 #Retain whitespace in variables
 IFS='%'
-# Usage yum_package_exists PKG_NAME
-function yum_package_exists() {
-  if yum list installed "$1" >/dev/null 2>&1; then
-    true
-  else
-    false
-  fi
-}
-# Usage apt_package_exists PKG_NAME
-function apt_package_exists() {
-	return dpkg -l "$1" &> /dev/null
-}
 # We override this string only if the package isn't installed.
 INSTALL_CMD=""
 # Try an SSH command to ubuntu first (faster that if root first)
@@ -32,6 +20,10 @@ if [ $? -eq 0 ]; then
 	  apt-get -y install unattended-upgrades &&
 	  dpkg-reconfigure -f noninteractive unattended-upgrades;
 	fi"
+	INSTALL_FUNCTION="# Usage apt_package_exists PKG_NAME
+function apt_package_exists() {
+	return dpkg -l "\$1" &> /dev/null
+}"
 else
 	echo "We *think* this is a CentOS box."
   USER="root"
@@ -39,8 +31,17 @@ else
   INSTALL_CMD="typeset -f | if ! yum_package_exists yum-plugin-security ; then
     yum install -y yum-plugin-security
 	fi"
+		INSTALL_FUNCTION="# Usage yum_package_exists PKG_NAME
+function yum_package_exists() {
+  if yum list installed "\$1" >/dev/null 2>&1; then
+    true
+  else
+    false
+  fi
+}"
 fi
 ssh -T -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no $USER@$HOSTNAME<<EOF
+  $(echo $INSTALL_FUNCTION)
   $(echo $INSTALL_CMD)
   $(echo $UP_CMD)
   echo "The previous commands ran on $( uname -a )"
