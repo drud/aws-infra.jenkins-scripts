@@ -1,5 +1,5 @@
 #!/bin/bash
-# Must pass $PROCNAME, HOSTNAME into the env.
+# Must pass $PROCNAME, HOSTNAME, OS into the env.
 # PROCNAME=""
 IFS="%"
 proc_count (){
@@ -13,7 +13,6 @@ proc_count (){
 }
 sudo -i
 proc_count "$PROCNAME"
-OS=$(./determine_os.sh)
 if [ "$OS" = "CENTOS" ]; then
 	RESTART_CMD="/etc/init.d/$PROCNAME restart"
 else
