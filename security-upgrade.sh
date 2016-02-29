@@ -6,9 +6,11 @@
 IFS='%'
 # We override this string only if the package isn't installed.
 INSTALL_CMD=""
-PROXY_CMD=$(${JENKINS_HOME}/workspace/jenkins-scripts/determine-proxy.sh)
+echo $JENKINS_HOME
+PROXY_CMD="$($JENKINS_HOME/workspace/jenkins-scripts/determine-proxy.sh $HOSTNAME)"
+echo $PROXY_CMD
 # Try an SSH command to ubuntu first (faster that if root first)
-RETURN=$(ssh -q -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=0 ubuntu@$HOSTNAME 'exit')
+RETURN=$(ssh -q -i /var/jenkins_home/.ssh/aws.pem $PROXY_CMD -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=0 ubuntu@$HOSTNAME 'exit')
 if [ $? -eq 0 ]; then
   echo "This is an ubuntu machine."
   USER="ubuntu"
@@ -39,8 +41,7 @@ else
   fi
 }"
 fi
-echo $INSTALL_FUNCTION
-ssh -T -i /var/jenkins_home/.ssh/aws.pem $PROXY_CMD -o StrictHostKeyChecking=no $USER@$HOSTNAME<<EOF
+ssh -T -i /var/jenkins_home/.ssh/aws.pem $PROXY_CMD -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=0 $USER@$HOSTNAME<<EOF
   $(echo $INSTALL_FUNCTION)
   $(echo $INSTALL_CMD)
   $(echo $UP_CMD)
