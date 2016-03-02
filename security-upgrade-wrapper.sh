@@ -13,6 +13,5 @@ else
 	$USER="root"
 fi
 SSH_CMD=$($JENKINS_HOME/workspace/jenkins-scripts/ssh-generator.sh $SCRIPTNAME $ENVOVERLOAD)
+echo "Here is the SSH CMD: $SSH_CMD"
 eval "$SSH_CMD"
-
-
