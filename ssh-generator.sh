@@ -16,5 +16,5 @@ else
 	USER="root"
 fi
 SSH_OPTIONS="-o StrictHostKeyChecking=no $PROXY_CMD -o NumberOfPasswordPrompts=0"
-SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOSTNAME 'sudo -Eib $ENVOVERLOAD bash -s --' < $JENKINS_HOME/workspace/jenkins-scripts/$SCRIPTNAME"
+SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOSTNAME 'sudo -Eib $ENVOVERLOAD bash -s --' < $JENKINS_HOME/workspace/jenkins-scripts/$SCRIPTNAME $OS"
 echo $SSH_CMD
