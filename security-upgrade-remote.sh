@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sudo -Eib env
-
 function apt_package_exists() {
   return dpkg -l "\$1" &> /dev/null
 }
