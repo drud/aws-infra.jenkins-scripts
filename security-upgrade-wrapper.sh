@@ -1,6 +1,6 @@
 #Retain whitespace in variables
 # SCRIPTNAME, HOSTNAME, ENVOVERLOAD
-ENVOVERLOAD=""
+ENVOVERLOAD="env"
 SCRIPTNAME="security-upgrade-remote.sh"
 # We override this string only if the package isn't installed.
 INSTALL_CMD=""
