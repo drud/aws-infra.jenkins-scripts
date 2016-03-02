@@ -1,5 +1,10 @@
 #!/bin/bash
-
+if [ -z "$1" ]; then
+  echo "This script requires that you pass in an OS to run."
+  echo "Usage: ./security-upgrade-remote.sh $OS"
+  exit 1;
+fi
+OS="$1"
 function apt_package_exists() {
   return dpkg -l "\$1" &> /dev/null
 }
