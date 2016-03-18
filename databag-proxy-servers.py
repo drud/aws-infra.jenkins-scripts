@@ -1,4 +1,6 @@
+#!/usr/bin/python
 import databag
+import click
 
 debug=True
 
@@ -13,6 +15,14 @@ if debug:
 #   "server web04.newmediadenver.com:80;"
 # ]
 def remove_server(servers, server_to_remove):
+  """
+  Removes a server from the list.
+
+  :param servers: The url entry to add to the databag
+  :param server_to_remove: The name of just the server or the full server string
+
+  :returns list of servers
+  """
   index_to_remove = None
   for index, server in enumerate(servers):
     if server_to_remove in server:
@@ -26,7 +36,7 @@ def remove_server(servers, server_to_remove):
 
 def add_server(servers, server_to_add):
   """
-  Add or remove entries from a proxy-structured databag.
+  Add a server to the list.
 
   :param servers: The url entry to add to the databag
   :param server_to_add: The name of just the server or the full server string
@@ -48,6 +58,13 @@ def add_server(servers, server_to_add):
   return servers
 
 def get_server_list(environment):
+  """
+  Get the list of servers for an environment
+
+  :param environment: 'staging' or 'production'
+
+  :returns list of servers
+  """
   proxy_databag = databag.get_databag("upstream", container=proxy_container)
   if environment=='production':
     server_list = proxy_databag[environment]['webcluster01']['servers']
@@ -58,7 +75,21 @@ def get_server_list(environment):
     return None
   return server_list
 
+@click.command()
+@click.option('--server', prompt="Server name:", help="Name of the server you would like to add/remove")
+@click.option('--environment', prompt="Which environment?", help="'staging' or 'production'", type=click.Choice(['staging', 'production']))
+@click.option('--add', 'operation', flag_value='add', default=True)
+@click.option('--remove', 'operation', flag_value='remove')
 def modify_server_list(server, environment, operation):
+  """
+  Get the list of servers for an environment
+
+  :param server: Name of server to add/remove
+  :param environment: 'staging' or 'production' environment
+  :param operation: 'add' or 'remove' the server
+
+  :returns list of servers
+  """
   proxy_databag = databag.get_databag("upstream", container=proxy_container)
   if environment=="production":
     server_list = proxy_databag[environment]['webcluster01']['servers']
@@ -82,6 +113,6 @@ def modify_server_list(server, environment, operation):
   databag.save_databag(proxy_databag, bag_name="upstream", container=proxy_container)
   return True
 
-if __name__ == '__main__':
-  modify_server_list(server="fakeweb07.newmediadenver.com", environment="production", operation="add")
-  modify_server_list(server="fakeweb06.nmdev.us", environment="staging", operation="add")
+# if __name__ == '__main__':
+#   modify_server_list(server="fakeweb07.newmediadenver.com", environment="production", operation="add")
+#   modify_server_list(server="fakeweb06.nmdev.us", environment="staging", operation="add")
