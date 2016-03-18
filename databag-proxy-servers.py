@@ -116,3 +116,5 @@ def modify_server_list(server, environment, operation):
 # if __name__ == '__main__':
 #   modify_server_list(server="fakeweb07.newmediadenver.com", environment="production", operation="add")
 #   modify_server_list(server="fakeweb06.nmdev.us", environment="staging", operation="add")
+if __name__ == '__main__':
+  modify_server_list()

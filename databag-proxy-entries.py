@@ -68,3 +68,5 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
 # if __name__ == '__main__':
 #   site_proxy_entry("mytest.nmdev.us", "staging", operation="add")
 #   site_proxy_entry("mytestprod.nmdev.us", "production", operation="add")
+if __name__ == '__main__':
+    site_proxy_entry()
