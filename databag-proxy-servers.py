@@ -83,12 +83,6 @@ def get_server_list(environment):
 def modify_server_list(server, environment, operation):
   """
   Get the list of servers for an environment
-
-  :param server: Name of server to add/remove
-  :param environment: 'staging' or 'production' environment
-  :param operation: 'add' or 'remove' the server
-
-  :returns list of servers
   """
   proxy_databag = databag.get_databag("upstream", container=proxy_container)
   if environment=="production":

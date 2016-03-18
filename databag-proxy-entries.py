@@ -12,8 +12,8 @@ if debug:
 @click.option('--url', prompt="What is the URL of the server you are trying to add?", help="URL of server you're trying to add")
 @click.option('--environment', prompt="Which environment?", help="'staging' or 'production'", type=click.Choice(['staging', 'production']))
 #@click.option('--add/--remove', default="add", help="'add' or 'remove' the entry")
-@click.option('--add', 'operation', flag_value='add', default=True)
-@click.option('--remove', 'operation', flag_value='remove')
+@click.option('--add', 'operation', flag_value='add', default=True, help="Add this entry to the proxy bag")
+@click.option('--remove', 'operation', flag_value='remove', help="Remove this entry from the proxy bag")
 @click.option('--auth', default=False, is_flag=True, help="Adds an auth screen")
 @click.option('--www-force', default=False, is_flag=True, help="Forces the url to rewrite to www.*")
 @click.option('--ssl-force', default=False, is_flag=True, help="Force a rewrite to https")
@@ -21,16 +21,6 @@ if debug:
 def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ssl):
   """
   Add or remove entries from a proxy-structured datBabag.
-
-  :param url: The url entry to add to the databag
-  :param environment: 'staging' or 'production'
-  :param operation: 'add' or 'remove' the entry
-  :param auth: If set to true, will add the auth screen
-  :param www_force: If set to true, will force the url to rewrite to www.*
-  :param ssl: String that lines up with the SSL entry in the auth databag
-  :param ssl_force: Force a rewrite to https
-
-  :returns dict databag
   """
   proxy_databag = databag.get_databag(bag_name="upstream", container=proxy_container)
   if environment=='production':
