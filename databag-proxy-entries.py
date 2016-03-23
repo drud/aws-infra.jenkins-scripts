@@ -35,13 +35,13 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   if operation == "add":
     site_entries[url] = {}
     if auth:
-      site_entries[url]["auth"] = "true"
+      site_entries[url]["auth"] = True
     if www_force:
-      site_entries[url]["www_force"] = "true"
+      site_entries[url]["www_force"] = True
     if ssl:
       site_entries[url]["ssl"] = ssl
     if ssl_force:
-      site_entries[url]["ssl_force"] = "true"
+      site_entries[url]["ssl_force"] = True
   elif operation == "remove":
     if url in site_entries.keys():
       site_entries.pop(url)
