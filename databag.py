@@ -9,6 +9,7 @@ import tempfile
 
 jenkins_home = os.getenv("JENKINS_HOME")
 secret_file = os.getenv('NMDCHEF_SECRET_FILE')
+secret_file = secret_file + " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
 
 def construct_cmd(op, container, bag_name, json_tmp_file_name):
   """
