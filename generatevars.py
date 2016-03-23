@@ -21,13 +21,13 @@ def process_databag(e, f, c, bundler, databag, path):
     :param databag: The databag to translate. eg: nmdhosting/1fee
     :param path: The path to write either generated.json or generated.yaml
     """
-    current_dir = os.getcwd()
-    if not os.getenv('NMDCHEF_REPO_LOCAL'):
-        raise Exception('NMDCHEF_REPO_LOCAL is not a vaild environment variable')
+    #current_dir = os.getcwd()
+    #if not os.getenv('NMDCHEF_REPO_LOCAL'):
+    #    raise Exception('NMDCHEF_REPO_LOCAL is not a valid environment variable')
     if not os.getenv('NMDCHEF_SECRET_FILE'):
         raise Exception('NMDCHEF_SECRET_FILE is not a vaild environment variable')
 
-    os.chdir(os.getenv('NMDCHEF_REPO_LOCAL'))
+    #os.chdir(os.getenv('NMDCHEF_REPO_LOCAL'))
     secret = os.getenv('NMDCHEF_SECRET_FILE')
     db = databag.split('/')[0]
     db_item = databag.split('/')[1]
@@ -52,7 +52,7 @@ def process_databag(e, f, c, bundler, databag, path):
         data = yaml.load(out)
         destination = '{0}/generated.yml'.format(os.path.abspath(path))
         output = yaml.dump(data[e], canonical=True)
-    os.chdir(current_dir)
+    #os.chdir(current_dir)
     with open(destination, 'w') as outfile:
         outfile.write(output)
 
