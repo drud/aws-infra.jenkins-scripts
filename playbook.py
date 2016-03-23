@@ -36,7 +36,7 @@ def get_databags():
 
 
 def generate_variables(databag, env, c, bundler):
-    cd = os.getcwd()
+    cd = "/var/jenkins_home/workspace/jenkins-scripts"
     os.system(cd + "/generatevars.py " + databag + " " + cd + "/ --f json")
     with open(cd + '/generated.json') as data_file:
         data = json.load(data_file)
