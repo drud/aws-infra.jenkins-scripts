@@ -3,7 +3,7 @@ import databag
 import click
 import sys
 
-debug=True
+debug=False
 
 proxy_container="nmdproxy"
 if debug:
