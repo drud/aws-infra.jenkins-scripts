@@ -26,6 +26,10 @@ Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/k
 # Get the encrypted data secret
 secret = Chef::EncryptedDataBagItem.load_secret(ENV['NMDCHEF_SECRET_FILE'])
 
+if type == 'd7' or type == 'd8'
+    type = 'drupal'
+end
+
 # values that are consistent across environment and platform
 common = {
     :sitename => sitename,
@@ -114,10 +118,11 @@ else
     new_site = {}
 end
 
+# Need to set new_site in all envs - add to common
+common = [common, new_site].reduce(:merge)
+
 # values that are different per platform
 if type == 'wp'
-    # Only need to set new_site vals in _default
-    default = [default, new_site].reduce(:merge)
     type_keys_default = {
         :auth_key => SecureRandom.base64(48).to_s,
         :secure_auth_key => SecureRandom.base64(48).to_s,
@@ -155,8 +160,6 @@ if type == 'wp'
         :active_theme => wp_active_theme,
     }
 elsif type == 'drupal'
-    # Need to set new_site in all envs - add to common
-    common = [common, new_site].reduce(:merge)
     type_keys_default = {
         :hash_salt => SecureRandom.base64(48).to_s,
         :cmi_sync => '/var/www/' + sitename + '/current/sync',
