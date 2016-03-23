@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import databag
 import click
+import sys
 
 debug=True
 
@@ -29,7 +30,7 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
     site_entries = proxy_databag[environment]['web01']['apps']
   else:
     raise Exception("Unrecognized environment of '{environment}. Available options are 'production' and 'development'".format(environment=environment))
-    return None
+    sys.exit(1)
 
   if operation == "add":
     site_entries[url] = {}
