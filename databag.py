@@ -8,7 +8,7 @@ import ast
 import tempfile
 
 jenkins_home = os.getenv("JENKINS_HOME")
-secret_file = "%s/.chef/nmd_encrypted_data_bag_secret" % (jenkins_home)
+secret_file = os.getenv('NMDCHEF_SECRET_FILE')
 
 def construct_cmd(op, container, bag_name, json_tmp_file_name):
   """
