@@ -98,7 +98,7 @@ client_metadata = {
         :email_address => ''
     },
     :production_url => '',
-    :we_are_hosting => True,
+    :we_are_hosting => true,
     :transactional_email => {
         :provider => '',
         :username => '',
