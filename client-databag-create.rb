@@ -88,7 +88,33 @@ production = {
         web_server_prod
     ]
 }
-
+client_metadata = {
+    :company_legal_name => '',
+    :company_city => '',
+    :company_state => '',
+    :primary_contact => {
+        :name => '',
+        :phone_number => '',
+        :email_address => ''
+    },
+    :production_url => '',
+    :we_are_hosting => True,
+    :transactional_email => {
+        :provider => '',
+        :username => '',
+        :password => ''
+    },
+    :dns => {
+        :provider => '',
+        :username => '',
+        :password => ''
+    },
+    :ssl => {
+        :provider => '',
+        :username => '',
+        :password => ''
+    }
+}
 # Override the production hosts directive if we need to expand a group
 if web_server_prod == 'webcluster01'
     production[:hosts] = [
@@ -186,6 +212,7 @@ bag_item['id'] = sitename
 bag_item['_default'] = [common, default, type_keys_default].reduce(:merge)
 bag_item['staging'] = [common, staging, type_keys_staging].reduce(:merge)
 bag_item['production'] = [common, production, xtradb, type_keys_production].reduce(:merge)
+bag_item['client_metadata'] = client_metadata
 
 
 # Encrypt and save new data bag
