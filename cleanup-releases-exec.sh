@@ -9,6 +9,8 @@ cd  /var/www/;
 for dir in `ls` ;
 do
   echo '----------------------------';
+  echo 'Purge node_modules';
+  rm -rf /var/www/$dir/shared/node_modules
   echo "Analyzing $dir";
   a=0;
         b=0;
