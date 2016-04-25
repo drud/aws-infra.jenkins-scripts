@@ -170,7 +170,7 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :url => 'http://' + sitename + '.nmdev.us',
+        :url => 'https://' + sitename + '.nmdev.us',
         :active_theme => wp_active_theme,
     }
     type_keys_production = {
@@ -182,7 +182,7 @@ if type == 'wp'
         :secure_auth_salt => SecureRandom.base64(48).to_s,
         :logged_in_salt => SecureRandom.base64(48).to_s,
         :nonce_salt => SecureRandom.base64(48).to_s,
-        :url => 'http://' + sitename + 'prod.nmdev.us',
+        :url => 'https://' + sitename + 'prod.nmdev.us',
         :active_theme => wp_active_theme,
     }
 elsif type == 'drupal'
