@@ -123,6 +123,13 @@ if web_server_prod == 'webcluster01'
         'web04.newmediadenver.com'
     ]
 end
+# Override the staging hosts directive if we need to expand a group
+if web_server_staging == 'webstagingcluster01'
+    staging[:hosts] = [
+        'web01.nmdev.us',
+        'web02.nmdev.us'
+    ]
+end
 
 # xtradb specifics
 if db_server_production == 'mysql.newmediadenver.com'
