@@ -6,12 +6,13 @@ import os
 import requests
 
 @click.command()
-@click.option('--environment', prompt='', help='Environment e.g. production, staging')
-def trigger_jobs_by_env(environment):
+@click.option('--environment', prompt='Environment', help='Environment e.g. production, staging')
+@click.option('--chef-action', prompt='Chef action', help='e.g. update, backup')
+def trigger_web_jobs(environment, chef_action):
     """
-    Trigger the sitepack job for this application build.
-    :param application: An application object.
-    :param deploy: The deployment this build is for.
+    Trigger a mass web job based on environment
+    :param environment - Which environment would you like to try executing this job on?
+    :param 
     """
     jenkins_url = 'https://leroy.nmdev.us'
 
@@ -30,7 +31,7 @@ def trigger_jobs_by_env(environment):
         if environment in job_name:
             job = J.get_job(job_name)
             # Set build parameters, kick off a new build, and block until complete.
-            params = {'name': job_name, 'CHEF_ACTION': 'update' }
+            params = {'name': job_name, 'CHEF_ACTION': chef_action }
             # Block so the jobs execute one-at-a-time
             qi = job.invoke(build_params=params, block=True)
             #build = qi.get_build()
@@ -49,4 +50,4 @@ def trigger_jobs_by_env(environment):
     #     print "THERE WAS AN ERROR WITH THE BUILD OF {job}".format(job=job_name)
 
 if __name__ == '__main__':
-    trigger_jobs_by_env()
+    trigger_web_jobs()
