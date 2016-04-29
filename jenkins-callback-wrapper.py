@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from jenkinsapi.jenkins import Jenkins
 from jenkinsapi.custom_exceptions import JenkinsAPIException
 from jenkinsapi.constants import STATUS_SUCCESS
