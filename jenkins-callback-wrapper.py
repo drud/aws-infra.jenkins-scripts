@@ -24,6 +24,7 @@ def trigger_web_jobs(environment, chef_action):
         print "Connection successful"
     except requests.exceptions.ConnectionError as e:
         print "Could not establish connection to Jenkins server at {jenkins_url}".format(jenkins_url=jenkins_url)
+        exit(1)
 
     print "Fetching list of jobs to be run:"
     jenkins_job_list = J.get_jobs_list()
