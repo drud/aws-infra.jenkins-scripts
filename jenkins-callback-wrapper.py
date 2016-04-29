@@ -13,7 +13,7 @@ def trigger_web_jobs(environment, chef_action):
     """
     Trigger a mass web job based on environment
     :param environment - Which environment would you like to try executing this job on?
-    :param 
+    :param chef_action - What would you like to perform on this environment?
     """
     jenkins_url = 'https://leroy.nmdev.us'
 
@@ -30,12 +30,17 @@ def trigger_web_jobs(environment, chef_action):
     jenkins_job_list = J.get_jobs_list()
     print "Looking for jobs that contain '{environment}'".format(environment=environment)
     for job_name in jenkins_job_list:
-        if environment in job_name:
+        if environment in job_name and "drud" not in job_name:
+            print "Working on {job_name}".format(job_name=job_name)
             job = J.get_job(job_name)
             # Set build parameters, kick off a new build, and block until complete.
             params = {'name': job_name, 'CHEF_ACTION': chef_action }
             # Block so the jobs execute one-at-a-time
-            qi = job.invoke(build_params=params, block=True)
+            try:
+                qi = job.invoke(build_params=params, block=True)
+            except Exception as e:
+                print e
+
             #build = qi.get_build()
 
     # Determine if the job already exists on this jenkins instance. If not, clone
