@@ -2,7 +2,7 @@
 import databag
 import click
 
-proxy_container="nmdproxytest"
+proxy_container="nmdproxy"
 
 #### Logic for taking servers in and out of rotation ####
 #Here's the servers array:
