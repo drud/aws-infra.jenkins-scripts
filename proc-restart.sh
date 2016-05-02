@@ -31,7 +31,7 @@ else
 fi
 
 # Override the cmd if hard reset set
-if [ "FORCEOP" = "hard reset" ]; then
+if [ "$FORCEOP" = "hard reset" ]; then
 	echo "A hard reset of proc $PROCNAME has been specified."
 	CMD="service $PROCNAME stop; killall $PROCNAME; service $PROCNAME start"
 fi
