@@ -30,7 +30,7 @@ def trigger_web_jobs(environment, chef_action):
     jenkins_job_list = J.get_jobs_list()
     print "Looking for jobs that contain '{environment}'".format(environment=environment)
     for job_name in jenkins_job_list:
-        if job_name.startswith(environment) and "drud" not in job_name:
+        if job_name != "" and job_name.startswith(environment) and "drud" not in job_name:
             print "Working on {job_name}".format(job_name=job_name)
             job = J.get_job(job_name)
             # Set build parameters, kick off a new build, and block until complete.
