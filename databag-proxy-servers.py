@@ -14,7 +14,7 @@ if debug:
 #   "server web02.newmediadenver.com:80;",
 #   "server web04.newmediadenver.com:80;"
 # ]
-def remove_server(servers, server_to_remove):
+def remove_server(servers, server_to_remove, cluster):
   """
   Removes a server from the list.
 
@@ -31,10 +31,11 @@ def remove_server(servers, server_to_remove):
   if index_to_remove:
     servers.pop(index_to_remove)
   else:
-    print "Could not find a server {server} in [{servers}] to remove.".format(server=server_to_remove,servers=",".join(servers))
+    print "Could not find a server {server} in {cluster}[{servers}] to remove.".format(server=server_to_remove,cluster=cluster,servers=",".join(servers))
+  print ','.join(server_list)
   return servers
 
-def add_server(servers, server_to_add):
+def add_server(servers, server_to_add, cluster):
   """
   Add a server to the list.
 
@@ -50,11 +51,12 @@ def add_server(servers, server_to_add):
     server_to_add="{server}:80;".format(server=server_to_add)
 
   if any([server_to_add==server for server in servers]):
-    print "Server '{server}' already exists in rotation. No action is required".format(server=server_to_add)
+    print "Server {cluster}['{server}]' already exists in rotation. No action is required".format(cluster=cluster,server=server_to_add)
     return True
   else:
-    print "Adding server '{server}' to webcluster01."
+    print "Adding server '{server}' to {cluster}.".format(server=server_to_add, cluster=cluster)
     servers=servers.append(server_to_add)
+  print ','.join(server_list)
   return servers
 
 def get_server_list(environment):
@@ -86,23 +88,21 @@ def modify_server_list(server, environment, operation):
   """
   proxy_databag = databag.get_databag("upstream", container=proxy_container)
   if environment=="production":
-    server_list = proxy_databag[environment]['webcluster01']['servers']
+    cluster='webcluster01'
   elif environment=="staging":
-    server_list = proxy_databag[environment]['web01']['servers']
+    cluster='web01'
   else:
     raise Exception("Unrecognized environment of '{environment}. Available options are 'production' and 'development'".format(environment=environment))
     return None
+  server_list = proxy_databag[environment][cluster]['servers']
   if operation == "add":
-    server_list = add_server(server_list, server)
+    server_list = add_server(server_list, server, cluster)
   elif operation == "remove":
-    server_list = remove_server(server_list, server)
+    server_list = remove_server(server_list, server, cluster)
   else:
     print "Unrecognized server operation of '{operation}'".format(operation=operation)
   # Put it all back together
-  if environment=="production":
-    proxy_databag[environment]['webcluster01']['servers'] = server_list
-  elif environment=="staging":
-    proxy_databag[environment]['web01']['servers'] = server_list
+  proxy_databag[environment][cluster]['servers'] = server_list
 
   databag.save_databag(proxy_databag, bag_name="upstream", container=proxy_container)
   return True
