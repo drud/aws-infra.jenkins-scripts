@@ -23,12 +23,16 @@ if [ "$FORCEOP" != "no" ]; then
 	echo "Setting operation to '$FORCEOP'"
 	OP=$FORCEOP
 fi
+# Build the commands out
 if [ "$OS" = "CENTOS" ]; then
 	CMD="/etc/init.d/$PROCNAME $OP"
 else
 	CMD="service $PROCNAME $OP"
 fi
+
+# Override the cmd if hard reset set
 if [ "FORCEOP" = "hard reset" ]; then
+	echo "A hard reset of proc $PROCNAME has been specified."
 	CMD="service $PROCNAME stop; killall $PROCNAME; service $PROCNAME start"
 fi
 
