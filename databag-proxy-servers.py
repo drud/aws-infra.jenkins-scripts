@@ -88,11 +88,13 @@ def get_server_list(environment):
 @click.option('--environment', prompt="Which environment?", help="'staging' or 'production'", type=click.Choice(['staging', 'production']))
 @click.option('--add', 'operation', flag_value='add', default=True)
 @click.option('--remove', 'operation', flag_value='remove')
-@click.option('--debug', 'debug', default='True')
+@click.option('--debug', 'debug', flag_value=True, default=True)
 def modify_server_list(server, environment, operation, debug):
   """
   Get the list of servers for an environment
   """
+  if !debug:
+    exit(1)
   if debug:
     global proxy_container
     proxy_container="nmdtest"
