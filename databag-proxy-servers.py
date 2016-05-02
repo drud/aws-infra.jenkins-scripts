@@ -24,6 +24,9 @@ def remove_server(servers, server_to_remove, cluster):
   :returns list of servers
   """
   index_to_remove = None
+  if servers == None or len(servers) == 0:
+    print "No servers are in rotation for '{cluster}'".format(cluster)
+    return []
   for index, server in enumerate(servers):
     if server_to_remove in server:
       index_to_remove = index
@@ -50,12 +53,16 @@ def add_server(servers, server_to_add, cluster):
   if ":80;" not in server_to_add:
     server_to_add="{server}:80;".format(server=server_to_add)
 
+  # Check for the "None" edgecase
+  if servers == None or len(servers) == 0:
+    print "No servers are in rotation for '{cluster}'".format(cluster)
+    servers=[]
   if any([server_to_add==server for server in servers]):
     print "Server {cluster}['{server}]' already exists in rotation. No action is required".format(cluster=cluster,server=server_to_add)
     return True
   else:
     print "Adding server '{server}' to {cluster}.".format(server=server_to_add, cluster=cluster)
-    servers=servers.append(server_to_add)
+    servers.append(server_to_add)
   print ','.join(server_list)
   return servers
 
@@ -95,6 +102,8 @@ def modify_server_list(server, environment, operation):
     raise Exception("Unrecognized environment of '{environment}. Available options are 'production' and 'development'".format(environment=environment))
     return None
   server_list = proxy_databag[environment][cluster]['servers']
+  if server_list is None:
+    print "server_list is None"
   if operation == "add":
     server_list = add_server(server_list, server, cluster)
   elif operation == "remove":
