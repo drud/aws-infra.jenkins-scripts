@@ -23,7 +23,7 @@ def remove_server(servers, server_to_remove, cluster):
   :returns list of servers
   """
   index_to_remove = None
-  if servers == None or type(servers} != type(list):
+  if servers == None or type(servers) != type(list):
     print "No servers are in rotation for '{cluster}'".format(cluster=cluster)
     return []
   for index, server in enumerate(servers):
