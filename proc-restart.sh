@@ -28,6 +28,9 @@ if [ "$OS" = "CENTOS" ]; then
 else
 	CMD="service $PROCNAME $OP"
 fi
+if [ "FORCEOP" = "hard restart" ]; then
+	CMD="service $PROCNAME stop; killall $PROCNAME; service $PROCNAME start"
+fi
 
 if [ $NUM_PROCS -lt 1 -a "$FORCEOP" = "no" ]; then
 	echo "No matching process found! Restarting '$PROCNAME'..."
