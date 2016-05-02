@@ -24,6 +24,9 @@ def remove_server(servers, server_to_remove, cluster):
   :returns list of servers
   """
   index_to_remove = None
+  if servers == None or len(servers) == 0:
+    print "No servers are in rotation for '{cluster}'".format(cluster)
+    return []
   for index, server in enumerate(servers):
     if server_to_remove in server:
       index_to_remove = index
@@ -50,6 +53,10 @@ def add_server(servers, server_to_add, cluster):
   if ":80;" not in server_to_add:
     server_to_add="{server}:80;".format(server=server_to_add)
 
+  # Check for the "None" edgecase
+  if servers == None or len(servers) == 0:
+    print "No servers are in rotation for '{cluster}'".format(cluster)
+    servers=[]
   if any([server_to_add==server for server in servers]):
     print "Server {cluster}['{server}]' already exists in rotation. No action is required".format(cluster=cluster,server=server_to_add)
     return True
