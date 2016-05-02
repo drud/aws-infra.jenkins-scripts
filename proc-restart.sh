@@ -28,7 +28,7 @@ if [ "$OS" = "CENTOS" ]; then
 else
 	CMD="service $PROCNAME $OP"
 fi
-if [ "FORCEOP" = "hard restart" ]; then
+if [ "FORCEOP" = "hard reset" ]; then
 	CMD="service $PROCNAME stop; killall $PROCNAME; service $PROCNAME start"
 fi
 
