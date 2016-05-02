@@ -2,8 +2,6 @@
 import databag
 import click
 
-debug=True
-
 proxy_container="nmdproxytest"
 
 #### Logic for taking servers in and out of rotation ####
@@ -23,7 +21,7 @@ def remove_server(servers, server_to_remove, cluster):
   :returns list of servers
   """
   index_to_remove = None
-  if servers == None or type(servers} != type(list):
+  if servers == None or not isinstance(servers, list):
     print "No servers are in rotation for '{cluster}'".format(cluster=cluster)
     return []
   for index, server in enumerate(servers):
@@ -35,7 +33,7 @@ def remove_server(servers, server_to_remove, cluster):
   else:
     print "Could not find server {server} in {cluster}[{servers}] to remove.".format(server=server_to_remove,cluster=cluster,servers=",".join(servers))
 
-  print ','.join(servers)
+  print "Remaining servers: [%s]" % ','.join(servers)
   return servers
 
 def add_server(servers, server_to_add, cluster):
@@ -93,8 +91,6 @@ def modify_server_list(server, environment, operation, debug):
   """
   Get the list of servers for an environment
   """
-  if !debug:
-    exit(1)
   if debug:
     global proxy_container
     proxy_container="nmdtest"
