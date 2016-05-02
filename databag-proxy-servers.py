@@ -55,7 +55,7 @@ def add_server(servers, server_to_add, cluster):
     return True
   else:
     print "Adding server '{server}' to {cluster}.".format(server=server_to_add, cluster=cluster)
-    servers=servers.append(server_to_add)
+    servers.append(server_to_add)
   print ','.join(server_list)
   return servers
 
@@ -95,6 +95,8 @@ def modify_server_list(server, environment, operation):
     raise Exception("Unrecognized environment of '{environment}. Available options are 'production' and 'development'".format(environment=environment))
     return None
   server_list = proxy_databag[environment][cluster]['servers']
+  if server_list is None:
+    print "server_list is None"
   if operation == "add":
     server_list = add_server(server_list, server, cluster)
   elif operation == "remove":
