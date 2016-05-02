@@ -4,9 +4,8 @@ import click
 
 debug=True
 
-proxy_container="nmdproxy"
-if debug:
-  proxy_container="nmdtest"
+proxy_container="nmdproxytest"
+
 #### Logic for taking servers in and out of rotation ####
 #Here's the servers array:
 # bag['production']['webcluster01']['servers'] = [
@@ -24,8 +23,8 @@ def remove_server(servers, server_to_remove, cluster):
   :returns list of servers
   """
   index_to_remove = None
-  if servers == None or len(servers) == 0:
-    print "No servers are in rotation for '{cluster}'".format(cluster)
+  if servers == None or type(servers} != type(list):
+    print "No servers are in rotation for '{cluster}'".format(cluster=cluster)
     return []
   for index, server in enumerate(servers):
     if server_to_remove in server:
@@ -34,8 +33,9 @@ def remove_server(servers, server_to_remove, cluster):
   if index_to_remove:
     servers.pop(index_to_remove)
   else:
-    print "Could not find a server {server} in {cluster}[{servers}] to remove.".format(server=server_to_remove,cluster=cluster,servers=",".join(servers))
-  print ','.join(server_list)
+    print "Could not find server {server} in {cluster}[{servers}] to remove.".format(server=server_to_remove,cluster=cluster,servers=",".join(servers))
+
+  print ','.join(servers)
   return servers
 
 def add_server(servers, server_to_add, cluster):
@@ -59,7 +59,7 @@ def add_server(servers, server_to_add, cluster):
     servers=[]
   if any([server_to_add==server for server in servers]):
     print "Server {cluster}['{server}]' already exists in rotation. No action is required".format(cluster=cluster,server=server_to_add)
-    return True
+    return servers
   else:
     print "Adding server '{server}' to {cluster}.".format(server=server_to_add, cluster=cluster)
     servers.append(server_to_add)
@@ -88,10 +88,16 @@ def get_server_list(environment):
 @click.option('--environment', prompt="Which environment?", help="'staging' or 'production'", type=click.Choice(['staging', 'production']))
 @click.option('--add', 'operation', flag_value='add', default=True)
 @click.option('--remove', 'operation', flag_value='remove')
-def modify_server_list(server, environment, operation):
+@click.option('--debug', 'debug', flag_value=True, default=True)
+def modify_server_list(server, environment, operation, debug):
   """
   Get the list of servers for an environment
   """
+  if !debug:
+    exit(1)
+  if debug:
+    global proxy_container
+    proxy_container="nmdtest"
   proxy_databag = databag.get_databag("upstream", container=proxy_container)
   if environment=="production":
     cluster='webcluster01'
