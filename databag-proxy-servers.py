@@ -55,7 +55,7 @@ def add_server(servers, server_to_add, cluster):
 
   # Check for the "None" edgecase
   if servers == None or len(servers) == 0:
-    print "No servers are in rotation for '{cluster}'".format(cluster)
+    print "No servers are in rotation for '{cluster}'".format(cluster=cluster)
     servers=[]
   if any([server_to_add==server for server in servers]):
     print "Server {cluster}['{server}]' already exists in rotation. No action is required".format(cluster=cluster,server=server_to_add)
@@ -63,7 +63,6 @@ def add_server(servers, server_to_add, cluster):
   else:
     print "Adding server '{server}' to {cluster}.".format(server=server_to_add, cluster=cluster)
     servers.append(server_to_add)
-  print ','.join(server_list)
   return servers
 
 def get_server_list(environment):
