@@ -28,7 +28,7 @@ def remove_server(servers, server_to_remove, cluster):
     if server_to_remove in server:
       index_to_remove = index
       break
-  if index_to_remove:
+  if index_to_remove is not None:
     servers.pop(index_to_remove)
   else:
     print "Could not find server {server} in {cluster}[{servers}] to remove.".format(server=server_to_remove,cluster=cluster,servers=",".join(servers))
