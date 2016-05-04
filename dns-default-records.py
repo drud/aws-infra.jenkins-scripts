@@ -7,8 +7,7 @@ import boto
 @click.option('--bag-name', help="The databag name that correlates to the site")
 @click.option('--add', 'operation', flag_value='add', default=True)
 @click.option('--remove', 'operation', flag_value='remove')
-@click.option('--other-cnames', help="A comma-delimited list of other cnames to remove", default=None)
-def cname_records(bag_name, operation, other_cnames):
+def cname_records(bag_name, operation):
     # Connect to the server
     conn = boto.connect_route53()
     # Go to our primary hosted zone
@@ -35,11 +34,6 @@ def cname_records(bag_name, operation, other_cnames):
         zone.delete_cname(default_staging_cname)
         print "Deleting '{record}'...".format(record=default_prod_cname)
         zone.delete_cname(default_prod_cname)
-        if other_cnames is not None and other_cnames is not "":
-            # Turn it into a list object
-            other_cnames = other_cnames.split(',')
-            for cname in other_cnames:
-                zone.delete_cname(cname)
         print "Done deleting."
 
 if __name__ == '__main__':
