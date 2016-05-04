@@ -3,7 +3,7 @@
 import click
 import boto
 
-
+@click.command()
 @click.option('--bag-name', help="The databag name that correlates to the site")
 @click.option('--add', 'operation', flag_value='add', default=True)
 @click.option('--remove', 'operation', flag_value='remove')
