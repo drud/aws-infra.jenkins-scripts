@@ -9,9 +9,6 @@ import boto
 @click.option('--remove', 'operation', flag_value='remove')
 @click.option('--other-cnames', help="A comma-delimited list of other cnames to remove", default=None)
 def cname_records(bag_name, operation, other_cnames):
-    if other_cnames:
-        print other_cnames
-    exit(0)
     # Connect to the server
     conn = boto.connect_route53()
     # Go to our primary hosted zone
