@@ -21,20 +21,26 @@ def cname_records(bag_name, operation, other_cnames):
     if operation == "add":
         try:
           zone.add_cname(default_staging_cname, 'hosting.nmdev.us')
+          print "Record '{record}' created.".format(record=default_staging_cname)
         except boto.route53.exception.DNSServerError:
-          print "Record exists."
+          print "Record '{record}' exists.".format(record=default_staging_cname)
         try:
           zone.add_cname(default_prod_cname, 'hosting.newmediadenver.com')
+          print "Record '{record}' created.".format(record=default_prod_cname)
         except boto.route53.exception.DNSServerError:
-          print "Record exists."
+          print "Record '{record}' exists.".format(record=default_prod_cname)
+        print "Done adding."
     elif operation == "remove":
+        print "Deleting '{record}'...".format(record=default_staging_cname)
         zone.delete_cname(default_staging_cname)
+        print "Deleting '{record}'...".format(record=default_prod_cname)
         zone.delete_cname(default_prod_cname)
         if other_cnames is not None:
             # Turn it into a list object
             other_cnames = other_cnames.split(',')
             for cname in other_cnames:
                 zone.delete_cname(cname)
+        print "Done deleting."
 
 if __name__ == '__main__':
     cname_records()
