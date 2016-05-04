@@ -40,4 +40,4 @@ def cname_records(bag_name, operation, other_cnames):
             zone.delete_cname(cname)
 
 if __name__ == '__main__':
-    cname_records(bag_name, operation, other_cnames)
+    cname_records()
