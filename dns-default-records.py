@@ -30,10 +30,16 @@ def cname_records(bag_name, operation):
           print "Record '{record}' exists.".format(record=default_prod_cname)
         print "Done adding."
     elif operation == "remove":
-        print "Deleting '{record}'...".format(record=default_staging_cname)
-        zone.delete_cname(default_staging_cname)
-        print "Deleting '{record}'...".format(record=default_prod_cname)
-        zone.delete_cname(default_prod_cname)
+        try:
+            zone.delete_cname(default_staging_cname)
+            print "Deleted '{record}'".format(record=default_staging_cname)
+        except:
+            print "Record '{record}' does not exist.".format(record=default_staging_cname)
+        try:
+            zone.delete_cname(default_prod_cname)
+            print "Deleted '{record}'".format(record=default_prod_cname)
+        except:
+            print "Record '{record}' does not exist.".format(record=default_prod_cname)      
         print "Done deleting."
 
 if __name__ == '__main__':
