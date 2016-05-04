@@ -33,8 +33,8 @@ def cname_records(bag_name, operation, other_cnames):
         if other_cnames is not None:
             # Turn it into a list object
             other_cnames = other_cnames.split(',')
-        for cname in other_cnames:
-            zone.delete_cname(cname)
+            for cname in other_cnames:
+                zone.delete_cname(cname)
 
 if __name__ == '__main__':
     cname_records()
