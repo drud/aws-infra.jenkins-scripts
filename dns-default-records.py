@@ -35,7 +35,7 @@ def cname_records(bag_name, operation, other_cnames):
         zone.delete_cname(default_staging_cname)
         print "Deleting '{record}'...".format(record=default_prod_cname)
         zone.delete_cname(default_prod_cname)
-        if other_cnames is not None:
+        if other_cnames is not None and other_cnames is not "":
             # Turn it into a list object
             other_cnames = other_cnames.split(',')
             for cname in other_cnames:
