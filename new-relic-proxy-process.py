@@ -1,4 +1,4 @@
-import databag
+import databag_local as databag
 import newrelic
 
 monitors = {x['uri']:x for x in newrelic.get_synthetics_monitors()}

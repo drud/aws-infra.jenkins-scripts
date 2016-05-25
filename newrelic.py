@@ -2,7 +2,7 @@
 from os import environ
 import requests
 import click
-import databag
+import databag_local as databag
 
 admin_key = environ.get("NEWRELIC_API_KEY")
 
@@ -22,7 +22,7 @@ def create_synthetics_monitor(monitor_name, monitor_url):
   }
   payload = {
     "name" : monitor_name,
-    "frequency" : 1,
+    "frequency" : 5,
     "uri" : monitor_url,
     "locations" : [ "AWS_US_WEST_2" ],
     "type" : "SIMPLE"
