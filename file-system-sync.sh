@@ -19,13 +19,13 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
   WEBROOT=${WEBROOTS_AND_SHAS[i]}
   GOODSHA=${WEBROOTS_AND_SHAS[i+1]}
   SHA_CHECK=(`eval $(./ssh-generator.sh "check-sha.sh $WEBROOT $GOODSHA" env)`)
-  if [ $SHA_CHECK[0] == "NOT" -a $SHA_CHECK[1] == "FOUND"]; then
+  if [ $SHA_CHECK[0] == "NOT" -a $SHA_CHECK[1] == "FOUND" ]; then
     echo "NOT FOUND"
   else
     echo "Working on '$WEBROOT'"
-    echo "Correct SHA:\t$GOODSHA"
-    echo "Found SHA:\t$SHA_CHECK[0]"
-    echo "Match?\t$SHA_CHECK[1]"
+    echo -e "Correct SHA:\t$GOODSHA"
+    echo -e "Found SHA:\t${SHA_CHECK[0]}"
+    echo -e "Match?\t${SHA_CHECK[1]}"
   fi
 done
 
