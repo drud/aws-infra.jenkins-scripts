@@ -18,14 +18,28 @@ arrlen=${#WEBROOTS_AND_SHAS[@]}
 for (( i=0; i<${arrlen}; i=i+2 )); do
   WEBROOT=${WEBROOTS_AND_SHAS[i]}
   GOODSHA=${WEBROOTS_AND_SHAS[i+1]}
+  echo "Working on '$WEBROOT':"
   SHA_CHECK=(`eval $(./ssh-generator.sh "check-sha.sh $WEBROOT $GOODSHA" env)`)
-  if [ $SHA_CHECK[0] == "NOT" -a $SHA_CHECK[1] == "FOUND" ]; then
-    echo "NOT FOUND"
+  if [ "${SHA_CHECK[0]}" == "NOT" -a "${SHA_CHECK[1]}" == "FOUND" ]; then
+    echo -e "\tNOT FOUND"
   else
-    echo "Working on '$WEBROOT'"
-    echo -e "Correct SHA:\t$GOODSHA"
-    echo -e "Found SHA:\t${SHA_CHECK[0]}"
-    echo -e "Match?\t${SHA_CHECK[1]}"
+    echo -e "\tCorrect SHA:\t$GOODSHA"
+    echo -e "\tFound SHA:\t${SHA_CHECK[0]}"
+    echo -e "\tMatch?\t${SHA_CHECK[1]}"
+    if [ "${SHA_CHECK[1]}" != "MATCH" ]; do
+      echo "Non-matching directory structure"
+      echo "Triggering a Jenkins update to correct directory structure..."
+      #TODO - GET THE STAGING/PRODUCTION
+      BAGNAME=$(echo $WEBROOT | sed 's|/var/www/||' | sed 's|/current||')
+      if [[ $OLD_SERVER == *"nmdev.us"* ]]; then
+        SERVER_ENVIRONMENT="staging"
+      else
+        SERVER_ENVIRONMENT="production"
+      fi
+      python jenkins-callback-wrapper.py --envionment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
+    else
+      echo "Match confirmed. Moving along..."
+    fi
   fi
 done
 
