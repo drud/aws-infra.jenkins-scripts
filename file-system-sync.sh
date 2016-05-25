@@ -8,7 +8,7 @@ IFS=' ' read -r -a array <<< "$string"
 #1. SSH into a good server and pull all the sites and SHAS from /var/www/*/current with find command
 echo "Reading webroots and SHAs from known good server."
 HOSTNAME=$GOOD_SERVER
-WEBROOTS_AND_SHAS=(`eval "$(./ssh-generator.sh find-web-roots-and-shas.sh env)"`)
+WEBROOTS_AND_SHAS=(`eval "$(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh find-web-roots-and-shas.sh env)"`)
 
 HOSTNAME=$OLD_SERVER
 # get length of an array
@@ -25,11 +25,11 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     SERVER_ENVIRONMENT="production"
   fi
   echo "Working on '$WEBROOT':"
-  SHA_CHECK=(`eval $(./ssh-generator.sh "check-sha.sh $WEBROOT $GOODSHA" env)`)
+  SHA_CHECK=(`eval $(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh "check-sha.sh $WEBROOT $GOODSHA" env)`)
   if [ "${SHA_CHECK[0]}" == "NOT" -a "${SHA_CHECK[1]}" == "FOUND" ]; then
     echo -e "\tFolder '$WEBROOT' NOT FOUND"
     echo "Triggering a Jenkins update to correct directory structure..."
-      python jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
+    python jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
   else
     echo -e "\tCorrect SHA:\t$GOODSHA"
     echo -e "\tFound SHA:\t${SHA_CHECK[0]}"
