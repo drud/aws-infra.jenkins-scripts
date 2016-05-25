@@ -7,9 +7,15 @@ OLD_SERVER="web02.nmdev.us"
 IFS=$'\n' read -rd '' -a y <<<"$x";
 #1. SSH into a good server and pull all the sites and SHAS from /var/www/*/current with find command
 HOSTNAME=$GOOD_SERVER
-WEBROOTS_AND_SHAS=$(./ssh-generator.sh find-web-roots-and-shas.sh env) 
+WEBROOTS_AND_SHAS=`eval "$(./ssh-generator.sh find-web-roots-and-shas.sh env)"`
 
 HOSTNAME=$OLD_SERVER
+for i in {0..${#WEBROOTS_AND_SHAS[@]}..2}; do
+  echo "Record:"
+  echo ${WEBROOTS_AND_SHAS[i]}
+  echo ${WEBROOTS_AND_SHAS[i+1]}
+done
+
 for ROOT_SHA in $WEBROOTS_AND_SHAS; do
   echo "Before"
   echo $ROOT_SHA
