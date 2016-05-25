@@ -26,7 +26,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     echo -e "\tCorrect SHA:\t$GOODSHA"
     echo -e "\tFound SHA:\t${SHA_CHECK[0]}"
     echo -e "\tMatch?\t${SHA_CHECK[1]}"
-    if [ "${SHA_CHECK[1]}" != "MATCH" ]; do
+    if [[ "${SHA_CHECK[1]}" != "MATCH" ]]; then
       echo "Non-matching directory structure"
       echo "Triggering a Jenkins update to correct directory structure..."
       #TODO - GET THE STAGING/PRODUCTION
@@ -36,7 +36,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
       else
         SERVER_ENVIRONMENT="production"
       fi
-      python jenkins-callback-wrapper.py --envionment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
+      python jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
     else
       echo "Match confirmed. Moving along..."
     fi
