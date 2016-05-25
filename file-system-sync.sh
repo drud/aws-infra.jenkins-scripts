@@ -2,8 +2,8 @@
 # 3 Jenkins jobs that pass data to the next
 #Sync server - the good server
 #Desynced server - the server without data
-GOOD_SERVER="web01.nmdev.us"
-OLD_SERVER="web02.nmdev.us"
+#GOOD_SERVER="web01.nmdev.us"
+#OLD_SERVER="web02.nmdev.us"
 IFS=' ' read -r -a array <<< "$string"
 #1. SSH into a good server and pull all the sites and SHAS from /var/www/*/current with find command
 echo "Reading webroots and SHAs from known good server."
