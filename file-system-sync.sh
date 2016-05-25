@@ -29,7 +29,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
   if [ "${SHA_CHECK[0]}" == "NOT" -a "${SHA_CHECK[1]}" == "FOUND" ]; then
     echo -e "\tFolder '$WEBROOT' NOT FOUND"
     echo "Triggering a Jenkins update to correct directory structure..."
-    python jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
+    python /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
   else
     echo -e "\tCorrect SHA:\t$GOODSHA"
     echo -e "\tFound SHA:\t${SHA_CHECK[0]}"
@@ -37,7 +37,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     if [[ "${SHA_CHECK[1]}" != "MATCH" ]]; then
       echo "Non-matching directory structure"
       echo "Triggering a Jenkins update to correct directory structure..."
-      python jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
+      python /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action UPDATE --bag-name $BAGNAME
     else
       echo "Match confirmed. Moving along..."
     fi
