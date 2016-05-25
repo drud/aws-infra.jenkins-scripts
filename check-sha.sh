@@ -7,6 +7,10 @@ fi
 WEBROOT=$1
 GOODSHA=$2
 
+if [ ! -d "$WEBROOT" ]; then
+  echo "NOT FOUND";
+fi
+
 SHA=$(git --git-dir=$WEBROOT/.git rev-parse HEAD)
 if [ "$SHA" != "$GOODSHA" ]; then
   echo "$SHA NO"
