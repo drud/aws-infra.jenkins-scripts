@@ -9,7 +9,7 @@ GOODSHA=$2
 
 SHA=$(git --git-dir=$WEBROOT/.git rev-parse HEAD)
 if [ "$SHA" != "$GOODSHA" ]; then
-  echo "NO MATCH"
+  echo "$SHA NO"
 else
-  echo "MATCH"
+  echo "$SHA MATCH"
 fi
