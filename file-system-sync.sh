@@ -14,7 +14,7 @@ HOSTNAME=$OLD_SERVER
 # get length of an array
 arrlen=${#WEBROOTS_AND_SHAS[@]}
 PROBLEM_SITES=()
-
+TRIGGERED_JOBS=()
 # 2. Given a site path, find the SHA on the desynced server and pass it back
 for (( i=0; i<${arrlen}; i=i+2 )); do
   RET_CODE=0

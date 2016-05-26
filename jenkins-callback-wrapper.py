@@ -37,7 +37,7 @@ def trigger_web_jobs(environment, chef_action, bag_name):
         job_name = "{environment}-{bag_name}".format(environment=environment, bag_name=bag_name)
         # Make sure the job exists
         if job_name not in jenkins_job_list:
-            print "Job {job_name} could not be found in the jenkins job list. Available jobs are:\n\t{jobs}".format(job_name=job_name,jobs=",".join(jenkins_job_list))
+            print "Job '{job_name}' could not be found in the jenkins job list. Available jobs are:\n\t{jobs}".format(job_name=job_name,jobs=",".join(jenkins_job_list))
             exit(1)
         # Set build parameters, kick off a new build, and block until complete.
         params = {'name': job_name, 'CHEF_ACTION': chef_action }
