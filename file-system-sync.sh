@@ -58,12 +58,12 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     TRIGGERED_JOBS+=("$SERVER_ENVIRONMENT-$BAGNAME")
   fi
 done
+echo "Here are the jobs that were sucessfully triggered:"
+for JOB in $TRIGGERED_JOBS; do
+  echo -e "\t-$JOB"
+done
 if [ -z "$PROBLEM_SITES" ]; then
   echo "All done. No problems :-)"
-  echo "Here are the jobs that were triggered."
-  for JOB in $TRIGGERED_JOBS; do
-    echo -e "\t-$JOB"
-  done
   exit 0
 fi
 # If there are any values in problem sites, list them here.
