@@ -139,7 +139,11 @@ def grow_ebs_volume(server_name, new_size, device_name):
     # Snapshot the volume
     print "Creating a snapshot of the instance."
     snapshot = vol.create_snapshot()
-    snapshot.wait_until_completed()
+    while snapshot.state != "available":
+        time.sleep(5)
+        snapshot.reload()
+    # This "waiter" will only wait 10 minutes and error out...which is far too short.
+    # snapshot.wait_until_completed()
 
     # Create a new volume from that snapshot - TODO MATCH AVAILABILITY ZONE WITH INSTANCE
     print "Creating a new volume using the snapshot"
