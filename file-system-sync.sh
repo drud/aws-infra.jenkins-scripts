@@ -33,8 +33,8 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
   SHA_CHECK=(`eval $(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh "check-sha.sh $WEBROOT $GOODSHA" env)`)
   if [ "${SHA_CHECK[0]}" == "NOT" -a "${SHA_CHECK[1]}" == "FOUND" ]; then
     echo -e "\tFolder '$WEBROOT' NOT FOUND"
-    echo "Triggering a Jenkins update to correct directory structure..."
-    python /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
+    echo "Triggering an update on Jenkins job $SERVER_ENVIRONMENT-$BAGNAME to correct directory structure..."
+    python -u /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
     RET_CODE=$?
   else
     echo -e "\tCorrect SHA:\t$GOODSHA"
@@ -43,7 +43,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     if [[ "${SHA_CHECK[1]}" != "MATCH" ]]; then
       echo "Non-matching directory structure"
       echo "Triggering an update on Jenkins job $SERVER_ENVIRONMENT-$BAGNAME to correct directory structure..."
-      python /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
+      python -u /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
       RET_CODE=$?
     else
       echo "Match confirmed. Moving along..."
