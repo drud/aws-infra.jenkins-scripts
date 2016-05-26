@@ -30,7 +30,6 @@ def trigger_web_jobs(environment, chef_action, bag_name):
         print "Could not establish connection to Jenkins server at {jenkins_url}".format(jenkins_url=jenkins_url)
         exit(1)
 
-    print "Fetching all available Jenkins jobs..."
     jenkins_job_list = J.get_jobs()
     jenkins_job_list = [str(x["name"]) for x in jenkins_job_list]
     if bag_name is not None:

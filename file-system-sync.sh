@@ -59,7 +59,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
   fi
 done
 echo "Here are the jobs that were sucessfully triggered:"
-for JOB in $TRIGGERED_JOBS; do
+for JOB in "${TRIGGERED_JOBS[@]}"; do
   echo -e "\t-$JOB"
 done
 if [ -z "$PROBLEM_SITES" ]; then
@@ -68,9 +68,10 @@ if [ -z "$PROBLEM_SITES" ]; then
 fi
 # If there are any values in problem sites, list them here.
 echo "Here are the sites we had issues syncing (debug output available above):"
-for SITE in $PROBLEM_SITES; do
+for SITE in "${PROBLEM_SITES[@]}"; do
   echo -e "\t-$SITE"
 done
+
 # If we got here, then there was obviously an issue. Return a bad status code and FAIL THE JOB!
 exit 1
 
