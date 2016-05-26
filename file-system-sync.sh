@@ -35,7 +35,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     echo -e "\tFolder '$WEBROOT' NOT FOUND"
     echo "Triggering an update on Jenkins job $SERVER_ENVIRONMENT-$BAGNAME to correct directory structure..."
     python -u /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
-    RET_CODE=$?
+    RET_CODE="$?"
   else
     echo -e "\tCorrect SHA:\t$GOODSHA"
     echo -e "\tFound SHA:\t${SHA_CHECK[0]}"
@@ -44,12 +44,13 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
       echo "Non-matching directory structure"
       echo "Triggering an update on Jenkins job $SERVER_ENVIRONMENT-$BAGNAME to correct directory structure..."
       python -u /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
-      RET_CODE=$?
+      RET_CODE="$?"
     else
       echo "Match confirmed. Moving along..."
     fi
   fi
-  if [ "$RET_CODE" == "1" ]; then
+  if [ "$RET_CODE" -eq "1" ]; then
+    echo "Adding problem site to array"
     PROBLEM_SITES+=("$BAGNAME")
   fi
 done

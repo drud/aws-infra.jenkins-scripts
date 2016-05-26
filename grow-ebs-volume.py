@@ -60,6 +60,7 @@ def start_instance(instance):
         try:
             print "Starting instance"
             instance.start()
+            instance.wait_until_running()
         except:
             print "Instance cannot be started in it's current state."
             print "Instance state: {instance_state}".format(instance_state=instance.state["Name"])
@@ -72,7 +73,7 @@ def grow_ebs_volume(server_name, new_size, device_name):
     """
     Grow the primary EBS volume for the specified instance
     """
-
+    boto3.setup_default_session(region_name='us-west-2')
     # Order of operations
     # Find instance AMI ID by server name tag
     instance_id, instance_dict = get_instance_by_tagged_name(server_name)
