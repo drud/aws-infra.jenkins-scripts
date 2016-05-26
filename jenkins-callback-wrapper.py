@@ -47,8 +47,10 @@ def trigger_web_jobs(environment, chef_action, bag_name):
             J.build_job(job_name, params)
             jenkinspoll.wait_for_job_to_finish(job_name, jenkins_connection=J)
             print "Done!"
+            exit(0)
         except Exception as e:
             print e
+            exit(1)
     else:
         print "Looking for jobs that contain '{environment}'".format(environment=environment)
         for job_name in jenkins_job_list:
