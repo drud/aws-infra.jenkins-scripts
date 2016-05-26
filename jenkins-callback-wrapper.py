@@ -1,14 +1,16 @@
 #!/usr/bin/python
-from jenkinsapi.jenkins import Jenkins
-from jenkinsapi.custom_exceptions import JenkinsAPIException
-from jenkinsapi.constants import STATUS_SUCCESS
+#from jenkinsapi.jenkins import Jenkins
+#from jenkinsapi.custom_exceptions import JenkinsAPIException
+#from jenkinsapi.constants import STATUS_SUCCESS
+import jenkins
+import jenkinspoll
 import click
 import os
 import requests
 
 @click.command()
 @click.option('--environment', prompt='Environment', help='Environment e.g. production, staging')
-@click.option('--chef-action', prompt='Chef action', help='e.g. update, backup')
+@click.option('--chef-action', prompt='Chef action', help='e.g. update, backup', type=click.Choice(['update', 'delete', 'backup']))
 @click.option('--bag-name', default=None, help="If set, will only trigger the job on the single bag specified")
 def trigger_web_jobs(environment, chef_action, bag_name):
     """
@@ -19,61 +21,51 @@ def trigger_web_jobs(environment, chef_action, bag_name):
     """
     jenkins_url = 'https://leroy.nmdev.us'
 
-    print "Connecting to Jenkins"
+    print "Connecting to Jenkins..."
     try:
         # Preumably username / password will come back as a ConfigMap.
-        J = Jenkins(jenkins_url, username=os.environ.get('JENKINS_SERVICE_USERNAME'), password=os.environ.get('JENKINS_SERVICE_PASSWORD'))
+        J = jenkins.Jenkins(jenkins_url, username=os.environ.get('JENKINS_SERVICE_USERNAME'), password=os.environ.get('JENKINS_SERVICE_PASSWORD'))
         print "Connection successful"
-    except requests.exceptions.ConnectionError as e:
+    except jenkins.JenkinsException as e:
         print "Could not establish connection to Jenkins server at {jenkins_url}".format(jenkins_url=jenkins_url)
         exit(1)
 
     print "Fetching all available Jenkins jobs..."
-    jenkins_job_list = J.get_jobs_list()
+    jenkins_job_list = J.get_jobs()
+    jenkins_job_list = [str(x["name"]) for x in jenkins_job_list]
     if bag_name is not None:
         job_name = "{environment}-{bag_name}".format(environment=environment, bag_name=bag_name)
         # Make sure the job exists
         if job_name not in jenkins_job_list:
             print "Job {job_name} could not be found in the jenkins job list. Available jobs are:\n\t{jobs}".format(job_name=job_name,jobs=",".join(jenkins_job_list))
             exit(1)
-        job = J.get_job(job_name)
         # Set build parameters, kick off a new build, and block until complete.
         params = {'name': job_name, 'CHEF_ACTION': chef_action }
         # Block so the jobs execute one-at-a-time
         try:
             print "Invoking job {job_name}...".format(job_name=job_name)
-            qi = job.invoke(build_params=params, block=True)
+            J.build_job(job_name, params)
+            jenkinspoll.wait_for_job_to_finish(job_name, jenkins_connection=J)
             print "Done!"
         except Exception as e:
             print e
     else:
         print "Looking for jobs that contain '{environment}'".format(environment=environment)
         for job_name in jenkins_job_list:
-            if job_name != "" and job_name.startswith(environment) and "drud" not in job_name:
-                print "Working on {job_name}".format(job_name=job_name)
-                job = J.get_job(job_name)
+            if job_name != "" and job_name != "{environment}-".format(environment=environment) and job_name.startswith(environment) and "drud" not in job_name:
+                print "Invoking {job_name}".format(job_name=job_name)
                 # Set build parameters, kick off a new build, and block until complete.
                 params = {'name': job_name, 'CHEF_ACTION': chef_action }
                 # Block so the jobs execute one-at-a-time
                 try:
-                    qi = job.invoke(build_params=params, block=True)
+                    J.build_job(job_name, params)
+                    jenkinspoll.wait_for_job_to_finish(job_name, jenkins_connection=J)
                 except Exception as e:
                     print e
 
-                #build = qi.get_build()
 
     # Determine if the job already exists on this jenkins instance. If not, clone
     # a new job from the 'sitepack' seed job so each build has it's own history.
-
-
-
-    # # Check for success and return a build.
-    # if build.get_status() == STATUS_SUCCESS:
-    #     build_number = build.get_number()
-    #     print "BUILD {number} OF {job} WAS SUCCESSFUL".format(number=build_number, job=job_name)
-    #     return True
-    # else:
-    #     print "THERE WAS AN ERROR WITH THE BUILD OF {job}".format(job=job_name)
 
 if __name__ == '__main__':
     trigger_web_jobs()

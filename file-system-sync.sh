@@ -36,7 +36,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
     echo -e "\tMatch?\t${SHA_CHECK[1]}"
     if [[ "${SHA_CHECK[1]}" != "MATCH" ]]; then
       echo "Non-matching directory structure"
-      echo "Triggering an UPDATE on Jenkins job $SERVER_ENVIRONMENT-$BAGNAME to correct directory structure..."
+      echo "Triggering an update on Jenkins job $SERVER_ENVIRONMENT-$BAGNAME to correct directory structure..."
       python /var/jenkins_home/workspace/jenkins-scripts/jenkins-callback-wrapper.py --environment $SERVER_ENVIRONMENT --chef-action update --bag-name $BAGNAME
     else
       echo "Match confirmed. Moving along..."
