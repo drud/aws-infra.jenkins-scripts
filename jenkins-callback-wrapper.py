@@ -22,7 +22,7 @@ def trigger_web_jobs(environment, chef_action, bag_name):
     print "Connecting to Jenkins"
     try:
         # Preumably username / password will come back as a ConfigMap.
-        J = Jenkins(jenkins_url, username=os.environ.get('JENKINS_GUEST_USERNAME'), password=os.environ.get('JENKINS_GUEST_PASSWORD'))
+        J = Jenkins(jenkins_url, username=os.environ.get('JENKINS_SERVICE_USERNAME'), password=os.environ.get('JENKINS_SERVICE_PASSWORD'))
         print "Connection successful"
     except requests.exceptions.ConnectionError as e:
         print "Could not establish connection to Jenkins server at {jenkins_url}".format(jenkins_url=jenkins_url)
