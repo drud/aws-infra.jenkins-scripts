@@ -107,6 +107,7 @@ def grow_ebs_volume(server_name, new_size, device_name):
     if len(devices) != 1:
         print "More than 1 device found."
         if device_name in devices.keys():
+            show_attached_volumes(instance)
             print "Using '{device_name}' (you can override this with the --device-name flag)".format(device_name=device_name)
             vol_id=devices[device_name]
             vol_device_name = devices_by_id[vol_id]
