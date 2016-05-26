@@ -53,7 +53,7 @@ for (( i=0; i<${arrlen}; i=i+2 )); do
   if [ "$RET_CODE" -eq 1 ]; then
     echo "Adding problem site to array"
     PROBLEM_SITES+=("$BAGNAME")
-  elif [ "RET_CODE" -eq 0 ]; then
+  elif [ "$RET_CODE" -eq 0 ]; then
     echo "Remembering this job as a success."
     TRIGGERED_JOBS+=("$SERVER_ENVIRONMENT-$BAGNAME")
   fi
