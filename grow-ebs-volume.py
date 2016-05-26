@@ -65,6 +65,18 @@ def start_instance(instance):
             print "Instance cannot be started in it's current state."
             print "Instance state: {instance_state}".format(instance_state=instance.state["Name"])
 
+def show_attached_volumes(instance):
+    mapping = instance.block_device_mappings
+    if len(mapping) <= 0:
+        print "No map found. Please check the instance manually to ensure there is at least one valid volume currently attached"
+        exit(1)
+    devices = {m["DeviceName"]: m["Ebs"]["VolumeId"] for m in mapping}
+    devices_by_id= {m["Ebs"]["VolumeId"]: m["DeviceName"] for m in mapping}
+    print "Device List:"
+    for name, vol_id in devices.iteritems():
+        vol = boto3.resource('ec2').Volume(vol_id)
+        print "\t{name}:\t{vol_id}\t{vol_size} GiB".format(name=name, vol_id=vol_id, vol_size=vol.size)
+
 @click.command()
 @click.option('--server-name', prompt='Server name', help='The FQDN of the server (e.g. web01.newmediadenver.com')
 @click.option('--new-size', prompt='New size (GiB)', help='The new size of the volume desired.')
@@ -155,6 +167,9 @@ def grow_ebs_volume(server_name, new_size, device_name):
 
     # Start the instance
     start_instance(instance)
+
+    print "Instance restarted. Here are the devices -"
+    show_attached_volumes(instance)
     
 if __name__ == '__main__':
     grow_ebs_volume()
