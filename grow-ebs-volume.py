@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 import click
 import os
 import requests
@@ -68,7 +67,8 @@ def start_instance(instance):
 @click.command()
 @click.option('--server-name', prompt='Server name', help='The FQDN of the server (e.g. web01.newmediadenver.com')
 @click.option('--new-size', prompt='New size (GiB)', help='The new size of the volume desired.')
-def grow_ebs_volume(server_name, new_size):
+@click.option('--device-name', default='/dev/xvda', help='The name of the device according to the EC2 console.')
+def grow_ebs_volume(server_name, new_size, device_name):
     """
     Grow the primary EBS volume for the specified instance
     """
@@ -84,34 +84,37 @@ def grow_ebs_volume(server_name, new_size):
     # Get the device mappings for that instance and find the volume's ID
     mapping = instance.block_device_mappings
     if len(mapping) <= 0:
-        print "No map found. Please check the instance manually to ensure there is a valid volume currently attached"
+        print "No map found. Please check the instance manually to ensure there is at least one valid volume currently attached"
         exit(1)
 
     devices = {m["DeviceName"]: m["Ebs"]["VolumeId"] for m in mapping}
     devices_by_id= {m["Ebs"]["VolumeId"]: m["DeviceName"] for m in mapping}
-    default_root_device = "/dev/xvda"
     vol_device_name = ""
     if len(devices) != 1:
-        print "Select a device:"
-        index=0
-        vols={}
-        for name, vol_id in devices.iteritems():
-            vol = boto3.resource('ec2').Volume(vol_id)
-            print "\t{index}:\t{name}:\t{vol_id}\t{vol_size} GiB".format(index=index, name=name, vol_id=vol_id, vol_size=vol.size)
-            vols[index] = vol_id
-            index=index+1
-        selected_vol_index = click.prompt("Select a device for '{server_name}'".format(server_name=server_name),type=int)
-        vol_id = vols[selected_vol_index]
-        vol_device_name = devices_by_id[vol_id]
-    else:
-        # If there's only 1 entry, try to grab it by the root device if it exists.
-        if default_root_device not in vol_id:
-            vol_id = devices[default_root_device]
-            vol_device_name = default_root_device
+        print "More than 1 device found."
+        if device_name in devices.keys():
+            print "Using '{device_name}' (you can override this with the --device-name flag)".format(device_name=device_name)
+            vol_id=devices[device_name]
+            vol_device_name = devices_by_id[vol_id]
         else:
-            # If it doesn't exist, then just pop the item out of the dict (it's the only item)
-            vol_device_name, vol_id = devices.popitem()
-            print "Could not find device at '{root_device}'. Using '{vol_name}' instead.".format(root_device=default_root_device,vol_name=vol_name)
+            print "Select a device:"
+            index=0
+            vols={}
+            for name, vol_id in devices.iteritems():
+                vol = boto3.resource('ec2').Volume(vol_id)
+                print "\t{index}:\t{name}:\t{vol_id}\t{vol_size} GiB".format(index=index, name=name, vol_id=vol_id, vol_size=vol.size)
+                vols[index] = vol_id
+                index=index+1
+            print "Re-run this job with one of the selected devices above."
+            exit(1)
+            #Commenting this out since we can't be interactive in Jenkins
+            #selected_vol_index = click.prompt("Select a device for '{server_name}'".format(server_name=server_name),type=int)
+            #vol_id = vols[selected_vol_index]
+            #vol_device_name = devices_by_id[vol_id]
+    else:
+        # If there's just a single entry, then just pop the item out of the dict (it's the only item)
+        vol_device_name, vol_id = devices.popitem()
+        print "Using '{vol_name}'/'{vol_id}' since it was the only attached volume found.".format(vol_name=vol_device_name, vol_id=vol_id)
     
     # Now you have the volume
     vol = boto3.resource('ec2').Volume(vol_id)
