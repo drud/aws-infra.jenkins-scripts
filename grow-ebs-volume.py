@@ -66,6 +66,7 @@ def start_instance(instance):
             print "Instance state: {instance_state}".format(instance_state=instance.state["Name"])
 
 def show_attached_volumes(instance):
+    instance.reload()
     mapping = instance.block_device_mappings
     if len(mapping) <= 0:
         print "No map found. Please check the instance manually to ensure there is at least one valid volume currently attached"
