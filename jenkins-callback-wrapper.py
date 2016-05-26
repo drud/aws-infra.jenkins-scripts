@@ -28,7 +28,7 @@ def trigger_web_jobs(environment, chef_action, bag_name):
         print "Could not establish connection to Jenkins server at {jenkins_url}".format(jenkins_url=jenkins_url)
         exit(1)
 
-    print "Fetching list of jobs to be run:"
+    print "Fetching all available Jenkins jobs..."
     jenkins_job_list = J.get_jobs_list()
     if bag_name is not None:
         job_name = "{environment}-{bag_name}".format(environment=environment, bag_name=bag_name)
@@ -41,6 +41,7 @@ def trigger_web_jobs(environment, chef_action, bag_name):
         params = {'name': job_name, 'CHEF_ACTION': chef_action }
         # Block so the jobs execute one-at-a-time
         try:
+            print "Invoking job {job_name}...".format(job_name=job_name)
             qi = job.invoke(build_params=params, block=True)
             print "Done!"
         except Exception as e:
