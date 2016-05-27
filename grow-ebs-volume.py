@@ -136,7 +136,7 @@ def grow_ebs_volume(server_name, new_size, device_name):
     # Now you have the volume
     vol = boto3.resource('ec2').Volume(vol_id)
     # Stop the instance
-    stop_instance(instance)
+    #stop_instance(instance)
 
     # Snapshot the volume
     print "Creating a snapshot of the instance."
