@@ -143,7 +143,6 @@ def grow_ebs_volume(server_name, new_size, device_name):
     while snapshot.state != "completed":
         time.sleep(5)
         snapshot.reload()
-        print snapshot.state
     # This "waiter" will only wait 10 minutes and error out...which is far too short.
     # snapshot.wait_until_completed()
 
