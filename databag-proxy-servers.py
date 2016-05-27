@@ -83,11 +83,10 @@ def get_server_list(environment):
 
 @click.command()
 @click.option('--server', prompt="Server name:", help="Name of the server you would like to add/remove")
-@click.option('--environment', prompt="Which environment?", help="'staging' or 'production'", type=click.Choice(['staging', 'production']))
 @click.option('--add', 'operation', flag_value='add', default=True)
 @click.option('--remove', 'operation', flag_value='remove')
 @click.option('--debug', 'debug', flag_value=True, default=False)
-def modify_server_list(server, environment, operation, debug):
+def modify_server_list(server, operation, debug):
   """
   Get the list of servers for an environment
   """
@@ -95,6 +94,7 @@ def modify_server_list(server, environment, operation, debug):
     global proxy_container
     proxy_container="nmdtest"
   proxy_databag = databag.get_databag("upstream", container=proxy_container)
+  environment = "staging" if "nmdev.us" in server else "production"
   if environment=="production":
     cluster='webcluster01'
   elif environment=="staging":
