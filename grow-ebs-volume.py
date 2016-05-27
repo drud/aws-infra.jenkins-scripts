@@ -51,6 +51,9 @@ def stop_instance(instance):
             print "There was a problem stopping the instance."
             print "Instance state: {instance_state}".format(instance_state=instance.state)
             exit(1)
+    while instance.state["Name"] != "stopped":
+        time.sleep(5)
+        instance.reload()
 
 def start_instance(instance):
     # Start the instance if needed
