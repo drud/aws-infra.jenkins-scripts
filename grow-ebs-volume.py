@@ -135,8 +135,6 @@ def grow_ebs_volume(server_name, new_size, device_name):
     
     # Now you have the volume
     vol = boto3.resource('ec2').Volume(vol_id)
-    # Stop the instance
-    #stop_instance(instance)
 
     # Snapshot the volume
     print "Creating a snapshot of the instance."
@@ -154,6 +152,8 @@ def grow_ebs_volume(server_name, new_size, device_name):
         time.sleep(5)
         new_volume.reload()
 
+    # Stop the instance
+    stop_instance(instance)
     # Detach the old volume noting where it was stored, waiting for it to fully detach
     print "Detaching the old volume"
     vol.detach_from_instance()
