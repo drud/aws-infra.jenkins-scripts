@@ -38,7 +38,8 @@ def get_instance_by_tagged_name(server_name):
 
 def stop_instance(instance):
     # Stop the instance before taking a snapshot - it's more accurate
-    while instance.state["Name"] == "pending" or instance.state["Name"] == "stopping":
+    # If any transitions are occuring, just hold on
+    while instance.state["Name"] == "pending" or instance.state["Name"] == "stopping" or instance.state["Name"] == "starting":
         time.sleep(5)
         instance.reload()
     if instance.state["Name"] != "stopped" and instance.state["Name"] != "stopping":
@@ -53,7 +54,8 @@ def stop_instance(instance):
 
 def start_instance(instance):
     # Start the instance if needed
-    while instance.state["Name"] == "pending":
+    # If any transitions are occuring, just hold on
+    while instance.state["Name"] == "pending" or instance.state["Name"] == "stopping" or instance.state["Name"] == "starting":
         time.sleep(5)
         instance.reload()
     if instance.state["Name"] != "started" and instance.state["Name"] != "starting":
