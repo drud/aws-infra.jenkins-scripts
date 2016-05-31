@@ -74,7 +74,7 @@ def remove_synthetics_monitor(monitor_id):
     return True
 
 @click.command()
-@click.option("--operation", help="Add")
+@click.option("--operation", help="Add/list/remove")
 @click.option("--monitor-name", help="The human friendly name of the synthetics monitor")
 @click.option("--monitor-url", help="The URL that you would like to monitor")
 @click.option("--monitor-id", help="Monitor id is needed for DELETE")
