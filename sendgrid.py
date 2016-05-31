@@ -51,7 +51,7 @@ def add_recipient(first_name, last_name, email, customer_business_name, customer
       "customer_production_site": customer_production_site
     }
   ]
-  r = requests.post(add_recipient_url, data = contacts, headers=header)
+  r = requests.post(add_recipient_url, data = json.dumps(contacts), headers=header)
   if r.status_code != 201:
     print "Non-201 status code recieved: {status_code}".format(status_code=r.status_code)
     print r.text
