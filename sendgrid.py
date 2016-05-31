@@ -1,4 +1,4 @@
-#/usr/bin/python
+#!/usr/bin/python
 import requests
 import click
 # Sendgrid API
@@ -43,13 +43,13 @@ def add_recipient(first_name, last_name, email, customer_business_name, customer
   r = requests.post(add_recipient_url, data = contacts)
   contact_response = r.json()
   if contact_response['error_count'] != 0:
-  	print "Error count of {error_count}".format(error_count=contact_response['error_count'])
+    print "Error count of {error_count}".format(error_count=contact_response['error_count'])
     exit(1)
   else:
     recipient_id = contact_response['persisted_recipients'][0]
   return recipient_id
 
-def add_recipient_to_contact_list(company="newmedia", recipient_id):
+def add_recipient_to_contact_list(company, recipient_id):
   # Add an existing recipient to a list
   # POST https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}
   # Response: 201
@@ -58,22 +58,22 @@ def add_recipient_to_contact_list(company="newmedia", recipient_id):
   newmedia_list_id = 173534
   drud_list_id = 173537
   if company == "1fee":
-  	list_id = onefee_list_id
+    list_id = onefee_list_id
   elif company == "newmedia":
-  	list_id = newmedia_list_id
+    list_id = newmedia_list_id
   elif company == "drud":
-  	list_id = drud_list_id
+    list_id = drud_list_id
   else:
-  	print "Unrecognized company name of {company_name}".format(company_name=company)
-  	exit(1)
+    print "Unrecognized company name of '{company_name}'".format(company_name=company)
+    exit(1)
   add_to_contact_list_url = 'https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}'.format(list_id=list_id, recipient_id=recipient_id)
   r = requests.post(add_to_contact_list_url)
   if r.status_code != 201:
-  	print "Non-201 status code recieved: {status_code}".format(status_code=r.status_code)
+    print "Non-201 status code recieved: {status_code}".format(status_code=r.status_code)
     print r.text
-  	exit(1)
+    exit(1)
 
-def add_sendgrid_recipient(company_name="newmedia", first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
+def add_sendgrid_recipient(company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
   recipient_id = add_recipient(first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site)
   add_recipient_to_contact_list(company_name, recipient_id)
 
@@ -86,7 +86,7 @@ def add_sendgrid_recipient(company_name="newmedia", first_name, last_name, email
 @click.option('--email', help="What is the client's email address?")
 @click.option('--customer-business-name', help="Client's legal business name")
 @click.option('--customer-staging-site', help="")
-@click.option('--customer-production-site')
+@click.option('--customer-production-site', help="")
 def sendgrid_router(operation, company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
   if operation=="add":
     add_sendgrid_recipient(company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site)
