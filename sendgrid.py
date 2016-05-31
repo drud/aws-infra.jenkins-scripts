@@ -47,6 +47,7 @@ def add_recipient(first_name, last_name, email, customer_business_name, customer
     exit(1)
   else:
     recipient_id = contact_response['persisted_recipients'][0]
+    print "Added '{first} {last}' <{email}> to SendGrid. Recipient ID={id}".format(first=first_name, last=last_name, email=email,id=recipient_id)
   return recipient_id
 
 def add_recipient_to_contact_list(company, recipient_id):
@@ -72,6 +73,8 @@ def add_recipient_to_contact_list(company, recipient_id):
     print "Non-201 status code recieved: {status_code}".format(status_code=r.status_code)
     print r.text
     exit(1)
+  else:
+    print "Added recipient with ID of '{id}' to the {company} mailing list.".format(id=recipient_id, company=company)
 
 def add_sendgrid_recipient(company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
   recipient_id = add_recipient(first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site)
