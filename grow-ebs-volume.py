@@ -140,11 +140,12 @@ def grow_ebs_volume(server_name, new_size, device_name):
     vol = boto3.resource('ec2').Volume(vol_id)
 
     # Snapshot the volume
-    print "Creating a snapshot of the instance."
+    print "Creating a snapshot of the instance..."
     snapshot = vol.create_snapshot()
     while snapshot.state != "completed":
         time.sleep(5)
         snapshot.reload()
+        print "Creating snapshot: {progress}%% complete".format(progress=snapshot.progress)
     # This "waiter" will only wait 10 minutes and error out...which is far too short.
     # snapshot.wait_until_completed()
 
