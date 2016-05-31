@@ -28,7 +28,7 @@ import click
 #     }
 #   ]
 # }
-def add_recipient(first_name, last_name, email, customer_business_name, customer_development_site, customer_production_site)
+def add_recipient(first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
   add_recipient_url = 'https://api.sendgrid.com/v3/contactdb/recipients'
   contacts = [
     {
@@ -49,7 +49,7 @@ def add_recipient(first_name, last_name, email, customer_business_name, customer
     recipient_id = contact_response['persisted_recipients'][0]
   return recipient_id
 
-def add_recipient_to_contact_list(company="newmedia", recipient_id)
+def add_recipient_to_contact_list(company="newmedia", recipient_id):
   # Add an existing recipient to a list
   # POST https://api.sendgrid.com/v3/contactdb/lists/{list_id}/recipients/{recipient_id}
   # Response: 201
@@ -73,25 +73,25 @@ def add_recipient_to_contact_list(company="newmedia", recipient_id)
     print r.text
   	exit(1)
 
-def add_sendgrid_recipient(company_name="newmedia", first_name, last_name, email, customer_business_name, customer_development_site, customer_production_site)
-  recipient_id = add_recipient(first_name, last_name, email, customer_business_name, customer_development_site, customer_production_site)
+def add_sendgrid_recipient(company_name="newmedia", first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
+  recipient_id = add_recipient(first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site)
   add_recipient_to_contact_list(company_name, recipient_id)
 
 @click.command()
 @click.option('--add', 'operation', flag_value='add', default=True)
 @click.option('--remove', 'operation', flag_value='remove')
 @click.option('--company-name', default="newmedia", help="Which internal company is the client associated with?")
-@click.option('--first-name')
-@click.option('--last-name')
-@click.option('--email')
-@click.option('--customer-business-name')
-@click.option('--customer-staging-site')
+@click.option('--first-name', help="What is the client's first name?")
+@click.option('--last-name', help="What is the client's last name?")
+@click.option('--email', help="What is the client's email address?")
+@click.option('--customer-business-name', help="Client's legal business name")
+@click.option('--customer-staging-site', help="")
 @click.option('--customer-production-site')
 def sendgrid_router(operation, company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
   if operation=="add":
     add_sendgrid_recipient(company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site)
   else:
-    print "Operation '{op}'' not supported".format(op=operation)
+    print "Operation '{op}' not supported".format(op=operation)
     exit(1)
 
 # Search for a specific recipient by any field
