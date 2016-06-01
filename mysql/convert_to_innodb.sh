@@ -31,7 +31,7 @@ fi
 ###################################################
 
 # Find all DBs that need to be converted
-SCRIPT="mysql -u doer -pYxPyixXLUEtFUR3z -e \"$FIND_ALL_TABLES\" 2>/dev/null"
+SCRIPT="mysql -u doer -pYxPyixXLUEtFUR3z -e \\\"$FIND_ALL_TABLES\\\" 2>/dev/null"
 SSH_CMD="$($JENKINS_SCRIPTS/ssh-generator.sh "$SCRIPT" "NOFILE" $PRIMARY_SERVER $OS)"
 echo "$SSH_CMD"
 RET=$($SSH_CMD)
