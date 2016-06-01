@@ -9,7 +9,7 @@ ENVIRONMENT="staging"
 DESYNC_NODE="SET GLOBAL wsrep_OSU_method='RSU';"
 
 # Find all the myisam tables
-FIND_ALL_TABLES="SELECT table_schema, TABLE_NAME, table_rows FROM information_schema.TABLES WHERE engine='myisam' AND table_schema NOT IN ('information_schema', 'performance_schema', 'mysql');"
+FIND_ALL_TABLES="SELECT table_schema, TABLE_NAME, table_rows FROM information_schema.TABLES WHERE engine='myisam' AND table_schema NOT IN \('information_schema', 'performance_schema', 'mysql'\);"
 
 # Change a myisam table to InnoDB
 CHANGE_TABLE="ALTER TABLE dbname.table_name engine = InnoDB;"
@@ -32,11 +32,16 @@ fi
 
 # Find all DBs that need to be converted
 SCRIPT="mysql -u doer -pYxPyixXLUEtFUR3z -e \\\"$FIND_ALL_TABLES\\\" 2>/dev/null"
-SSH_CMD="$($JENKINS_SCRIPTS/ssh-generator.sh "$SCRIPT" "NOFILE" $PRIMARY_SERVER $OS)"
+echo "$JENKINS_SCRIPTS/ssh-generator.sh "$SCRIPT" "NOFILE" $PRIMARY_SERVER $OS"
 echo "CMD:"
 echo "$SSH_CMD"
+echo "1"
 RET=$("$SSH_CMD")
-STATUS=$?
+echo $RET
+echo "2"
+RET="`$SSH_CMD`"
+echo $RET
+#STATUS=$?
 echo "Status"
 echo $STATUS
 echo "Return"
