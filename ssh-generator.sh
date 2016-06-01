@@ -6,6 +6,7 @@
 # eval "$SSH_CMD"
 # STATUS=$?
 # exit $STATUS
+# If SCRIPTNAME=="NOFILE", then 
 if [ -z "$1" -o -z "$2" ]; then
 	echo "This script requires that you pass in a scriptname to run."
 	echo "Usage: ./ssh-generator.sh SCRIPTNAME ENVOVERLOAD HOST OS"
@@ -33,6 +34,11 @@ else
 	USER="root"
 fi
 
-SSH_OPTIONS="-o StrictHostKeyChecking=no $PROXY_CMD -o NumberOfPasswordPrompts=0"
-SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOST 'sudo -Eib $ENVOVERLOAD bash -s --' < $JENKINS_SCRIPTS/$SCRIPTNAME $OS"
+if [ "$ENVOVERLOAD" = "NOFILE" ]; then
+  SSH_OPTIONS="-o StrictHostKeyChecking=no $PROXY_CMD -o NumberOfPasswordPrompts=0"
+  SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOST '$SCRIPTNAME'"
+else
+  SSH_OPTIONS="-o StrictHostKeyChecking=no $PROXY_CMD -o NumberOfPasswordPrompts=0"
+  SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOST 'sudo -Eib $ENVOVERLOAD bash -s --' < $JENKINS_SCRIPTS/$SCRIPTNAME $OS"
+fi
 echo $SSH_CMD

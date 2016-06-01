@@ -6,5 +6,7 @@ if [ -z "$1" -o -z "$2" ]; then
 fi
 QUERY_TEXT="$1"
 DB_NAME="$2"
-
-mysql -u user -p -e "$QUERY_TEXT" "$DB_NAME"
+#staging
+#mysql -u doer -pYxPyixXLUEtFUR3z
+#mysql -u doer -pYxPyixXLUEtFUR3z -e "$FIND_ALL_TABLES" 2>/dev/null
+mysql -u doer -pYxPyixXLUEtFUR3z -e "$QUERY_TEXT" "$DB_NAME" 2>/dev/null

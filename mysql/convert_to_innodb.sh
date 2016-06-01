@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #!!! Pass these variables in
-ENVIRONMENT="production"
+ENVIRONMENT="staging"
 
 
 # Setup the SQL variables ########################
@@ -27,7 +27,7 @@ if [ "$ENVIRONMENT" = "production" ]; then
 elif [ "$ENVIRONMENT" = "staging" ]; then
   PERCONA_SERVERS=("percona03.nmdev.us")
   PRIMARY_SERVER="percona03.nmdev.us"
-  OS="UBUNTU"
+  OS="CENTOS"
 else
   echo "Unrecognized environment of '$ENVIRONMENT'"
 fi
@@ -35,7 +35,7 @@ fi
 
 # Find all DBs that need to be converted
 SCRIPT="mysql/mysql_command_injector.sh \"$FIND_ALL_TABLES\" 'information_schema'"
-SSH_CMD="$($JENKINS_SCRIPTS/ssh-generator.sh "$SCRIPT" env $PRIMARY_SERVER $OS)"
+SSH_CMD="$($JENKINS_SCRIPTS/ssh-generator.sh "$SCRIPT" "NOFILE" $PRIMARY_SERVER $OS)"
 echo "$SSH_CMD"
 eval "$SSH_CMD"
 STATUS=$?
