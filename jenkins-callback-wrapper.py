@@ -56,7 +56,7 @@ def trigger_web_jobs(environment, chef_action, bag_name):
             if job_name != "" and job_name != "{environment}-".format(environment=environment) and job_name.startswith(environment) and "drud" not in job_name:
                 print "Invoking {job_name}".format(job_name=job_name)
                 # Set build parameters, kick off a new build, and block until complete.
-                params = {'name': job_name, 'CHEF_ACTION': chef_action }
+                params = {'CHEF_ACTION': chef_action }
                 # Block so the jobs execute one-at-a-time
                 try:
                     J.build_job(job_name, params)
