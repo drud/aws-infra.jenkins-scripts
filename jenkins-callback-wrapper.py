@@ -39,7 +39,7 @@ def trigger_web_jobs(environment, chef_action, bag_name):
             print "Job '{job_name}' could not be found in the jenkins job list. Available jobs are:\n\t{jobs}".format(job_name=job_name,jobs=",".join(jenkins_job_list))
             exit(1)
         # Set build parameters, kick off a new build, and block until complete.
-        params = {'name': job_name, 'CHEF_ACTION': chef_action }
+        params = {'CHEF_ACTION': chef_action }
         # Block so the jobs execute one-at-a-time
         try:
             print "Invoking job {job_name}...".format(job_name=job_name)
