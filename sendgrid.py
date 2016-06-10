@@ -72,12 +72,15 @@ def add_recipient_to_contact_list(company, recipient_id):
   onefee_list_id = 173536
   newmedia_list_id = 173534
   drud_list_id = 173537
+  drud_hosting_id = 385645
   if company == "1fee":
     list_id = onefee_list_id
   elif company == "newmedia":
     list_id = newmedia_list_id
   elif company == "drud":
     list_id = drud_list_id
+  elif company == "drud_hosting":
+    list_id = drud_hosting_id
   else:
     print "Unrecognized company name of '{company_name}'".format(company_name=company)
     exit(1)
