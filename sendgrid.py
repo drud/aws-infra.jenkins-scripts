@@ -46,9 +46,9 @@ def add_recipient(first_name, last_name, email, customer_business_name, customer
       "email": email,
       "last_name": last_name,
       "first_name": first_name,
-      "customer_business_name": customer_business_name,
-      "customer_staging_site": customer_staging_site,
-      "customer_production_site": customer_production_site
+      #"customer_business_name": customer_business_name,
+      #"customer_staging_site": customer_staging_site,
+      #"customer_production_site": customer_production_site
     }
   ]
   r = requests.post(add_recipient_url, data = json.dumps(contacts), headers=header)
@@ -104,9 +104,9 @@ def add_sendgrid_recipient(company_name, first_name, last_name, email, customer_
 @click.option('--first-name', prompt="First Name", help="What is the client's first name?")
 @click.option('--last-name', prompt="Last Name", help="What is the client's last name?")
 @click.option('--email', prompt="Email Address", help="What is the client's email address?")
-#@click.option('--customer-business-name', prompt="Client Legal Business Name", help="Client's legal business name")
-#@click.option('--customer-staging-site', prompt="Staging URL", help="Client's staging URL")
-#@click.option('--customer-production-site', prompt="Prod URL", help="Client's prod URL")
+@click.option('--customer-business-name', default="Client Legal Business Name", help="Client's legal business name")
+@click.option('--customer-staging-site', default="Staging URL", help="Client's staging URL")
+@click.option('--customer-production-site', default="Prod URL", help="Client's prod URL")
 def sendgrid_router(operation, company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site):
   if operation=="add":
     add_sendgrid_recipient(company_name, first_name, last_name, email, customer_business_name, customer_staging_site, customer_production_site)
