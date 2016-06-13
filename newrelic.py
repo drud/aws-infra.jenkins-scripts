@@ -2,7 +2,7 @@
 from os import environ
 import requests
 import click
-import databag as databag
+import databag
 import base64
 
 admin_key = environ.get("NEWRELIC_API_KEY")
