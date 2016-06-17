@@ -106,7 +106,7 @@ def grow_ebs_volume(server_name, new_size, device_name):
     # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
     ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, "@", host, "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=vol_device_name)]
     print subprocess.check_output(ssh_cmd)
-         
+    exit(0)     
     # Get the device mappings for that instance and find the volume's ID
     mapping = instance.block_device_mappings
     if len(mapping) <= 0:
