@@ -100,13 +100,6 @@ def grow_ebs_volume(server_name, new_size, device_name):
     # Get EC2 instance object
     instance = boto3.resource('ec2').Instance(instance_id)
 
-    tags = {x['Key']: x['Value'] for x in instance.tags}
-    user=tags['DeployUser']
-    host=tags['Name']
-    # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
-    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, "@", host, "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=vol_device_name)]
-    print subprocess.check_output(ssh_cmd)
-    exit(0)     
     # Get the device mappings for that instance and find the volume's ID
     mapping = instance.block_device_mappings
     if len(mapping) <= 0:
@@ -143,6 +136,14 @@ def grow_ebs_volume(server_name, new_size, device_name):
         vol_device_name, vol_id = devices.popitem()
         print "Using '{vol_name}'/'{vol_id}' since it was the only attached volume found.".format(vol_name=vol_device_name, vol_id=vol_id)
     
+    tags = {x['Key']: x['Value'] for x in instance.tags}
+    user=tags['DeployUser']
+    host=tags['Name']
+    # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
+    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, "@", host, "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=vol_device_name)]
+    print subprocess.check_output(ssh_cmd)
+    exit(0)  
+
     # Now you have the volume
     vol = boto3.resource('ec2').Volume(vol_id)
 
