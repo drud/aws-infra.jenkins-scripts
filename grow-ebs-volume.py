@@ -6,6 +6,7 @@ import requests
 import time
 import boto
 import boto3
+import subprocess
 
 
 def get_instance_by_tagged_name(server_name):
@@ -98,7 +99,8 @@ def grow_ebs_volume(server_name, new_size, device_name):
     
     # Get EC2 instance object
     instance = boto3.resource('ec2').Instance(instance_id)
-
+    print instance.tags
+    exit(0)
      
     # Get the device mappings for that instance and find the volume's ID
     mapping = instance.block_device_mappings
@@ -181,6 +183,10 @@ def grow_ebs_volume(server_name, new_size, device_name):
 
     print "Instance restarted. Here are the devices -"
     show_attached_volumes(instance)
+
+    # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
+    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, host, "\"resize2fs", "{dev}\"".format(dev=vol_device_name)]
+    ls_output = subprocess.check_output(ssh_cmd)
     
 if __name__ == '__main__':
     grow_ebs_volume()
