@@ -99,7 +99,9 @@ def grow_ebs_volume(server_name, new_size, device_name):
     
     # Get EC2 instance object
     instance = boto3.resource('ec2').Instance(instance_id)
-    print instance.tags
+    tags = {x['Key']: x['Value'] for x in instance.tags}
+    print tags['DeployUser']
+    print tags['Name']
     exit(0)
      
     # Get the device mappings for that instance and find the volume's ID
