@@ -99,10 +99,6 @@ def grow_ebs_volume(server_name, new_size, device_name):
     
     # Get EC2 instance object
     instance = boto3.resource('ec2').Instance(instance_id)
-    tags = {x['Key']: x['Value'] for x in instance.tags}
-    print tags['DeployUser']
-    print tags['Name']
-    exit(0)
      
     # Get the device mappings for that instance and find the volume's ID
     mapping = instance.block_device_mappings
@@ -186,8 +182,11 @@ def grow_ebs_volume(server_name, new_size, device_name):
     print "Instance restarted. Here are the devices -"
     show_attached_volumes(instance)
 
+    tags = {x['Key']: x['Value'] for x in instance.tags}
+    user=tags['DeployUser']
+    host=tags['Name']
     # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
-    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, host, "\"resize2fs", "{dev}\"".format(dev=vol_device_name)]
+    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, "@", host, "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=vol_device_name)]
     ls_output = subprocess.check_output(ssh_cmd)
     
 if __name__ == '__main__':
