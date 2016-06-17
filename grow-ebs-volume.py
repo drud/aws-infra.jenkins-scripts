@@ -135,14 +135,6 @@ def grow_ebs_volume(server_name, new_size, device_name):
         # If there's just a single entry, then just pop the item out of the dict (it's the only item)
         vol_device_name, vol_id = devices.popitem()
         print "Using '{vol_name}'/'{vol_id}' since it was the only attached volume found.".format(vol_name=vol_device_name, vol_id=vol_id)
-    
-    tags = {x['Key']: x['Value'] for x in instance.tags}
-    user=tags['DeployUser']
-    host=tags['Name']
-    # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
-    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', "{user}@{host}".format(user=user,host=host), "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=device_name)]
-    print subprocess.check_output(ssh_cmd)
-    exit(0)  
 
     # Now you have the volume
     vol = boto3.resource('ec2').Volume(vol_id)
@@ -190,12 +182,12 @@ def grow_ebs_volume(server_name, new_size, device_name):
     print "Instance restarted. Here are the devices -"
     show_attached_volumes(instance)
 
-    tags = {x['Key']: x['Value'] for x in instance.tags}
-    user=tags['DeployUser']
-    host=tags['Name']
-    # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
-    ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', user, "@", host, "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=device_name)]
-    print subprocess.check_output(ssh_cmd)
+    # tags = {x['Key']: x['Value'] for x in instance.tags}
+    # user=tags['DeployUser']
+    # host=tags['Name']
+    # # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
+    # ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', "{user}@{host}".format(user=user,host=host), "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=device_name)]
+    # print subprocess.check_output(ssh_cmd)
     
 if __name__ == '__main__':
     grow_ebs_volume()
