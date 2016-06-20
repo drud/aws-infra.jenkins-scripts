@@ -118,8 +118,8 @@ client_metadata = {
 # Override the production hosts directive if we need to expand a group
 if web_server_prod == 'webcluster01'
     production[:hosts] = [
-        'web01.newmediadenver.com',
         'web02.newmediadenver.com',
+        'web03.newmediadenver.com',
         'web04.newmediadenver.com'
     ]
 end
