@@ -4,20 +4,23 @@ import subprocess
 instance_id = 'i-318ca4c6'
 image_type = "gluster"
 new_instance_name = 'gluster0test.nmdev.us'
+new_instance_name = "gluster01.nmdev.us"
 #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster0test.nmdev.us')
 
-user="root"
-host="gluster01.nmdev.us"
+user="root" if "nmdev.us" in new_instance_name else "ubuntu"
+host=new_instance_name
 aws_key='/var/jenkins_home/.ssh/aws.pem'
 aws_key='/Users/csterling/.ssh/nmd/jenkins_ac.pem'
 # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }}
 ssh_cmd = ['ssh', '-p22', '-i', aws_key, '-o', 'StrictHostKeyChecking=no', "{user}@{host}".format(user=user,host=host)]
-ssh_cmd = ssh_cmd + '"cat /etc/fstab"'.split(" ")
-a = subprocess.check_output(ssh_cmd)
-
-print ">>>>a<<<<"
-
-
+ssh_cmd = ssh_cmd + 'sudo cat /etc/fstab'.split(" ")
+fstab_file_contents = subprocess.check_output(ssh_cmd)
+for line in fstab_file_contents:
+  if line.startswith('/dev/xvdf'):
+    fstab_entry_line = line
+    fstab_entry = line.split(' ')
+    break 
+print fstab_entry
 
 
 # AWS devices /dev/sda and /dev/xvdf
