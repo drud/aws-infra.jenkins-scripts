@@ -32,7 +32,7 @@ def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   new_instance_name The FQDN of the new instance e.g. gluster01.nmdev.us
   """
   # Connect to EC2
-  ec2 = boto3.resource('ec2')
+  ec2 = boto3.resource('ec2', region_name='us-west-2')
 
   # Get existing box's metadata
   instance_to_replace = ec2.Instance(instance_id)
@@ -48,7 +48,7 @@ def create_instance_like(instance_id, image_type, new_instance_name='tester'):
     new_instance_type = instance_to_replace.instance_type
 
   # Connect to EC2
-  ec2 = boto3.client('ec2')
+  ec2 = boto3.client('ec2', region_name='us-west-2')
 
   # Get a list of all images that are close to the name passed in, made by us
   possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
@@ -57,7 +57,7 @@ def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   # Select the last image in the list
   most_recent_image = sorted_images[-1]
 
-  ec2 = boto3.resource('ec2')
+  ec2 = boto3.resource('ec2', region_name='us-west-2')
   # Create a new instance based on the AMI we just found
   instances = ec2.create_instances(ImageId=most_recent_image['ImageId'],
     MinCount=1,
@@ -138,7 +138,7 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   fstab_entry, fstab_entry_line = remote_fstab.find_and_remove_fstab_entry(old_user, old_host, device_name)
 
   # Connect to EC2
-  ec2 = boto3.resource('ec2')
+  ec2 = boto3.resource('ec2', region_name='us-west-2')
   # Get the volume we're moving
   vol = ec2.Volume(volume_id)
   
