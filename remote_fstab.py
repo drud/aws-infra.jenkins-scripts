@@ -16,6 +16,10 @@ def get_fstab(user, host="gluster01.nmdev.us"):
 # proc       /proc     proc    defaults         0 0
 # sysfs      /sys      sysfs   defaults         0 0
 # /dev/xvdf /srv/sdb1 ext4 defaults 0 2"""
+  if 'Please login as the user "ubuntu" rather than the user "root".' in fstab_file_contents:
+    raise Exception("Please set the 'DeployUser' tag in EC2 to 'ubuntu' so that we can SSH into this machine in the future")
+    # We could recover THIS gracefully, but chances are, other functions will fail without this.
+    #fstab_file_contents = get_fstab('ubuntu', host)
   return fstab_file_contents
 
 def set_fstab(user, host, fstab_file_contents):
