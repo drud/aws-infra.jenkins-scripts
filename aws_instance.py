@@ -113,15 +113,28 @@ def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   return new_instance
 
 
-def move_volume(volume_id, old_instance_id, new_instance_id, fstab_entry):
+def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
-  user="user"
-  host="host"
-  # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }}
-  ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', "{user}@{host}".format(user=user,host=host)]
+
+  # Setup the SSH commands
+  ssh_cmd = "ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {user}@{host}"
+  umount_cmd = ssh_cmd + " umount {device}"
+  mmkdir_cmd = ssh_cmd + " mkdir -p {folder}"
+  mount_cmd = ssh_cmd + " mount {device}"
+  #boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":["i-318ca4c6"]}, {"Name":"key","Values":["Environment"]}])['Tags'][0]['Value']
+  old_host = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  old_user = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags'][0]['Value']
+  old_user = "root" if old_user == "" else old_user
+  new_host = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  new_user = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags'][0]['Value']
+  new_user = "root" if new_user == "" else new_user
+
+  print "Moving {device} from {ouser}@{ohost} to {nuser}@{nhost}".format(device=device_name,ouser=old_user,ohost=old_host,nuser=new_user,nhost=new_host)
+
   # SSH into the old instance and umount the volume.
-  umount_cmd = ssh_cmd + ['"umount', '/dev/sda1"']
+  subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "))
   # SSH into the old instance and delete the fstab entry.
+  fstab_entry, fstab_entry_line = remote_fstab.find_and_remove_fstab_entry(old_user, old_host, device_name)
 
   # Connect to EC2
   ec2 = boto3.resource('ec2')
@@ -130,28 +143,40 @@ def move_volume(volume_id, old_instance_id, new_instance_id, fstab_entry):
   
   # Detach it
   old_info = vol.detach_from_instance(InstanceId=old_instance_id)
+  aws_device_name = old_info['Device']
   
   # Attach it to the new instance
   vol.attach_to_instance(InstanceId=new_instance_id, Device=old_info['Device'])
   
   # SSH into the new instance and create an fstab entry
-  # SSH into the new instance and mount the brick
+  remote_fstab.append_fstab_entry(new_user, new_host, fstab_entry_line)
 
-  # If gluster
+
+  # SSH into the new instance and mkdir -p the directory
+  subprocess.check_output(mkdir_cmd.format(user=new_user, host=new_host, folder=fstab_entry[1]).split(" "))
+  
+  # SSH into the new instance and mount it
+  subprocess.check_output(mount_cmd.format(user=new_user, host=new_host, device=device_name).split(" "))
+
+  # TODO If gluster
   # SSH into ANOTHER gluster instance, and from it, run a replace-brick and a peer-disconnect
 
 # instance.detech_volume(VolumeId="")
 if __name__ == '__main__':
-  fstab_entry = {
-    "file_system":"/dev/sda1",
-    "dir":"/mnt",
-    "type":"ext4",
-    "options":"defaults",
-    "dump":"0",
-    "pass":"1"
-  }
-  user=tags['DeployUser']
-  host=tags['Name']
-  
   #ssh_exec_cmd = ['"umount', '{dev}'.format(dev=)]
   #print subprocess.check_output(ssh_cmd)
+
+  # instance_id = 'i-318ca4c6' # gluster01.nmdev.us
+  # image_type = "gluster"
+  # old_host = "gluster01.nmdev.us"
+  # new_host = 'gluster0test.nmdev.us'
+  # new_instance_name = new_host
+  # user="root" if "nmdev.us" in host else "ubuntu"
+  
+  #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster03.nmdev.us')
+  #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster04.nmdev.us')
+  # gluster03.nmdev.us->10.0.3.153 in Z2WYJTE6C15CN4
+  # ec2.Instance(id='i-45854cea')
+  # gluster04.nmdev.us->10.0.3.27 in Z2WYJTE6C15CN4
+  # ec2.Instance(id='i-52854cfd')
+  move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', '/dev/xvdf')
