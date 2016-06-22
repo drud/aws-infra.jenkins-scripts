@@ -19,11 +19,11 @@ def get_fstab(host="gluster01.nmdev.us"):
   # Commenting out the actual callback during testing
   #fstab_file_contents = subprocess.check_output(ssh_cmd)
   fstab_file_contents="""LABEL=centos_root   /        ext4      defaults         0 0
-  devpts     /dev/pts  devpts  gid=5,mode=620   0 0
-  tmpfs      /dev/shm  tmpfs   defaults         0 0
-  proc       /proc     proc    defaults         0 0
-  sysfs      /sys      sysfs   defaults         0 0
-  /dev/xvdf /srv/sdb1 ext4 defaults 0 2"""
+devpts     /dev/pts  devpts  gid=5,mode=620   0 0
+tmpfs      /dev/shm  tmpfs   defaults         0 0
+proc       /proc     proc    defaults         0 0
+sysfs      /sys      sysfs   defaults         0 0
+/dev/xvdf /srv/sdb1 ext4 defaults 0 2"""
   return fstab_file_contents
 
 def set_fstab(fstab_file_contents):
