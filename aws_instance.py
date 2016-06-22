@@ -179,4 +179,4 @@ if __name__ == '__main__':
   # ec2.Instance(id='i-45854cea')
   # gluster04.nmdev.us->10.0.3.27 in Z2WYJTE6C15CN4
   # ec2.Instance(id='i-52854cfd')
-  move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', '/dev/xvdf')
+  move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', device_name='/dev/xvdf')
