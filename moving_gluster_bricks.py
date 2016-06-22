@@ -26,7 +26,9 @@ sysfs      /sys      sysfs   defaults         0 0
 /dev/xvdf /srv/sdb1 ext4 defaults 0 2"""
   return fstab_file_contents
 
-def set_fstab(fstab_file_contents):
+def set_fstab(fstab_file_contents, host="gluster01.nmdev.us"):
+  user="root" if "nmdev.us" in host else "ubuntu"
+  aws_key='/var/jenkins_home/.ssh/aws.pem'
   ssh_cmd = ['ssh', '-p22', '-vv', '-i', aws_key]
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
   ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
