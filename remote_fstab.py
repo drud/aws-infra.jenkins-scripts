@@ -1,13 +1,5 @@
 #!/usr/bin/python
-import aws_instance
 import subprocess
-
-instance_id = 'i-318ca4c6'
-image_type = "gluster"
-old_host = "gluster01.nmdev.us"
-new_host = 'gluster0test.nmdev.us'
-user="root" if "nmdev.us" in host else "ubuntu"
-#create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster0test.nmdev.us')
 
 def get_fstab(user, host="gluster01.nmdev.us"):
   aws_key='/var/jenkins_home/.ssh/aws.pem'
@@ -68,7 +60,7 @@ def append_fstab_entry(user, host, fstab_entry_line):
   ssh_cmd += 'sudo echo "{fstab}" >> /etc/fstab'.format(fstab=fstab_entry_line).split(" ")
   fstab_file_contents = subprocess.check_output(ssh_cmd)
 
-def move_fstab_entry(old_user, old_host, new_user, new_host, device_to_move='/dev/xvdf')
+def move_fstab_entry(old_user, old_host, new_user, new_host, device_to_move='/dev/xvdf'):
   fstab_entry, fstab_entry_line = find_and_remove_fstab_entry(old_user, old_host, device_to_move)
   add_fstab_entry(new_user, new_host, fstab_entry_line)
 
