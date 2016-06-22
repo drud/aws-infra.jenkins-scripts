@@ -95,7 +95,7 @@ def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   hosted_zone_id = "Z2WYJTE6C15CN4" if "nmdev.us" in new_instance_name else "ZS8SECWEXOKXH"
 
   print "A {name}->{ip} in {dns_id}".format(name=new_instance_name, ip=new_instance.private_ip_address, dns_id=hosted_zone_id)
-  #Create the corresponding DNS entry for this server
+  # Create the corresponding DNS entry for this server
   boto3.client('route53').change_resource_record_sets(
     HostedZoneId=hosted_zone_id,
     ChangeBatch={
@@ -122,11 +122,11 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   mmkdir_cmd = ssh_cmd + " mkdir -p {folder}"
   mount_cmd = ssh_cmd + " mount {device}"
   #boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":["i-318ca4c6"]}, {"Name":"key","Values":["Environment"]}])['Tags'][0]['Value']
-  old_host = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
-  old_user = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags'][0]['Value']
+  old_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  old_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags'][0]['Value']
   old_user = "root" if old_user == "" else old_user
-  new_host = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
-  new_user = boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags'][0]['Value']
+  new_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags'][0]['Value']
   new_user = "root" if new_user == "" else new_user
 
   print "Moving {device} from {ouser}@{ohost} to {nuser}@{nhost}".format(device=device_name,ouser=old_user,ohost=old_host,nuser=new_user,nhost=new_host)
