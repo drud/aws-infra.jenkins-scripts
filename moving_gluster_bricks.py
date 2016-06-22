@@ -8,7 +8,7 @@ new_instance_name = 'gluster0test.nmdev.us'
 new_instance_name = "gluster01.nmdev.us"
 #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster0test.nmdev.us')
 
-def get_fstab(host="gluster01.nmdev.us")
+def get_fstab(host="gluster01.nmdev.us"):
   user="root" if "nmdev.us" in host else "ubuntu"
   aws_key='/var/jenkins_home/.ssh/aws.pem'
   # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }}
