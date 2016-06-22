@@ -6,7 +6,7 @@ def get_fstab(user, host="gluster01.nmdev.us"):
   # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }}
   ssh_cmd = ['ssh', '-p22', '-i', aws_key]
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
-  ssh_cmd += "{user}@{host}".format(user=user, host=host)
+  ssh_cmd += ["{user}@{host}".format(user=user, host=host)]
   ssh_cmd += 'sudo cat /etc/fstab'.split(" ")
 
   fstab_file_contents = subprocess.check_output(ssh_cmd)
@@ -56,7 +56,7 @@ def append_fstab_entry(user, host, fstab_entry_line):
   aws_key = '/var/jenkins_home/.ssh/aws.pem'
   ssh_cmd = ['ssh', '-p22', '-i', aws_key]
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
-  ssh_cmd += "{user}@{host}".format(user=user,host=host)
+  ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
   ssh_cmd += 'sudo echo "{fstab}" >> /etc/fstab'.format(fstab=fstab_entry_line).split(" ")
   fstab_file_contents = subprocess.check_output(ssh_cmd)
 
