@@ -23,8 +23,14 @@
 import boto3
 from pprint import pprint as p
 import subprocess
+import remote_fstab
 
-def create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster0test.nmdev.us'):
+def create_instance_like(instance_id, image_type, new_instance_name='tester'):
+  """
+  instance_id The instance to be mimicked
+  image_type A basic search string that partially matches an AMI label
+  new_instance_name The FQDN of the new instance e.g. gluster01.nmdev.us
+  """
   # Connect to EC2
   ec2 = boto3.resource('ec2')
 
@@ -85,22 +91,26 @@ def create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_ins
   # Tag the instance with CreateTags()
   new_instance.create_tags(Tags=tags)
 
-  hosted_zone_id="Z2WYJTE6C15CN4" if "nmdev.us" in new_instance_name else "ZS8SECWEXOKXH"
+  # Determine the hosted zone ID by the instance ID
+  hosted_zone_id = "Z2WYJTE6C15CN4" if "nmdev.us" in new_instance_name else "ZS8SECWEXOKXH"
 
-  # Create the corresponding DNS entry for this server
+  print "A {name}->{ip} in {dns_id}".format(name=new_instance_name, ip=new_instance.private_ip_address, dns_id=hosted_zone_id)
+  #Create the corresponding DNS entry for this server
   boto3.client('route53').change_resource_record_sets(
     HostedZoneId=hosted_zone_id,
     ChangeBatch={
-      Changes: [{
+      'Changes': [{
         'Action': 'UPSERT',
         'ResourceRecordSet': {
           'Name': new_instance_name,
           'Type': 'A',
+          'TTL': 300,
+          'ResourceRecords': [{'Value': new_instance.private_ip_address}]
         },
-        'ResourceRecords': [{'Value': new_instance.private_ip_address}]
       }]
     }
   )
+  return new_instance
 
 
 def move_volume(volume_id, old_instance_id, new_instance_id, fstab_entry):
