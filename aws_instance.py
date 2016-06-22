@@ -118,7 +118,7 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
 
   # Setup the SSH commands
   ssh_cmd = "ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {user}@{host}"
-  umount_cmd = ssh_cmd + " sudo umount {device}"
+  umount_cmd = ssh_cmd + " sudo umount -f {device}"
   mmkdir_cmd = ssh_cmd + " sudo mkdir -p {folder}"
   mount_cmd = ssh_cmd + " sudo mount {device}"
   #boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":["i-318ca4c6"]}, {"Name":"key","Values":["Environment"]}])['Tags'][0]['Value']
@@ -134,6 +134,8 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
 
   # SSH into the old instance and umount the volume.
   subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "))
+  # If the volume wasn't mounted
+
   # SSH into the old instance and delete the fstab entry.
   fstab_entry, fstab_entry_line = remote_fstab.find_and_remove_fstab_entry(old_user, old_host, device_name)
 
