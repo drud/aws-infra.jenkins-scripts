@@ -31,7 +31,9 @@ def find_and_remove_fstab_entry(user, host, device_name):
   fstab_lines = fstab_file_contents.split("\n")
   fstab_entry = []
   fstab_entry_index = None
+  print "Listing fstab on old machine:"
   for index, line in enumerate(fstab_lines):
+    print "Entry: {entry}".format(entry=line)
     # Find the line with the device on it
     if line.startswith(device_name):
       fstab_entry_line = line
