@@ -37,7 +37,7 @@ def set_fstab(fstab_file_contents):
 def find_and_remove_fstab_entry(device_name, fstab_file_contents):
   fstab_lines = fstab_file_contents.split("\n")
   fstab_entry = []
-  fstab_entry_index=-1
+  fstab_entry_index = None
   for index, line in enumerate(fstab_lines):
     # Find the line with the device on it
     if line.startswith(device_name):
@@ -45,15 +45,14 @@ def find_and_remove_fstab_entry(device_name, fstab_file_contents):
       fstab_entry = line.split(' ')
       fstab_entry_index = index
       break
-  # if we can find the entry
-  if fstab_entry_index != -1:
-    print fstab_entry
-  else:
+  # if we cannot find the entry, return nothing
+  if fstab_entry_index is None:
     print "FSTAB ENTRY NOT FOUND"
     return None, fstab_file_contents
   
   # Remove entry
   del fstab_lines[fstab_entry_index]
+
   # Reassemble the file contents
   fstab_modified_file_contents = "\n".join(fstab_lines)
   return fstab_entry, fstab_modified_file_contents
