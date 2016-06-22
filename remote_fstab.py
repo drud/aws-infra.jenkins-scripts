@@ -23,12 +23,14 @@ def get_fstab(user, host="gluster01.nmdev.us"):
   return fstab_file_contents
 
 def set_fstab(user, host, fstab_file_contents):
+  chmod_fstab(user, host, '0777')
   aws_key='/var/jenkins_home/.ssh/aws.pem'
   ssh_cmd = ['ssh', '-p22', '-i', aws_key]
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
   ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
   ssh_cmd += 'sudo echo "{fstab}" > /etc/fstab'.format(fstab=fstab_file_contents).split(" ")
   fstab_file_contents = subprocess.check_output(ssh_cmd)
+  chmod_fstab(user, host, '0644')
 
 def find_and_remove_fstab_entry(user, host, device_name):
   fstab_file_contents = get_fstab(user, host)
@@ -60,15 +62,25 @@ def find_and_remove_fstab_entry(user, host, device_name):
 
 def append_fstab_entry(user, host, fstab_entry_line):
   aws_key = '/var/jenkins_home/.ssh/aws.pem'
+  chmod_fstab(user, host, '0777')
   ssh_cmd = ['ssh', '-p22', '-i', aws_key]
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
   ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
   ssh_cmd += 'sudo echo "{fstab}" >> /etc/fstab'.format(fstab=fstab_entry_line).split(" ")
-  fstab_file_contents = subprocess.check_output(ssh_cmd)
+  subprocess.check_output(ssh_cmd)
+  chmod_fstab(user, host, '0644')
 
 def move_fstab_entry(old_user, old_host, new_user, new_host, device_to_move='/dev/xvdf'):
   fstab_entry, fstab_entry_line = find_and_remove_fstab_entry(old_user, old_host, device_to_move)
   add_fstab_entry(new_user, new_host, fstab_entry_line)
+
+def chmod_fstab(user, host, chmod):
+  aws_key = '/var/jenkins_home/.ssh/aws.pem'
+  ssh_cmd = ['ssh', '-p22', '-i', aws_key]
+  ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
+  ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
+  ssh_cmd += 'sudo chmod {chmod} /etc/fstab'.format(chmod=chmod).split(" ")
+  subprocess.check_output(ssh_cmd)
 
 if __name__ == '__main__':
   # AWS devices /dev/sda and /dev/xvdf
