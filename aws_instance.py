@@ -27,6 +27,7 @@ import remote_fstab
 import time
 import click
 
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 def get_instance_by_tagged_name(server_name):
     # Theoretically something like this should work
@@ -214,9 +215,6 @@ def move_volume(volume_id, old_host, new_host, device_name):
   
   # SSH into the new instance and mount it
   subprocess.check_output(mount_cmd.format(user=new_user, host=new_host, device=device_name).split(" "))
-
-  # TODO If gluster
-  # SSH into ANOTHER gluster instance, and from it, run a replace-brick and a peer-disconnect
 
 # instance.detech_volume(VolumeId="")
 if __name__ == '__main__':
