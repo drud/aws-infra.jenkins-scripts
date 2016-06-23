@@ -4,6 +4,7 @@ import click
 import aws_instance
 import jenkins
 import jenkinspoll
+import subprocess
 
 aws_key='/var/jenkins_home/.ssh/aws.pem'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -128,5 +129,6 @@ def move_gluster_brick():
   # Replace the old brick with the new one
 
 
-
+if __name__ == '__main__':
+  siteman()
 
