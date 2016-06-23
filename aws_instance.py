@@ -132,9 +132,15 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
 
   print "Moving {device} from {ouser}@{ohost} to {nuser}@{nhost}".format(device=device_name,ouser=old_user,ohost=old_host,nuser=new_user,nhost=new_host)
 
-  # SSH into the old instance and umount the volume.
-  subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "))
-  # If the volume wasn't mounted
+  try:
+    # SSH into the old instance and umount the volume.
+    subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "))
+  except subprocess.CalledProcessError, e:
+    # If the volume wasn't mounted
+    if "not mounted" in e.output:
+      print "The volume wasn't mounted. Continuing..."
+    else:
+      exit(e.output)
 
   # SSH into the old instance and delete the fstab entry.
   fstab_entry, fstab_entry_line = remote_fstab.find_and_remove_fstab_entry(old_user, old_host, device_name)
