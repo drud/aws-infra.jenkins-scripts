@@ -99,6 +99,8 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
 
   ec2 = boto3.resource('ec2', region_name='us-west-2')
   # Create a new instance based on the AMI we just found
+  # TODO - DELETE THIS LINE - this is to save money during testing
+  new_instance_type = "t2.micro"
   instances = ec2.create_instances(ImageId=most_recent_image['ImageId'],
     MinCount=1,
     MaxCount=1,
