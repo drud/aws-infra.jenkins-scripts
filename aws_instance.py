@@ -144,10 +144,6 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
       print "The volume wasn't mounted. Continuing..."
     else:
       exit(e.output)
-  if "not mounted" in ret:
-    print "The volume wasn't mounted...continuing"
-  elif "returned non-zero exit status" in ret:
-    exit(ret)
 
   # SSH into the old instance and delete the fstab entry.
   fstab_entry, fstab_entry_line = remote_fstab.find_and_remove_fstab_entry(old_user, old_host, device_name)
