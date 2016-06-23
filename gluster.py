@@ -18,7 +18,7 @@ def build_and_run_command(user, host, command):
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
   ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
   ssh_cmd += 'sudo {command}'.format(command=command).split(" ")
-  return subprocess.check_output(ssh_cmd)
+  return subprocess.check_output(ssh_cmd, stderr=subprocess.STDOUT)
 
 @siteman.command()
 @click.option('--user')
