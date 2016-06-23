@@ -15,7 +15,7 @@ def build_and_run_command(user, host, command):
   ssh_cmd = ['ssh', '-p22', '-i', aws_key]
   ssh_cmd += ['-o', 'StrictHostKeyChecking=no']
   ssh_cmd += ["{user}@{host}".format(user=user,host=host)]
-  ssh_cmd += '{command}'.format(command=command).split(" ")
+  ssh_cmd += 'sudo {command}'.format(command=command).split(" ")
   return subprocess.check_output(ssh_cmd)
 
 @siteman.command()
