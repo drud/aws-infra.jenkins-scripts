@@ -157,20 +157,27 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
   umount_cmd = ssh_cmd + " sudo umount {device}"
   mkdir_cmd = ssh_cmd + " sudo mkdir -p {folder}"
   mount_cmd = ssh_cmd + " sudo mount {device}"
+  
+  # Figure out the old instance ID by hostname tags
   old_instance_id, old_instance_dict = get_instance_by_tagged_name(old_host)
   if old_instance_id == None:
     exit("Cannot continue without a valid instance to get the volume from")
   old_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   old_user = "root" if len(old_user)<1 else old_user[0]['Value']
 
+  # Figure out the new instance ID by hostname tags
   new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_host)
+  # If we couldn't find the instance, spawn a new one
   if new_instance_id == None:
     print "Since no match found, assuming that you want a brand new instance"
+    # We have to have a string to find the AMI, so if we don't have one, fail
     if volume_type == "standard":
       raise Exception("Cannot create a new instance unless you specify a non-standard volume-type")
+    # Create the new instance
     new_instance_id = create_instance_like(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
     new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
     new_user = "root" if len(new_user)<1 else new_user[0]['Value']
+    # If it's of type gluster, there are some Jenkins jobs we have to run
     if volume_type == "gluster":
       gluster.configure_new_gluster_instance(user, host)
 
