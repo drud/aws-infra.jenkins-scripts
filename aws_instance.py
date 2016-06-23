@@ -26,6 +26,7 @@ import subprocess
 import remote_fstab
 import time
 import click
+import gluster
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -63,7 +64,7 @@ def siteman():
     pass
 
 @siteman.command()
-@click.option('--host-to-mimic', prompt='ID of instance to be mimicked', help='ID of instance to be mimicked')
+@click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label')
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
 def create_instance_like(host_to_mimic, image_type, new_instance_name='tester'):
@@ -156,7 +157,8 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name='tester'):
 @click.option('--old-host', prompt='Old Hostname', help='Instance ID that volume is currently attached to')
 @click.option('--new-host', prompt='New Hostname', help='Instance ID that you would like to attach the volume to')
 @click.option('--device-name', prompt='Device Name', help='Name of device in AWS and FSTAB. Note - if these names don\'t match, this will not work.')
-def move_volume(volume_id, old_host, new_host, device_name):
+@click.option('--volume-type', default="standard", help="Specifying a different volume type can trigger custom actions. See help for choices.", type=click.Choice(['standard', 'gluster']))
+def move_volume(volume_id, old_host, new_host, device_name, volume_type):
   print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
 
   # Setup the SSH commands
@@ -183,6 +185,17 @@ def move_volume(volume_id, old_host, new_host, device_name):
   print "Moving {device} from {ouser}@{ohost} to {nuser}@{nhost}".format(device=device_name,ouser=old_user,ohost=old_host,nuser=new_user,nhost=new_host)
 
   try:
+    if volume_type == "gluster":
+      # Determine the gluster node we'll run against later
+      environment = "staging" if "nmdev.us" in new_host else "production"
+      gluster_user = "root" if environment == "staging" else "ubuntu"
+      gluster_host = "gluster01.nmdev.us" if environment == "staging" else "gluster06.newmediadenver.com"
+      if old_host == "gluster01.nmdev.us":
+        gluster_host = "gluster02.nmdev.us"
+      elif old_host == "gluster06.newmediadenver.com":
+        gluster_host = "gluster05.newmediadenver.com"
+        
+      gluster.kill_gluster(old_user, old_host)
     # SSH into the old instance and umount the volume.
     ret = subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "), stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as e:
@@ -215,6 +228,12 @@ def move_volume(volume_id, old_host, new_host, device_name):
   
   # SSH into the new instance and mount it
   subprocess.check_output(mount_cmd.format(user=new_user, host=new_host, device=device_name).split(" "))
+
+  if volume_type == "gluster":
+    gluster.start_gluster(new_user, new_host)
+    gluster.peer_connect(gluster_user, gluster_host, peer=new_host)
+    gluster.replace_brick(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
+
 
 # instance.detech_volume(VolumeId="")
 if __name__ == '__main__':
