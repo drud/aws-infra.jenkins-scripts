@@ -126,24 +126,6 @@ def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_m
   command="gluster volume replace-brick nmd {old_host}:{old_mount_point}/nmd {new_host}:{new_mount_point}/nmd commit force".format(old_user=old_user, old_host=old_host, old_mount_point=old_mount_point, new_user=new_user, new_host=new_host, new_mount_point=new_mount_point)
   print build_and_run_command(user, host, command)
 
-@siteman.command()
-def move_gluster_brick():
-  # Stop glusterd
-  # Stop glusterfsd
-
-  # Unmount the volume
-  # Delete the old fstab
-  # Detach the volume
-  # Attach the volume
-  # Create the new fstab
-  # Mount the volume
-  aws_instance.move_volume(volume_id, old_instance_id, new_instance_id, device_name)
-
-  # Start glusterd
-  # Start glusterfsd
-  # Discover the new peer
-  # Replace the old brick with the new one
-
 
 if __name__ == '__main__':
   siteman()
