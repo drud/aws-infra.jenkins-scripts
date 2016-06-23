@@ -24,6 +24,7 @@ import boto3
 from pprint import pprint as p
 import subprocess
 import remote_fstab
+import time
 
 def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   """
@@ -156,6 +157,11 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   # Detach it
   old_info = vol.detach_from_instance(InstanceId=old_instance_id)
   aws_device_name = old_info['Device']
+
+  while vol.state != "available":
+    print "Current volume state it {state}. Waiting for available state.".format(state=vol.state)
+    time.sleep(5)
+    vol.reload()
   
   # Attach it to the new instance
   vol.attach_to_instance(InstanceId=new_instance_id, Device=old_info['Device'])
