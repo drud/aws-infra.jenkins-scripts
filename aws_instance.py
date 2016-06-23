@@ -63,16 +63,16 @@ def siteman():
     pass
 
 @siteman.command()
-@click.option('--instance-id', prompt='ID of instance to be mimicked', help='ID of instance to be mimicked')
+@click.option('--host-to-mimic', prompt='ID of instance to be mimicked', help='ID of instance to be mimicked')
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label')
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
-def create_instance_like(instance_id, image_type, new_instance_name='tester'):
+def create_instance_like(host_to_mimic, image_type, new_instance_name='tester'):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
-
+  instance_id, instance_dict = get_instance_by_tagged_name(host_to_mimic)
   # Get existing box's metadata
   instance_to_replace = ec2.Instance(instance_id)
   security_group_ids = [x['GroupId'] for x in instance_to_replace.security_groups]
@@ -234,4 +234,5 @@ if __name__ == '__main__':
   # ec2.Instance(id='i-45854cea')
   # gluster04.nmdev.us->10.0.3.27 in Z2WYJTE6C15CN4
   # ec2.Instance(id='i-52854cfd')
-  move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', device_name='/dev/xvdf')
+  #move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', device_name='/dev/xvdf')
+  siteman()
