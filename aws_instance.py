@@ -120,7 +120,7 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   # Setup the SSH commands
   ssh_cmd = "ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {user}@{host}"
   umount_cmd = ssh_cmd + " sudo umount {device}"
-  mmkdir_cmd = ssh_cmd + " sudo mkdir -p {folder}"
+  mkdir_cmd = ssh_cmd + " sudo mkdir -p {folder}"
   mount_cmd = ssh_cmd + " sudo mount {device}"
   #boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":["i-318ca4c6"]}, {"Name":"key","Values":["Environment"]}])['Tags'][0]['Value']
   old_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
@@ -159,7 +159,7 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   aws_device_name = old_info['Device']
 
   while vol.state != "available":
-    print "Current volume state it {state}. Waiting for available state.".format(state=vol.state)
+    print "Current volume state is '{state}'. Waiting for available state.".format(state=vol.state)
     time.sleep(5)
     vol.reload()
   
