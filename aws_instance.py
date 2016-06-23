@@ -56,7 +56,7 @@ def get_instance_by_tagged_name(server_name):
 
     if instance_id == "":
         print "A server with name '{server_name}' could not be mapped to an instance id.".format(server_name=server_name)
-        exit(1)
+        return None, None
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version='1.0.0')
@@ -65,9 +65,9 @@ def siteman():
 
 @siteman.command()
 @click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
-@click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label')
+@click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
-def create_instance_like(host_to_mimic, image_type, new_instance_name='tester'):
+def create_instance_like(host_to_mimic, image_type, new_instance_name):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
@@ -150,23 +150,32 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name='tester'):
 @click.option('--old-host', prompt='Old Hostname', help='Instance ID that volume is currently attached to')
 @click.option('--new-host', prompt='New Hostname', help='Instance ID that you would like to attach the volume to')
 @click.option('--device-name', prompt='Device Name', help='Name of device in AWS and FSTAB. Note - if these names don\'t match, this will not work.')
-@click.option('--volume-type', default="standard", help="Specifying a different volume type can trigger custom actions. See help for choices.", type=click.Choice(['standard', 'gluster']))
+@click.option('--volume-type', default="standard", help="Specifying a different volume type can trigger custom actions. See help for choices.", type=click.Choice(['standard', 'gluster', 'percona', 'proxy']))
 def move_volume(volume_id, old_host, new_host, device_name, volume_type):
-  print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
-
   # Setup the SSH commands
   ssh_cmd = "ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {user}@{host}"
   umount_cmd = ssh_cmd + " sudo umount {device}"
   mkdir_cmd = ssh_cmd + " sudo mkdir -p {folder}"
   mount_cmd = ssh_cmd + " sudo mount {device}"
   old_instance_id, old_instance_dict = get_instance_by_tagged_name(old_host)
-  new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_host)
-  #boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":["i-318ca4c6"]}, {"Name":"key","Values":["Environment"]}])['Tags'][0]['Value']
-  #old_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  if old_instance_id == None:
+    exit("Cannot continue without a valid instance to get the volume from")
   old_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   old_user = "root" if len(old_user)<1 else old_user[0]['Value']
-  old_user = "root" if old_user == "" else old_user
-  #new_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+
+  new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_host)
+  if new_instance_id == None:
+    print "Since no match found, assuming that you want a brand new instance"
+    if volume_type == "standard":
+      raise Exception("Cannot create a new instance unless you specify a non-standard volume-type")
+    new_instance_id = create_instance_like(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
+    new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
+    new_user = "root" if len(new_user)<1 else new_user[0]['Value']
+    if volume_type == "gluster":
+      gluster.configure_new_gluster_instance(user, host)
+
+  print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
+
   new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   new_user = "root" if len(new_user)<1 else new_user[0]['Value']
 
