@@ -106,14 +106,7 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name='tester'):
     SecurityGroupIds=security_group_ids,
     InstanceType=new_instance_type,
     Placement=instance_to_replace.placement,
-    BlockDeviceMappings=[{
-      'DeviceName': "/dev/sda1",
-      'Ebs': {
-        'VolumeSize': old_primary_volume.size,
-        'DeleteOnTermination': old_primary_volume.attachments[0]['DeleteOnTermination'],
-        'VolumeType': old_primary_volume.volume_type
-      }
-    }],
+    BlockDeviceMappings=instance_to_replace.block_device_mappings,
     SubnetId=instance_to_replace.subnet_id)
     
   new_instance = instances[0]
