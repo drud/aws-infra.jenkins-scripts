@@ -136,7 +136,9 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
     # SSH into the old instance and umount the volume.
     subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "))
   except subprocess.CalledProcessError as e:
-    print e   
+    print e
+    print e.output
+    print e.returncode 
     # If the volume wasn't mounted
     if "not mounted" in e.output:
       print "The volume wasn't mounted. Continuing..."
