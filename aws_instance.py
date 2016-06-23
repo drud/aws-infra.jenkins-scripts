@@ -25,12 +25,49 @@ from pprint import pprint as p
 import subprocess
 import remote_fstab
 import time
+import click
 
+
+def get_instance_by_tagged_name(server_name):
+    # Theoretically something like this should work
+    # ec2 = boto3.resource('ec2')
+    # instances = ec2.instances.filter(Filters=[{'Name': 'Name', 'Values': ['running']}])
+    # print instances
+    # for instance in instances:
+    #     print(instance.id, instance.instance_type)
+    instance_id = ""
+    instance_dict = None
+    instance = None
+    ec2_connection = boto3.client('ec2', region_name='us-west-2')
+    ec2_instances = ec2_connection.describe_instances()["Reservations"]
+    for instance in ec2_instances:
+        for x in instance["Instances"]:
+            instance_name = ""
+            # Parse the instance name out of the tags. This is a hacky way - is there a more elegant solution?
+            instance_name = [y["Value"] for y in x["Tags"] if y["Key"] == "Name"][0]
+            #servers[instance_name] = x["InstanceId"]
+            if server_name == instance_name:
+                instance_id = x["InstanceId"]
+                instance_dict = x
+                print "Found server instance ID of '{instance_id}' for server named '{server_name}'".format(instance_id=instance_id, server_name=server_name)
+                return instance_id, instance_dict
+
+    if instance_id == "":
+        print "A server with name '{server_name}' could not be mapped to an instance id.".format(server_name=server_name)
+        exit(1)
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(version='1.0.0')
+def siteman():
+    pass
+
+@siteman.command()
+@click.option('--instance-id', prompt='ID of instance to be mimicked', help='ID of instance to be mimicked')
+@click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label')
+@click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
 def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   """
-  instance_id The instance to be mimicked
-  image_type A basic search string that partially matches an AMI label
-  new_instance_name The FQDN of the new instance e.g. gluster01.nmdev.us
+  Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
@@ -113,8 +150,12 @@ def create_instance_like(instance_id, image_type, new_instance_name='tester'):
   )
   return new_instance
 
-
-def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
+@siteman.command()
+@click.option('--volume-id', prompt='ID of volume to move', help='ID of volume to move')
+@click.option('--old-host', prompt='Old Hostname', help='Instance ID that volume is currently attached to')
+@click.option('--new-host', prompt='New Hostname', help='Instance ID that you would like to attach the volume to')
+@click.option('--device-name', prompt='Device Name', help='Name of device in AWS and FSTAB. Note - if these names don\'t match, this will not work.')
+def move_volume(volume_id, old_host, new_host, device_name):
   print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
 
   # Setup the SSH commands
@@ -122,12 +163,14 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   umount_cmd = ssh_cmd + " sudo umount {device}"
   mkdir_cmd = ssh_cmd + " sudo mkdir -p {folder}"
   mount_cmd = ssh_cmd + " sudo mount {device}"
+  old_instance_id, old_instance_dict = get_instance_by_tagged_name(old_host)
+  new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_host)
   #boto3.client('ec2').describe_tags(Filters=[{"Name":"resource-id","Values":["i-318ca4c6"]}, {"Name":"key","Values":["Environment"]}])['Tags'][0]['Value']
-  old_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  #old_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
   old_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   old_user = "root" if len(old_user)<1 else old_user[0]['Value']
   old_user = "root" if old_user == "" else old_user
-  new_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
+  #new_host = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["Name"]}])['Tags'][0]['Value']
   new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   new_user = "root" if len(new_user)<1 else new_user[0]['Value']
 
