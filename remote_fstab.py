@@ -44,6 +44,7 @@ def find_and_remove_fstab_entry(user, host, device_name):
     if line.startswith(device_name):
       fstab_entry_line = line
       fstab_entry = line.split(' ')
+      fstab_entry = filter(None, fstab_entry)
       fstab_entry_index = index
       break
   # if we cannot find the entry, return nothing
