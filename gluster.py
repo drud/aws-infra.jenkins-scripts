@@ -30,7 +30,7 @@ def build_and_run_command(user, host, command):
 @click.option('--peer')
 def peer_disconnect(user, host, peer):
   """
-  Ex) gluster peer detach gluster02.newmediadenver.com
+  gluster peer detach gluster02.newmediadenver.com
   """
   command="gluster peer detach {peer}".format(peer=peer)
   print build_and_run_command(user, host, command)
@@ -41,18 +41,25 @@ def peer_disconnect(user, host, peer):
 @click.option('--peer')
 def peer_connect(user, host, peer):
   """
-  Ex) gluster peer probe gluster02.newmediadenver.com
+  gluster peer probe gluster02.newmediadenver.com
   """
   command="gluster peer probe {peer}".format(peer=peer)
   print build_and_run_command(user, host, command)
 
-def kill_gluster():
-  command="service stop glusterd && service stop glusterfsd && killall glusterd && killall glusterfsd"
-  print build_and_run_command(user, host, command)
+@siteman.command()
+@click.option('--user')
+@click.option('--host')
+def kill_gluster(user, host):
+  print build_and_run_command(user, host, "service glusterd stop")
+  print build_and_run_command(user, host, "service glusterfsd stop")
+  print build_and_run_command(user, host, "killall glusterd")
 
-def start_gluster():
-  command="service glusterd start && service glusterfsd start"
-  print build_and_run_command(user, host, command)
+@siteman.command()
+@click.option('--user')
+@click.option('--host')
+def start_gluster(user, host):
+  print build_and_run_command(user, host, "service glusterd start")
+  print build_and_run_command(user, host, "service glusterfsd start")
 
 @siteman.command()
 @click.option('--user')
@@ -105,15 +112,21 @@ def configure_new_gluster_instance(user, host):
   jenkinspoll.wait_for_job_to_finish("jenkins-playbook", jenkins_connection=J)
 
 @siteman.command()
-@click.option('--user')
-@click.option('--host')
-def gluster_replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
+@click.option('')
+@click.option('--old_host', prompt='old_host', help='old_host')
+@click.option('--old_user', prompt='old_user', help='old_user')
+@click.option('--old_mount_point', prompt='old_mount_point', help='old_mount_point')
+@click.option('--new_host', prompt='new_host', help='new_host')
+@click.option('--new_user', prompt='new_user', help='new_user')
+@click.option('--new_mount_point', prompt='new_mount_point', help='new_mount_point')
+def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
   """
   gluster volume replace-brick nmd gluster02.newmediadenver.com:/srv/sdb1/nmd gluster06.newmediadenver.com:/srv/sdg1/nmd commit force
   """
   command="gluster volume replace-brick nmd {old_host}:{old_mount_point}/nmd {new_host}:{new_mount_point}/nmd commit force".format(old_user=old_user, old_host=old_host, old_mount_point=old_mount_point, new_user=new_user, new_host=new_host, new_mount_point=new_mount_point)
   print build_and_run_command(user, host, command)
 
+@siteman.command()
 def move_gluster_brick():
   # Stop glusterd
   # Stop glusterfsd
