@@ -131,15 +131,17 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   new_user = "root" if len(new_user)<1 else new_user[0]['Value']
 
+  # Connect to EC2
+  ec2 = boto3.resource('ec2', region_name='us-west-2')
+  # Get the volume we're moving
+  vol = ec2.Volume(volume_id)
+
   print "Moving {device} from {ouser}@{ohost} to {nuser}@{nhost}".format(device=device_name,ouser=old_user,ohost=old_host,nuser=new_user,nhost=new_host)
 
   try:
     # SSH into the old instance and umount the volume.
     ret = subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "), stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as e:
-    print e
-    print e.output
-    print e.returncode 
     # If the volume wasn't mounted
     if "not mounted" in e.output:
       print "The volume wasn't mounted. Continuing..."
@@ -148,11 +150,6 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
 
   # SSH into the old instance and delete the fstab entry.
   fstab_entry, fstab_entry_line = remote_fstab.find_and_remove_fstab_entry(old_user, old_host, device_name)
-
-  # Connect to EC2
-  ec2 = boto3.resource('ec2', region_name='us-west-2')
-  # Get the volume we're moving
-  vol = ec2.Volume(volume_id)
   
   # Detach it
   old_info = vol.detach_from_instance(InstanceId=old_instance_id)
@@ -168,7 +165,6 @@ def move_volume(volume_id, old_instance_id, new_instance_id, device_name):
   
   # SSH into the new instance and create an fstab entry
   remote_fstab.append_fstab_entry(new_user, new_host, fstab_entry_line)
-
 
   # SSH into the new instance and mkdir -p the directory
   subprocess.check_output(mkdir_cmd.format(user=new_user, host=new_host, folder=fstab_entry[1]).split(" "))
