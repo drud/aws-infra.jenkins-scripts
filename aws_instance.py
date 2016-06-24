@@ -167,7 +167,7 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
     print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after a 60 second wait."
     time.sleep(60)
     # If it's of type gluster, there are some Jenkins jobs we have to run
-    gluster.configure_new_gluster_instance(user, new_instance_name)
+    gluster.configure_new_gluster_instance_fnc(user, new_instance_name)
   return new_instance
 
 @siteman.command()
@@ -203,9 +203,6 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     new_instance_id = new_instance.instance_id
     new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
     new_user = "root" if len(new_user)<1 else str(new_user[0]['Value'])
-    # If it's of type gluster, there are some Jenkins jobs we have to run
-    if volume_type == "gluster":
-      gluster.configure_new_gluster_instance(old_user, old_host)
 
   print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
 
@@ -230,7 +227,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
       elif old_host == "gluster06.newmediadenver.com":
         gluster_host = "gluster05.newmediadenver.com"
         
-      gluster.kill_gluster(old_user, old_host)
+      gluster.kill_gluster_fnc(old_user, old_host)
     # SSH into the old instance and umount the volume.
     ret = subprocess.check_output(umount_cmd.format(user=old_user,host=old_host,device=device_name).split(" "), stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as e:
@@ -265,10 +262,10 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
   subprocess.check_output(mount_cmd.format(user=new_user, host=new_host, device=device_name).split(" "))
 
   if volume_type == "gluster":
-    gluster.kill_gluster(new_user, new_host)
-    gluster.start_gluster(new_user, new_host)
-    gluster.peer_connect(gluster_user, gluster_host, peer=new_host)
-    gluster.replace_brick(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
+    gluster.kill_gluster_fnc(new_user, new_host)
+    gluster.start_gluster_fnc(new_user, new_host)
+    gluster.peer_connect_fnc(gluster_user, gluster_host, peer=new_host)
+    gluster.replace_brick_fnc(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
 
 
 # instance.detech_volume(VolumeId="")
