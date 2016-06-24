@@ -112,13 +112,12 @@ def configure_new_gluster_instance(user, host):
   jenkinspoll.wait_for_job_to_finish("jenkins-playbook", jenkins_connection=J)
 
 @siteman.command()
-@click.option('')
-@click.option('--old_host', prompt='old_host', help='old_host')
-@click.option('--old_user', prompt='old_user', help='old_user')
-@click.option('--old_mount_point', prompt='old_mount_point', help='old_mount_point')
-@click.option('--new_host', prompt='new_host', help='new_host')
-@click.option('--new_user', prompt='new_user', help='new_user')
-@click.option('--new_mount_point', prompt='new_mount_point', help='new_mount_point')
+@click.option('--old-host', prompt='old_host', help='old_host')
+@click.option('--old-user', prompt='old_user', help='old_user')
+@click.option('--old-mount-point', prompt='old_mount_point', help='old_mount_point')
+@click.option('--new-host', prompt='new_host', help='new_host')
+@click.option('--new-user', prompt='new_user', help='new_user')
+@click.option('--new-mount-point', prompt='new_mount_point', help='new_mount_point')
 def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
   """
   gluster volume replace-brick nmd gluster02.newmediadenver.com:/srv/sdb1/nmd gluster06.newmediadenver.com:/srv/sdg1/nmd commit force
