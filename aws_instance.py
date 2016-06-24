@@ -140,7 +140,7 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
   # Determine the hosted zone ID by the instance ID
   hosted_zone_id = "Z2WYJTE6C15CN4" if "nmdev.us" in new_instance_name else "ZS8SECWEXOKXH"
 
-  print "A {name}->{ip} in {dns_id}".format(name=new_instance_name, ip=new_instance.private_ip_address, dns_id=hosted_zone_id)
+  print "A record created: {name}->{ip} in {dns_id}".format(name=new_instance_name, ip=new_instance.private_ip_address, dns_id=hosted_zone_id)
   # Create the corresponding DNS entry for this server
   boto3.client('route53').change_resource_record_sets(
     HostedZoneId=hosted_zone_id,
@@ -192,7 +192,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     new_user = "root" if len(new_user)<1 else new_user[0]['Value']
     # If it's of type gluster, there are some Jenkins jobs we have to run
     if volume_type == "gluster":
-      gluster.configure_new_gluster_instance(user, host)
+      gluster.configure_new_gluster_instance(old_user, old_host)
 
   print "Moving {vol} - detaching from {old} and attaching to {new}".format(vol=volume_id, old=old_instance_id, new=new_instance_id)
 
