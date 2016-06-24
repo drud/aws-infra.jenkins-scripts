@@ -156,6 +156,11 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
       }]
     }
   )
+  if "gluster" in image_type:
+    print "There are some Jenkins jobs that need to be run. Kicking them off after a 60 second wait."
+    time.sleep(60)
+    # If it's of type gluster, there are some Jenkins jobs we have to run
+    gluster.configure_new_gluster_instance(old_user, old_host)
   return new_instance
 
 @siteman.command()
@@ -252,6 +257,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
   subprocess.check_output(mount_cmd.format(user=new_user, host=new_host, device=device_name).split(" "))
 
   if volume_type == "gluster":
+    gluster.kill_gluster(new_user, new_host)
     gluster.start_gluster(new_user, new_host)
     gluster.peer_connect(gluster_user, gluster_host, peer=new_host)
     gluster.replace_brick(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
