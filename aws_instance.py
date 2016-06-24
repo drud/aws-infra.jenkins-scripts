@@ -68,6 +68,9 @@ def siteman():
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
 def create_instance_like(host_to_mimic, image_type, new_instance_name):
+  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name)
+
+def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
@@ -199,7 +202,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     if volume_type == "standard":
       raise Exception("Cannot create a new instance unless you specify a non-standard volume-type")
     # Create the new instance
-    new_instance = create_instance_like(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
+    new_instance = create_instance_like_fnc(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
     new_instance_id = new_instance.instance_id
     new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
     new_user = "root" if len(new_user)<1 else str(new_user[0]['Value'])
