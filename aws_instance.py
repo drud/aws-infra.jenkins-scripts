@@ -162,7 +162,7 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
     }
   )
   user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
-  user = "root" if len(user)<1 else user[0]['Value']
+  user = "root" if len(user)<1 else str(user[0]['Value'])
   if "gluster" in image_type:
     print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after a 60 second wait."
     time.sleep(60)
@@ -188,7 +188,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
   if old_instance_id == None:
     exit("Cannot continue without a valid instance to get the volume from")
   old_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[old_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
-  old_user = "root" if len(old_user)<1 else old_user[0]['Value']
+  old_user = "root" if len(old_user)<1 else str(old_user[0]['Value'])
 
   # Figure out the new instance ID by hostname tags
   new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_host)
@@ -202,7 +202,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     new_instance = create_instance_like(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
     new_instance_id = new_instance.instance_id
     new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
-    new_user = "root" if len(new_user)<1 else new_user[0]['Value']
+    new_user = "root" if len(new_user)<1 else str(new_user[0]['Value'])
     # If it's of type gluster, there are some Jenkins jobs we have to run
     if volume_type == "gluster":
       gluster.configure_new_gluster_instance(old_user, old_host)
