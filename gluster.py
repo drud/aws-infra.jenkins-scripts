@@ -5,6 +5,7 @@ import aws_instance
 import jenkins
 import jenkinspoll
 import subprocess
+import os
 
 aws_key='/var/jenkins_home/.ssh/aws.pem'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -29,6 +30,9 @@ def build_and_run_command(user, host, command):
 @click.option('--host')
 @click.option('--peer')
 def peer_disconnect(user, host, peer):
+  peer_disconnect(user, host, peer)
+
+def peer_disconnect_fnc(user, host, peer):
   """
   gluster peer detach gluster02.newmediadenver.com
   """
@@ -40,6 +44,9 @@ def peer_disconnect(user, host, peer):
 @click.option('--host')
 @click.option('--peer')
 def peer_connect(user, host, peer):
+  peer_connect(user, host, peer)
+
+def peer_connect_fnc(user, host, peer):
   """
   gluster peer probe gluster02.newmediadenver.com
   """
@@ -50,21 +57,30 @@ def peer_connect(user, host, peer):
 @click.option('--user')
 @click.option('--host')
 def kill_gluster(user, host):
-  print build_and_run_command(user, host, "service glusterd stop")
-  print build_and_run_command(user, host, "service glusterfsd stop")
+  kill_gluster(user, host, peer)
+
+def kill_gluster_fnc(user, host):
+  print build_and_run_command(user, host, "/etc/init.d/glusterfs-server stop")
   print build_and_run_command(user, host, "killall glusterd")
+  print build_and_run_command(user, host, "killall glusterfsd")
+  print build_and_run_command(user, host, "killall glusterfs")
 
 @siteman.command()
 @click.option('--user')
 @click.option('--host')
 def start_gluster(user, host):
-  print build_and_run_command(user, host, "service glusterd start")
-  print build_and_run_command(user, host, "service glusterfsd start")
+  start_gluster(user, host, peer)
+
+def start_gluster_fnc(user, host):
+  print build_and_run_command(user, host, "/etc/init.d/glusterfs-server start")
 
 @siteman.command()
 @click.option('--user')
 @click.option('--host')
 def gluster_status(user, host):
+  gluster_status(user, host, peer)
+
+def gluster_status_fnc(user, host):
   """
   gluster volume status
   """
@@ -75,6 +91,9 @@ def gluster_status(user, host):
 @click.option('--user')
 @click.option('--host')
 def gluster_heal(user, host):
+  gluster_heal(user, host, peer)
+
+def gluster_heal_fnc(user, host):
   """
   gluster volume heal nmd
   """
@@ -85,6 +104,9 @@ def gluster_heal(user, host):
 @click.option('--user')
 @click.option('--host')
 def gluster_heal_info(user, host):
+  gluster_heal_info(user, host, peer)
+
+def gluster_heal_info_fnc(user, host):
   """
   gluster volume heal nmd info
   """
@@ -95,13 +117,19 @@ def gluster_heal_info(user, host):
 @click.option('--user')
 @click.option('--host')
 def configure_new_gluster_instance(user, host):
+  configure_new_gluster_instance(user, host, peer)
+
+def configure_new_gluster_instance_fnc(user, host):
+  """
+  Kick off jenkins-playbook to make sure the software is installed
+  """
   J = jenkins.Jenkins('https://leroy.nmdev.us', username=os.environ.get('JENKINS_SERVICE_USERNAME'), password=os.environ.get('JENKINS_SERVICE_PASSWORD'))
   # Set build parameters, kick off a new build, and block until complete.
   environment = "staging" if "nmdev.us" in host else "production"
 
   # Run the ansible installer on the gluster box
   print "Running jenkins-playbook with install options on the gluster box"
-  params = {"TARGET_HOST": host, "AWS_ENVIRONMENT": environment, "AWS_SSH_USER": user, "ANSIBLE_TAGS": 'aws,provision,packages'}
+  params = {"TARGET_HOST": "gluster", "AWS_ENVIRONMENT": environment, "AWS_SSH_USER": user, "ANSIBLE_TAGS": 'aws,provision,packages'}
   J.build_job("jenkins-playbook", params)
   jenkinspoll.wait_for_job_to_finish("jenkins-playbook", jenkins_connection=J)
   
@@ -125,7 +153,13 @@ def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_m
   command="gluster volume replace-brick nmd {old_host}:{old_mount_point}/nmd {new_host}:{new_mount_point}/nmd commit force".format(old_user=old_user, old_host=old_host, old_mount_point=old_mount_point, new_user=new_user, new_host=new_host, new_mount_point=new_mount_point)
   print build_and_run_command(user, host, command)
 
+@siteman.command()
+@click.option('--user')
+@click.option('--host')
+@click.option('--device')
+def format_brick_to_ext4(user,host,device):
+  command="mkfs.ext4 {device}".format(device=device)
+  print build_and_run_command(user, host, command)
 
 if __name__ == '__main__':
   siteman()
-
