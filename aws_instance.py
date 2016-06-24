@@ -44,9 +44,8 @@ def get_instance_by_tagged_name(server_name):
     ec2_instances = ec2_connection.describe_instances()["Reservations"]
     for instance in ec2_instances:
         for x in instance["Instances"]:
-            instance_name = ""
-            # Parse the instance name out of the tags. This is a hacky way - is there a more elegant solution?
-            instance_name = [y["Value"] for y in x["Tags"] if y["Key"] == "Name"][0]
+            tags = {x["Key"]:x["Value"] for x in x["Tags"]}
+            instance_name = tags["Name"]
             if server_name == instance_name and boto3.resource('ec2', region_name='us-west-2').Instance(x["InstanceId"]).state["Name"] != "terminated":
                 instance_id = x["InstanceId"]
                 instance_dict = x
