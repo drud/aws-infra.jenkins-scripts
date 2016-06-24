@@ -47,8 +47,7 @@ def get_instance_by_tagged_name(server_name):
             instance_name = ""
             # Parse the instance name out of the tags. This is a hacky way - is there a more elegant solution?
             instance_name = [y["Value"] for y in x["Tags"] if y["Key"] == "Name"][0]
-            #servers[instance_name] = x["InstanceId"]
-            if server_name == instance_name:
+            if server_name == instance_name and boto3.resource('ec2', region_name='us-west-2').Instance(x["InstanceId"]).state["Name"] != "terminated":
                 instance_id = x["InstanceId"]
                 instance_dict = x
                 print "Found server instance ID of '{instance_id}' for server named '{server_name}'".format(instance_id=instance_id, server_name=server_name)
@@ -77,6 +76,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
   instance_id, instance_dict = get_instance_by_tagged_name(host_to_mimic)
+  if instance_id == None:
+    exit("Cannot continue without a valid instance")
   # Get existing box's metadata
   instance_to_replace = ec2.Instance(instance_id)
   security_group_ids = [x['GroupId'] for x in instance_to_replace.security_groups]
