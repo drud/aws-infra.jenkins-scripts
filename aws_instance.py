@@ -139,8 +139,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
       "Value": "ubuntu"
       })
 
-  print subprocess.check_output(ssh-keygen -f "/root/.ssh/known_hosts -R {ip}".format(ip=new_instance.private_ip_address).split(" ")) 
-  print subprocess.check_output(ssh-keygen -f "/root/.ssh/known_hosts -R {host}".format(host=new_instance_name).split(" "))
+  print subprocess.check_output('ssh-keygen -f "/root/.ssh/known_hosts" -R {ip}'.format(ip=new_instance.private_ip_address).split(" ")) 
+  print subprocess.check_output('ssh-keygen -f "/root/.ssh/known_hosts" -R {host}'.format(host=new_instance_name).split(" "))
   # To Tag the instance
   # Ensure the instance is "running"
   new_instance.wait_until_running()
