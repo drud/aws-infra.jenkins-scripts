@@ -80,6 +80,16 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
   old_block_device_mapping = instance_to_replace.block_device_mappings
   vol_id = old_block_device_mapping[0]['Ebs']['VolumeId']
   old_primary_volume = ec2.Volume(vol_id)
+  device_map = []
+  for device in instance_to_replace.block_device_mappings:
+    this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
+    device_map.append({ "DeviceName": device["DeviceName"],
+      "Ebs": {
+        'VolumeSize': this_vol.size,
+        'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
+        'VolumeType': this_vol.volume_type
+      }
+    })
 
   # "Upgrade" to the newest generation of servers
   if instance_to_replace.instance_type.startswith('m1'):
@@ -108,7 +118,7 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
     SecurityGroupIds=security_group_ids,
     InstanceType=new_instance_type,
     Placement=instance_to_replace.placement,
-    BlockDeviceMappings=instance_to_replace.block_device_mappings,
+    BlockDeviceMappings=device_map,
     SubnetId=instance_to_replace.subnet_id)
     
   new_instance = instances[0]
