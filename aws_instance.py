@@ -81,9 +81,10 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
   vol_id = old_block_device_mapping[0]['Ebs']['VolumeId']
   old_primary_volume = ec2.Volume(vol_id)
   device_map = []
+  device_name = device["DeviceName"].replace("/dev/","").replace("sd", "xvd")
   for device in instance_to_replace.block_device_mappings:
     this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
-    device_map.append({ "DeviceName": device["DeviceName"],
+    device_map.append({ "DeviceName": device_name,
       "Ebs": {
         'VolumeSize': this_vol.size,
         'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
