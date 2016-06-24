@@ -128,10 +128,10 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
   new_instance = instances[0]
   # Get the tags figured out for the new instance
   tags = instance_to_replace.tags
-  for tag in tags:
-    for i, (tag, val) in enumerate(tag.items()):
-      if val == "Name":
-        tags[i-1]["Value"] = new_instance_name
+  for i, tag in enumerate(instance_to_replace.tags):
+    if tag["Key"] == "Name":
+      tags[i]["Value"] = new_instance_name
+      break
   
   if "gluster" in image_type:
     tags.append({
@@ -139,6 +139,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
       "Value": "ubuntu"
       })
 
+  print subprocess.check_output(ssh-keygen -f "/root/.ssh/known_hosts -R {ip}".format(ip=new_instance.private_ip_address).split(" ")) 
+  print subprocess.check_output(ssh-keygen -f "/root/.ssh/known_hosts -R {host}".format(host=new_instance_name).split(" "))
   # To Tag the instance
   # Ensure the instance is "running"
   new_instance.wait_until_running()
