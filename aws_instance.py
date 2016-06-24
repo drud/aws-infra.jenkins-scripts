@@ -80,9 +80,6 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
   # Get existing box's metadata
   instance_to_replace = ec2.Instance(instance_id)
   security_group_ids = [x['GroupId'] for x in instance_to_replace.security_groups]
-  old_block_device_mapping = instance_to_replace.block_device_mappings
-  vol_id = old_block_device_mapping[0]['Ebs']['VolumeId']
-  old_primary_volume = ec2.Volume(vol_id)
   device_map = []
   for device in instance_to_replace.block_device_mappings:
     this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
