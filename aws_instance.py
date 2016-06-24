@@ -44,7 +44,7 @@ def get_instance_by_tagged_name(server_name):
     ec2_instances = ec2_connection.describe_instances()["Reservations"]
     for instance in ec2_instances:
         for x in instance["Instances"]:
-            tags = {x["Key"]:x["Value"] for x in x["Tags"]}
+            tags = {y["Key"]:y["Value"] for y in x["Tags"]}
             instance_name = tags["Name"]
             if server_name == instance_name and boto3.resource('ec2', region_name='us-west-2').Instance(x["InstanceId"]).state["Name"] != "terminated":
                 instance_id = x["InstanceId"]
