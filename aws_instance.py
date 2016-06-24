@@ -129,7 +129,12 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
     for i, (tag, val) in enumerate(tag.items()):
       if val == "Name":
         tags[i-1]["Value"] = new_instance_name
-        break
+  
+  if "gluster" in image_type:
+    tags.append({
+      "Key": "DeployUser",
+      "Value": "ubuntu"
+      })
 
   # To Tag the instance
   # Ensure the instance is "running"
@@ -156,11 +161,13 @@ def create_instance_like(host_to_mimic, image_type, new_instance_name):
       }]
     }
   )
+  user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
+  user = "root" if len(user)<1 else user[0]['Value']
   if "gluster" in image_type:
-    print "There are some Jenkins jobs that need to be run. Kicking them off after a 60 second wait."
+    print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after a 60 second wait."
     time.sleep(60)
     # If it's of type gluster, there are some Jenkins jobs we have to run
-    gluster.configure_new_gluster_instance(old_user, old_host)
+    gluster.configure_new_gluster_instance(user, new_instance_name)
   return new_instance
 
 @siteman.command()
@@ -192,7 +199,8 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     if volume_type == "standard":
       raise Exception("Cannot create a new instance unless you specify a non-standard volume-type")
     # Create the new instance
-    new_instance_id = create_instance_like(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
+    new_instance = create_instance_like(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
+    new_instance_id = new_instance.instance_id
     new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
     new_user = "root" if len(new_user)<1 else new_user[0]['Value']
     # If it's of type gluster, there are some Jenkins jobs we have to run
