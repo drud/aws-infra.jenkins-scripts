@@ -178,6 +178,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   if "gluster" in image_type:
     print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after a 5 minute wait."
     time.sleep(60*5)
+    gluster.add_gluster_repo(user, host)
     # If it's of type gluster, there are some Jenkins jobs we have to run
     gluster.configure_new_gluster_instance_fnc(user, new_instance_name)
 

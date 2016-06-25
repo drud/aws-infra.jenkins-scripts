@@ -185,5 +185,9 @@ def format_brick_to_ext4(user, host, device):
   command="mkfs.ext4 {device}".format(device=device)
   print build_and_run_command(user, host, command)
 
+def add_gluster_repo(user, host):
+  command="add-apt-repository ppa:gluster/glusterfs-3.7"
+  print build_and_run_command(user, host, command)
+
 if __name__ == '__main__':
   siteman()
