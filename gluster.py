@@ -26,7 +26,7 @@ def build_and_run_command(user, host, command):
     # Gracefully handle previously stopped procs
     if "stop: Unknown instance" in e.output:
       return ""
-    elif "no process found" in e.output:
+    elif "no process found" in e.output or "no process killed" in e.output:
       return ""
     elif "command not found" in e.output:
       return "command not found"
