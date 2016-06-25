@@ -279,6 +279,10 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
   # SSH into the new instance and mkdir -p the directory
   subprocess.check_output(mkdir_cmd.format(user=new_user, host=new_host, folder=fstab_entry[1]).split(" "))
   
+  while vol.state != "in-use":
+    print "Current volume state is '{state}'. Waiting for 'in-use' state.".format(state=vol.state)
+    time.sleep(5)
+    vol.reload()
   # SSH into the new instance and mount it
   subprocess.check_output(mount_cmd.format(user=new_user, host=new_host, device=device_name).split(" "))
 
