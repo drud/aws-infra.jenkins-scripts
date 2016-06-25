@@ -142,6 +142,9 @@ def configure_new_gluster_instance_fnc(user, host):
   # Set build parameters, kick off a new build, and block until complete.
   environment = "staging" if "nmdev.us" in host else "production"
 
+  # Override - any new gluster instance should be user=ubuntu
+  user="ubuntu"
+
   # Run the ansible installer on the gluster box
   print "Running jenkins-playbook with install options on the gluster box"
   params = {"TARGET_HOST": "gluster", "AWS_ENVIRONMENT": environment, "AWS_SSH_USER": user, "ANSIBLE_TAGS": 'aws,provision,packages'}
