@@ -30,7 +30,7 @@ def build_and_run_command(user, host, command):
 @click.option('--host')
 @click.option('--peer')
 def peer_disconnect(user, host, peer):
-  peer_disconnect(user, host, peer)
+  peer_disconnect_fnc(user, host, peer)
 
 def peer_disconnect_fnc(user, host, peer):
   """
@@ -44,7 +44,7 @@ def peer_disconnect_fnc(user, host, peer):
 @click.option('--host')
 @click.option('--peer')
 def peer_connect(user, host, peer):
-  peer_connect(user, host, peer)
+  peer_connect_fnc(user, host, peer)
 
 def peer_connect_fnc(user, host, peer):
   """
@@ -57,7 +57,7 @@ def peer_connect_fnc(user, host, peer):
 @click.option('--user')
 @click.option('--host')
 def kill_gluster(user, host):
-  kill_gluster(user, host, peer)
+  kill_gluster_fnc(user, host)
 
 def kill_gluster_fnc(user, host):
   print build_and_run_command(user, host, "/etc/init.d/glusterfs-server stop")
@@ -68,7 +68,7 @@ def kill_gluster_fnc(user, host):
 @click.option('--user')
 @click.option('--host')
 def start_gluster(user, host):
-  start_gluster(user, host, peer)
+  start_gluster_fnc(user, host)
 
 def start_gluster_fnc(user, host):
   print build_and_run_command(user, host, "/etc/init.d/glusterfs-server start")
@@ -77,7 +77,7 @@ def start_gluster_fnc(user, host):
 @click.option('--user')
 @click.option('--host')
 def gluster_status(user, host):
-  gluster_status(user, host, peer)
+  gluster_status_fnc(user, host)
 
 def gluster_status_fnc(user, host):
   """
@@ -90,7 +90,7 @@ def gluster_status_fnc(user, host):
 @click.option('--user')
 @click.option('--host')
 def gluster_heal(user, host):
-  gluster_heal(user, host, peer)
+  gluster_heal_fnc(user, host)
 
 def gluster_heal_fnc(user, host):
   """
@@ -103,7 +103,7 @@ def gluster_heal_fnc(user, host):
 @click.option('--user')
 @click.option('--host')
 def gluster_heal_info(user, host):
-  gluster_heal_info(user, host, peer)
+  gluster_heal_info_fnc(user, host)
 
 def gluster_heal_info_fnc(user, host):
   """
@@ -116,7 +116,7 @@ def gluster_heal_info_fnc(user, host):
 @click.option('--user')
 @click.option('--host')
 def configure_new_gluster_instance(user, host):
-  configure_new_gluster_instance(user, host, peer)
+  configure_new_gluster_instance_fnc(user, host)
 
 def configure_new_gluster_instance_fnc(user, host):
   """
@@ -146,6 +146,9 @@ def configure_new_gluster_instance_fnc(user, host):
 @click.option('--new-user', prompt='new_user', help='new_user')
 @click.option('--new-mount-point', prompt='new_mount_point', help='new_mount_point')
 def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
+  replace_brick_fnc(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point)
+
+def replace_brick_fnc(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
   """
   gluster volume replace-brick nmd gluster02.newmediadenver.com:/srv/sdb1/nmd gluster06.newmediadenver.com:/srv/sdg1/nmd commit force
   """
@@ -156,7 +159,10 @@ def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_m
 @click.option('--user')
 @click.option('--host')
 @click.option('--device')
-def format_brick_to_ext4(user,host,device):
+def format_brick_to_ext4(user, host, device):
+  format_brick_to_ext4_fnc(user,host,device)
+
+def format_brick_to_ext4(user, host, device)
   command="mkfs.ext4 {device}".format(device=device)
   print build_and_run_command(user, host, command)
 
