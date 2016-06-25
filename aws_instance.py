@@ -43,14 +43,15 @@ def get_instance_by_tagged_name(server_name):
     ec2_connection = boto3.client('ec2', region_name='us-west-2')
     ec2_instances = ec2_connection.describe_instances()["Reservations"]
     for instance in ec2_instances:
-        for x in instance["Instances"]:
-            tags = {y["Key"]:y["Value"] for y in x["Tags"]}
-            instance_name = tags["Name"]
-            if server_name == instance_name and boto3.resource('ec2', region_name='us-west-2').Instance(x["InstanceId"]).state["Name"] != "terminated":
-                instance_id = x["InstanceId"]
-                instance_dict = x
-                print "Found server instance ID of '{instance_id}' for server named '{server_name}'".format(instance_id=instance_id, server_name=server_name)
-                return instance_id, instance_dict
+      for x in instance["Instances"]:
+        if "Tags" in x:
+          tags = {y["Key"]:y["Value"] for y in x["Tags"]}
+          instance_name = tags["Name"]
+          if server_name == instance_name and boto3.resource('ec2', region_name='us-west-2').Instance(x["InstanceId"]).state["Name"] != "terminated":
+              instance_id = x["InstanceId"]
+              instance_dict = x
+              print "Found server instance ID of '{instance_id}' for server named '{server_name}'".format(instance_id=instance_id, server_name=server_name)
+              return instance_id, instance_dict
 
     if instance_id == "":
         print "A server with name '{server_name}' could not be mapped to an instance id.".format(server_name=server_name)
