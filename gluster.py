@@ -30,6 +30,8 @@ def build_and_run_command(user, host, command):
       return ""
     elif "command not found" in e.output:
       return "command not found"
+    elif "/etc/init.d/glusterfs-server: No such file or directory" in e.output:
+      return "command not found"
     exit(e.output)
 
 @siteman.command()
@@ -82,7 +84,10 @@ def start_gluster(user, host):
   start_gluster_fnc(user, host)
 
 def start_gluster_fnc(user, host):
-  print build_and_run_command(user, host, "/etc/init.d/glusterfs-server start")
+  out = build_and_run_command(user, host, "/etc/init.d/glusterfs-server start")
+  if out == "command not found":
+    print build_and_run_command(user, host, "service glusterd start")
+    print build_and_run_command(user, host, "service glusterfsd start")    
 
 @siteman.command()
 @click.option('--user')
