@@ -28,6 +28,8 @@ def build_and_run_command(user, host, command):
       return ""
     elif "no process found" in e.output:
       return ""
+    elif "command not found" in e.output:
+      return "command not found"
     exit(e.output)
 
 @siteman.command()
@@ -65,7 +67,11 @@ def kill_gluster(user, host):
   kill_gluster_fnc(user, host)
 
 def kill_gluster_fnc(user, host):
-  print build_and_run_command(user, host, "/etc/init.d/glusterfs-server stop")
+  print "Killing gluster..."
+  out = build_and_run_command(user, host, "/etc/init.d/glusterfs-server stop")
+  if out == "command not found":
+    print build_and_run_command(user, host, "service glusterd stop")
+    print build_and_run_command(user, host, "service glusterfsd stop")
   print build_and_run_command(user, host, "killall glusterfsd")
   print build_and_run_command(user, host, "killall glusterfs")
 
