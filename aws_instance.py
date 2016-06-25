@@ -69,7 +69,7 @@ def siteman():
 def create_instance_like(host_to_mimic, image_type, new_instance_name):
   create_instance_like_fnc(host_to_mimic, image_type, new_instance_name)
 
-def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
+def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
@@ -85,13 +85,24 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name):
   for device in instance_to_replace.block_device_mappings:
     this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
     device_name = device["DeviceName"].replace("/dev/","").replace("sd", "xvd").replace("1", "")
-    device_map.append({ "DeviceName": device_name,
-      "Ebs": {
-        'VolumeSize': this_vol.size,
-        'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
-        'VolumeType': this_vol.volume_type
-      }
-    })
+    
+    if recreate_all_volumes:
+      device_map.append({ "DeviceName": device_name,
+        "Ebs": {
+          'VolumeSize': this_vol.size,
+          'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
+          'VolumeType': this_vol.volume_type
+        }
+      })
+    elif recreate_all_volumes == False and "xvda" in device_name:
+      # Append only the primary volume
+      device_map.append({ "DeviceName": device_name,
+        "Ebs": {
+          'VolumeSize': this_vol.size,
+          'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
+          'VolumeType': this_vol.volume_type
+        }
+      })
 
   # "Upgrade" to the newest generation of servers
   if instance_to_replace.instance_type.startswith('m1'):
@@ -202,7 +213,7 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     if volume_type == "standard":
       raise Exception("Cannot create a new instance unless you specify a non-standard volume-type")
     # Create the new instance
-    new_instance = create_instance_like_fnc(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host)
+    new_instance = create_instance_like_fnc(host_to_mimic=old_host, image_type=volume_type, new_instance_name=new_host, recreate_all_volumes=False)
     new_instance_id = new_instance.instance_id
     new_user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
     new_user = "root" if len(new_user)<1 else str(new_user[0]['Value'])
