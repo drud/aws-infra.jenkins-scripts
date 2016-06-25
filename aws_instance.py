@@ -182,6 +182,13 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     time.sleep(60)
     # If it's of type gluster, there are some Jenkins jobs we have to run
     gluster.configure_new_gluster_instance_fnc(user, new_instance_name)
+
+  # if len(device_map) > 1:
+  #   time.sleep(60)
+  #   for device in device_map:
+  #     if "sda" not in device["DeviceName"] and "xvda" not in device["DeviceName"]:
+  #       # Non-primary partition that needs formatting
+
   return new_instance
 
 @siteman.command()
