@@ -169,7 +169,7 @@ def replace_brick_fnc(old_host, old_user, old_mount_point, new_host, new_user, n
   gluster volume replace-brick nmd gluster02.newmediadenver.com:/srv/sdb1/nmd gluster06.newmediadenver.com:/srv/sdg1/nmd commit force
   """
   command="gluster volume replace-brick nmd {old_host}:{old_mount_point}/nmd {new_host}:{new_mount_point}/nmd commit force".format(old_user=old_user, old_host=old_host, old_mount_point=old_mount_point, new_user=new_user, new_host=new_host, new_mount_point=new_mount_point)
-  print build_and_run_command(user, host, command)
+  print build_and_run_command(new_user, new_host, command)
 
 @siteman.command()
 @click.option('--user')
