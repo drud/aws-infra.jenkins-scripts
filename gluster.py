@@ -23,6 +23,9 @@ def build_and_run_command(user, host, command):
   try:
     return subprocess.check_output(ssh_cmd, stderr=subprocess.STDOUT)
   except subprocess.CalledProcessError as e:
+    # Gracefully handle previously stopped procs
+    if "stop: Unknown instance" in e.output:
+      return e.output
     exit(e.output)
 
 @siteman.command()
