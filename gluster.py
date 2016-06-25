@@ -61,7 +61,6 @@ def kill_gluster(user, host):
 
 def kill_gluster_fnc(user, host):
   print build_and_run_command(user, host, "/etc/init.d/glusterfs-server stop")
-  print build_and_run_command(user, host, "killall glusterd")
   print build_and_run_command(user, host, "killall glusterfsd")
   print build_and_run_command(user, host, "killall glusterfs")
 
