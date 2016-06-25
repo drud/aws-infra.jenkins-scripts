@@ -165,7 +165,7 @@ def replace_brick_fnc(old_host, old_user, old_mount_point, new_host, new_user, n
 def format_brick_to_ext4(user, host, device):
   format_brick_to_ext4_fnc(user,host,device)
 
-def format_brick_to_ext4(user, host, device)
+def format_brick_to_ext4(user, host, device):
   command="mkfs.ext4 {device}".format(device=device)
   print build_and_run_command(user, host, command)
 
