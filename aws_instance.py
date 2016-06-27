@@ -176,9 +176,9 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   user = "root" if len(user)<1 else str(user[0]['Value'])
   if "gluster" in image_type:
-    print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after a 5 minute wait."
-    time.sleep(60*5)
-    gluster.add_gluster_repo(user, host)
+    print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after waiting for it to respond to a ping.\nNote: If this doesn't respond, you may need to manually intervene by restarting the server."
+    gluster.poll_server_with_ping(new_instance_name)
+    gluster.add_gluster_repo(user, new_instance_name)
     # If it's of type gluster, there are some Jenkins jobs we have to run
     gluster.configure_new_gluster_instance_fnc(user, new_instance_name)
 

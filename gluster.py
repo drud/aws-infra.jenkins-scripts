@@ -6,6 +6,7 @@ import jenkins
 import jenkinspoll
 import subprocess
 import os
+import time
 
 aws_key='/var/jenkins_home/.ssh/aws.pem'
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -188,6 +189,19 @@ def format_brick_to_ext4(user, host, device):
 def add_gluster_repo(user, host):
   command="add-apt-repository ppa:gluster/glusterfs-3.7"
   print build_and_run_command(user, host, command)
+
+def ping_server(host):
+  try:
+    out = subprocess.check_output("ping -c 1 {host}".format(host=host).split(" "), stderr=subprocess.STDOUT)
+    return True
+  except subprocess.CalledProcessError as e:
+    if e.returncode != 0:
+      return False
+
+def poll_server_with_ping(host):
+  print "Polling {host}. Will continue polling until host responds...".format(host=host)
+  while ping_server(host) == False:
+    time.sleep(5)
 
 if __name__ == '__main__':
   siteman()
