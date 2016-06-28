@@ -77,69 +77,75 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   """
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
-  instance_id, instance_dict = get_instance_by_tagged_name(host_to_mimic)
-  if instance_id == None:
-    exit("Cannot continue without a valid instance")
-  # Get existing box's metadata
+  # Sanity check before we get started
+  new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_instance_name)
   instance_to_replace = ec2.Instance(instance_id)
-  security_group_ids = [x['GroupId'] for x in instance_to_replace.security_groups]
-  device_map = []
-  for device in instance_to_replace.block_device_mappings:
-    this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
-    device_name = device["DeviceName"].replace("/dev/","").replace("sd", "xvd").replace("1", "")
+  if new_instance_id == None:
+    instance_id, instance_dict = get_instance_by_tagged_name(host_to_mimic)
+    if instance_id == None:
+      exit("Cannot continue without a valid instance")
+    # Get existing box's metadata
     
-    if recreate_all_volumes:
-      device_map.append({ "DeviceName": device_name,
-        "Ebs": {
-          'VolumeSize': this_vol.size,
-          'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
-          'VolumeType': this_vol.volume_type
-        }
-      })
-    elif recreate_all_volumes == False and "xvda" in device_name:
-      # Append only the primary volume
-      device_map.append({ "DeviceName": device_name,
-        "Ebs": {
-          'VolumeSize': this_vol.size,
-          'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
-          'VolumeType': this_vol.volume_type
-        }
-      })
+    security_group_ids = [x['GroupId'] for x in instance_to_replace.security_groups]
+    device_map = []
+    for device in instance_to_replace.block_device_mappings:
+      this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
+      device_name = device["DeviceName"].replace("/dev/","").replace("sd", "xvd").replace("1", "")
+      
+      if recreate_all_volumes:
+        device_map.append({ "DeviceName": device_name,
+          "Ebs": {
+            'VolumeSize': this_vol.size,
+            'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
+            'VolumeType': this_vol.volume_type
+          }
+        })
+      elif recreate_all_volumes == False and "xvda" in device_name:
+        # Append only the primary volume
+        device_map.append({ "DeviceName": device_name,
+          "Ebs": {
+            'VolumeSize': this_vol.size,
+            'DeleteOnTermination': this_vol.attachments[0]['DeleteOnTermination'],
+            'VolumeType': this_vol.volume_type
+          }
+        })
 
-  # "Upgrade" to the newest generation of servers
-  if instance_to_replace.instance_type.startswith('m1'):
-    new_instance_type = instance_to_replace.instance_type.replace('m1', 'm3')
-  elif instance_to_replace.instance_type.startswith('m2'):
-    new_instance_type = instance_to_replace.instance_type.replace('m2', 'r3')
+    # "Upgrade" to the newest generation of servers
+    if instance_to_replace.instance_type.startswith('m1'):
+      new_instance_type = instance_to_replace.instance_type.replace('m1', 'm3')
+    elif instance_to_replace.instance_type.startswith('m2'):
+      new_instance_type = instance_to_replace.instance_type.replace('m2', 'r3')
+    else:
+      new_instance_type = instance_to_replace.instance_type
+
+    if debug:
+      # If we're debugging, we don't need a large instance.
+      new_instance_type = "t2.micro"
+    # Connect to EC2
+    ec2 = boto3.client('ec2', region_name='us-west-2')
+
+    # Get a list of all images that are close to the name passed in, made by us
+    possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
+    # Sort the images by creation date
+    sorted_images = sorted(possible_images['Images'], key=lambda k: k['CreationDate'])
+    # Select the last image in the list
+    most_recent_image = sorted_images[-1]
+
+    ec2 = boto3.resource('ec2', region_name='us-west-2')
+    # Create a new instance based on the AMI we just found
+    instances = ec2.create_instances(ImageId=most_recent_image['ImageId'],
+      MinCount=1,
+      MaxCount=1,
+      KeyName=instance_to_replace.key_pair.key_name,
+      SecurityGroupIds=security_group_ids,
+      InstanceType=new_instance_type,
+      Placement=instance_to_replace.placement,
+      BlockDeviceMappings=device_map,
+      SubnetId=instance_to_replace.subnet_id)
+      
+    new_instance = instances[0]
   else:
-    new_instance_type = instance_to_replace.instance_type
-
-  if debug:
-    # If we're debugging, we don't need a large instance.
-    new_instance_type = "t2.micro"
-  # Connect to EC2
-  ec2 = boto3.client('ec2', region_name='us-west-2')
-
-  # Get a list of all images that are close to the name passed in, made by us
-  possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
-  # Sort the images by creation date
-  sorted_images = sorted(possible_images['Images'], key=lambda k: k['CreationDate'])
-  # Select the last image in the list
-  most_recent_image = sorted_images[-1]
-
-  ec2 = boto3.resource('ec2', region_name='us-west-2')
-  # Create a new instance based on the AMI we just found
-  instances = ec2.create_instances(ImageId=most_recent_image['ImageId'],
-    MinCount=1,
-    MaxCount=1,
-    KeyName=instance_to_replace.key_pair.key_name,
-    SecurityGroupIds=security_group_ids,
-    InstanceType=new_instance_type,
-    Placement=instance_to_replace.placement,
-    BlockDeviceMappings=device_map,
-    SubnetId=instance_to_replace.subnet_id)
-    
-  new_instance = instances[0]
+    print "An instance named {name} already exists. Not re-creating instance, but running post-processor hooks.".format(name=new_instance_name)
   # Get the tags figured out for the new instance
   tags = instance_to_replace.tags
   for i, tag in enumerate(instance_to_replace.tags):
