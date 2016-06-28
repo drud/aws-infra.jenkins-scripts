@@ -64,7 +64,7 @@ def siteman():
 
 @siteman.command()
 @click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
-@click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy']))
+@click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy', 'percona']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
 def create_instance_like(host_to_mimic, image_type, new_instance_name):
   create_instance_like_fnc(host_to_mimic, image_type, new_instance_name)
@@ -145,6 +145,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       "Key": "DeployUser",
       "Value": "ubuntu"
       })
+  elif "percona" in image_type:
+    pass
 
   #print subprocess.check_output('sudo ssh-keygen -f "/root/.ssh/known_hosts" -R {ip}'.format(ip=new_instance.private_ip_address).split(" ")) 
   #print subprocess.check_output('sudo ssh-keygen -f "/root/.ssh/known_hosts" -R {host}'.format(host=new_instance_name).split(" "))
