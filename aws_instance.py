@@ -146,6 +146,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     new_instance = instances[0]
   else:
     print "An instance named {name} already exists. Not re-creating instance, but running post-processor hooks.".format(name=new_instance_name)
+    new_instance = boto3.resource('ec2', region_name='us-west-2').Instance(new_instance_id)
   # Get the tags figured out for the new instance
   tags = instance_to_replace.tags
   for i, tag in enumerate(instance_to_replace.tags):
