@@ -21,6 +21,7 @@
 #!/usr/bin/python
 
 import boto3
+import botocore
 from pprint import pprint as p
 import subprocess
 import remote_fstab
@@ -165,22 +166,27 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   # Determine the hosted zone ID by the instance ID
   hosted_zone_id = "Z2WYJTE6C15CN4" if "nmdev.us" in new_instance_name else "ZS8SECWEXOKXH"
 
-  print "A record created: {name}->{ip} in {dns_id}".format(name=new_instance_name, ip=new_instance.private_ip_address, dns_id=hosted_zone_id)
-  # Create the corresponding DNS entry for this server
-  boto3.client('route53').change_resource_record_sets(
-    HostedZoneId=hosted_zone_id,
-    ChangeBatch={
-      'Changes': [{
-        'Action': 'UPSERT',
-        'ResourceRecordSet': {
-          'Name': new_instance_name,
-          'Type': 'A',
-          'TTL': 300,
-          'ResourceRecords': [{'Value': new_instance.private_ip_address}]
-        },
-      }]
-    }
-  )
+  print "Creating 'A' record: {name}->{ip} in {dns_id}".format(name=new_instance_name, ip=new_instance.private_ip_address, dns_id=hosted_zone_id)
+  try:
+    # Create the corresponding DNS entry for this server
+    boto3.client('route53').change_resource_record_sets(
+      HostedZoneId=hosted_zone_id,
+      ChangeBatch={
+        'Changes': [{
+          'Action': 'UPSERT',
+          'ResourceRecordSet': {
+            'Name': new_instance_name,
+            'Type': 'A',
+            'TTL': 300,
+            'ResourceRecords': [{'Value': new_instance.private_ip_address}]
+          },
+        }]
+      }
+    )
+  except botocore.exceptions.ClientError as e:
+    print "There was an error creating the A record. You will have to create it manually"
+    print "Error: %s" % e
+    exit(0)
   user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   user = "root" if len(user)<1 else str(user[0]['Value'])
   if "gluster" in image_type:
