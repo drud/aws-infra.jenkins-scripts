@@ -67,10 +67,10 @@ def siteman():
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy', 'percona']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
 @click.option('--debug', is_flag=True)
-def create_instance_like(host_to_mimic, image_type, new_instance_name):
-  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name)
+def create_instance_like(host_to_mimic, image_type, new_instance_name, debug):
+  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, debug=debug)
 
-def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True):
+def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, debug=False):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
@@ -113,6 +113,9 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   else:
     new_instance_type = instance_to_replace.instance_type
 
+  if debug:
+    # If we're debugging, we don't need a large instance.
+    new_instance_type = "t2.micro"
   # Connect to EC2
   ec2 = boto3.client('ec2', region_name='us-west-2')
 
