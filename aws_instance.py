@@ -79,13 +79,12 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   ec2 = boto3.resource('ec2', region_name='us-west-2')
   # Sanity check before we get started
   new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_instance_name)
-  instance_to_replace = ec2.Instance(instance_id)
   if new_instance_id == None:
     instance_id, instance_dict = get_instance_by_tagged_name(host_to_mimic)
     if instance_id == None:
       exit("Cannot continue without a valid instance")
     # Get existing box's metadata
-    
+    instance_to_replace = ec2.Instance(instance_id)
     security_group_ids = [x['GroupId'] for x in instance_to_replace.security_groups]
     device_map = []
     for device in instance_to_replace.block_device_mappings:
