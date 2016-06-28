@@ -160,20 +160,21 @@ def configure_new_gluster_instance_fnc(user, host):
 
 @siteman.command()
 @click.option('--old-host', prompt='old_host', help='old_host')
-@click.option('--old-user', prompt='old_user', help='old_user')
 @click.option('--old-mount-point', prompt='old_mount_point', help='old_mount_point')
 @click.option('--new-host', prompt='new_host', help='new_host')
 @click.option('--new-user', prompt='new_user', help='new_user')
 @click.option('--new-mount-point', prompt='new_mount_point', help='new_mount_point')
-def replace_brick(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
+@click.option('--gluster-user', prompt='gluster_user')
+@click.option('--gluster-host', prompt='gluster_host')
+def replace_brick(old_host, old_mount_point, new_host, new_user, new_mount_point, gluster_user, gluster_host):
   replace_brick_fnc(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point)
 
-def replace_brick_fnc(old_host, old_user, old_mount_point, new_host, new_user, new_mount_point):
+def replace_brick_fnc(old_host, old_mount_point, new_host, new_user, new_mount_point, gluster_user, gluster_host):
   """
   gluster volume replace-brick nmd gluster02.newmediadenver.com:/srv/sdb1/nmd gluster06.newmediadenver.com:/srv/sdg1/nmd commit force
   """
   command="gluster volume replace-brick nmd {old_host}:{old_mount_point}/nmd {new_host}:{new_mount_point}/nmd commit force".format(old_user=old_user, old_host=old_host, old_mount_point=old_mount_point, new_user=new_user, new_host=new_host, new_mount_point=new_mount_point)
-  print build_and_run_command(new_user, new_host, command)
+  print build_and_run_command(gluster_user, gluster_host, command)
 
 @siteman.command()
 @click.option('--user')
