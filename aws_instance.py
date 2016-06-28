@@ -66,6 +66,7 @@ def siteman():
 @click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy', 'percona']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
+@click.option('--debug', is_flag=True)
 def create_instance_like(host_to_mimic, image_type, new_instance_name):
   create_instance_like_fnc(host_to_mimic, image_type, new_instance_name)
 
@@ -107,6 +108,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   # "Upgrade" to the newest generation of servers
   if instance_to_replace.instance_type.startswith('m1'):
     new_instance_type = instance_to_replace.instance_type.replace('m1', 'm3')
+  elif instance_to_replace.instance_type.startswith('m2'):
+    new_instance_type = instance_to_replace.instance_type.replace('m2', 'r3')
   else:
     new_instance_type = instance_to_replace.instance_type
 
