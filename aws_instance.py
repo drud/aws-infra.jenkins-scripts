@@ -156,7 +156,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       tags[i]["Value"] = new_instance_name
       break
   
-  if "gluster" in image_type:
+  if image_type in ['gluster', 'percona', 'proxy']:
     tags.append({
       "Key": "DeployUser",
       "Value": "ubuntu"
