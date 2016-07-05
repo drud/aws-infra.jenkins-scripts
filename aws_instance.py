@@ -92,7 +92,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     device_map = []
     for device in instance_to_replace.block_device_mappings:
       this_vol = ec2.Volume(device["Ebs"]["VolumeId"])
-      device_name = device["DeviceName"].replace("/dev/","").replace("sd", "xvd").replace("1", "")
+      device_name = device["DeviceName"] if "/dev/sda" not in device["DeviceName"] else "/dev/sda1"
       
       if recreate_all_volumes:
         device_map.append({ "DeviceName": device_name,
