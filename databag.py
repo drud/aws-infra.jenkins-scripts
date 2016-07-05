@@ -30,9 +30,16 @@ def construct_cmd(op, container, bag_name, json_tmp_file_name):
 
   :returns string command
   """
-  cmd = "knife data bag %s %s %s" % (op, container, bag_name)
-  secret = "--secret-file %s" % (secret_file)
-  cmd = "%s %s -F json > %s" % (cmd, secret, json_tmp_file_name)
+  cmd=""
+  if local:
+    cmd += "cd ~/cookbooks/chef; bundle exec"
+  cmd += " knife data bag {op} {container} {bag_name}".format(op=op, container=container, bag_name=bag_name)
+  cmd += " --secret-file {secret}".format(secret=secret_file)
+  if not local:
+    cmd += " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
+  cmd += " -F json > {json_file}".format(json_file=json_tmp_file_name)
+  if local:
+    cmd += "; cd -;"
   return cmd
 
 def run_cmd(op="show", container="nmdhosting", bag_name="", clean_up=True):
@@ -53,9 +60,10 @@ def run_cmd(op="show", container="nmdhosting", bag_name="", clean_up=True):
   # Pull that clean data back in
   with open(json_tmp_file.name) as data_file:    
     data = json.load(data_file)
-  if clean_up:
-    # I am not your mother...clean-up after yourself. :-)
-    json_tmp_file.delete=True
+    if clean_up:
+      # I am not your mother...clean-up after yourself. :-)
+      #os.remove(json_tmp_file.name)
+      json_tmp_file.delete=True
   return data
 
 def search_all(container, environment="_default", search_key="db_host", search_term=""):
@@ -101,8 +109,15 @@ def create_from_file(container, bag_name, json_tmp_file_name):
 
   :returns string result of the call to shell
   """
-  secret = "--secret-file %s" % secret_file
-  cmd = "knife data bag from file {0} '{1}' {2}".format(container, json_tmp_file_name, secret)
+  cmd=""
+  if local:
+    cmd += "cd ~/cookbooks/chef; bundle exec"
+  cmd += "knife data bag from file {0} '{1}'".format(container, json_tmp_file_name)
+  cmd += "--secret-file {secret}".format(secret=secret_file)
+  if not local:
+    cmd += " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
+  if local:
+    cmd += "; cd -;"
   return subprocess.call(cmd, shell=True)
 
 def change_value(bag_name, container="nmdhosting", environment="_default", key="db_host", term=""):
