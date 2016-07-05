@@ -6,10 +6,18 @@ import json
 from pprint import pprint as p
 import ast
 import tempfile
+import click
+import ast
 
-jenkins_home = os.getenv("JENKINS_HOME")
+jenkins_home = str(os.getenv("JENKINS_HOME"))
 secret_file = os.getenv('NMDCHEF_SECRET_FILE')
-secret_file = secret_file + " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+local = True if "/var/jenkins_home" not in jenkins_home else False
+
+@click.group(context_settings=CONTEXT_SETTINGS)
+@click.version_option(version='1.0.0')
+def siteman():
+  pass
 
 def construct_cmd(op, container, bag_name, json_tmp_file_name):
   """
@@ -147,18 +155,29 @@ def save_databag(databag, bag_name, container="nmdhosting"):
   create_from_file(container, bag_name, tmp.name)
   tmp.delete=True
   return True
-  
 
+@siteman.command()
+@click.option('--environment', help="Ex) staging", type=click.Choice(['_default', 'staging', 'production']))
+@click.option('--key', help="Ex) db_host")
+@click.option('--term', help="Ex) A quoted string that corresponds to a pythonic data structure ['web01.newmediadenver.com','web02.newmediadenver.com']")
+@click.option('--new-term', help="Ex) ['web02.newmediadenver.com','web03.newmediadenver.com']")
+def find_and_replace(environment="staging", key="db_host", term="fake_db", new_term="real_db"):
+  # Try to evaluate the terms safely into pythonic equivalents
+  try:
+    if "[" in term or "{" in term:
+      term = ast.literal_eval(term)
+    if "[" in new_term or "{" in new_term:
+      new_term = ast.literal_eval(new_term)
+  except ValueError as e:
+    print "One of your terms is in an unrecognized format."
+  for bag in search_all(container="nmdhosting", environment=environment, search_key=key, search_term=term):
+    print "Working on {bag_id}".format(bag_id=bag['id'])
+    change_value(bag_name=bag['id'],
+      container="nmdhosting",
+      environment=environment,
+      key=key,
+      term=new_term)
 
 if __name__ == '__main__':
-  # environment = "staging"
-  # key = "db_host"
-  # db_host = "percona"
-  #search_all(environment=environment, search_key=key, search_term=db_host)
-  # Make sure nmdhosting/test123456fsdlkjf exists
-  change_value(bag_name="test123456fsdlkjf",
-    container="nmdhosting",
-    environment="staging",
-    key="wonderful",
-    term="people2")
+  siteman()
 
