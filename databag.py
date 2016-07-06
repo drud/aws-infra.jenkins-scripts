@@ -112,8 +112,8 @@ def create_from_file(container, bag_name, json_tmp_file_name):
   cmd=""
   if local:
     cmd += "cd ~/cookbooks/chef; bundle exec"
-  cmd += "knife data bag from file {0} '{1}'".format(container, json_tmp_file_name)
-  cmd += "--secret-file {secret}".format(secret=secret_file)
+  cmd += " knife data bag from file {0} '{1}'".format(container, json_tmp_file_name)
+  cmd += " --secret-file {secret}".format(secret=secret_file)
   if not local:
     cmd += " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
   if local:
@@ -169,6 +169,7 @@ def save_databag(databag, bag_name, container="nmdhosting"):
   # And load the databag from this new file
   create_from_file(container, bag_name, tmp.name)
   tmp.delete=True
+  os.remove(tmp.name)
   return True
 
 @siteman.command()
@@ -185,7 +186,7 @@ def find_and_replace(environment="staging", key="db_host", term="fake_db", new_t
       new_term = ast.literal_eval(new_term)
   except ValueError as e:
     print "One of your terms is in an unrecognized format."
-  for bag in search_all(container="nmdhosting", environment=environment, search_key=key, search_term=term):
+  for bag_name, bag in search_all(container="nmdhosting", environment=environment, search_key=key, search_term=term).items():
     print "Working on {bag_id}".format(bag_id=bag['id'])
     change_value(bag_name=bag['id'],
       container="nmdhosting",
