@@ -17,7 +17,7 @@ bucket=environ.get('Databag_Name')
 # Enter the required information about the company
 # Run the SSL command
 command='openssl req -new -newkey rsa:2048 -nodes -out /tmp/{domain_name}.csr -keyout /tmp/{domain_name}.key -subj'.format(domain_name=domain_name).split(" ")
-command+=['"/C=US/ST={state}/L={city}/O={legal_name}/CN={domain_name}"'.format(state=state, city=city, legal_name=legal_name, domain_name=domain_name)]
+command+=['/C=US/ST={state}/L={city}/O={legal_name}/CN={domain_name}'.format(state=state, city=city, legal_name=legal_name, domain_name=domain_name)]
 print " ".join(command)
 out = subprocess.check_output(command)
 print out
