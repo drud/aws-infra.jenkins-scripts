@@ -1,6 +1,6 @@
 # A job for creating and managing key generation
 
-from os import environ, remove
+from os import environ, remove, path
 import subprocess
 
 jenkins_scripts = environ.get("JENKINS_SCRIPTS")
@@ -13,6 +13,11 @@ city=environ.get('City')
 legal_name=environ.get('Legal_Name')
 bucket=environ.get('Databag_Name')
 
+if path.exists("/tmp/{domain_name}.csr").format(domain_name=domain_name):
+	remove("/tmp/{domain_name}.csr").format(domain_name=domain_name)
+
+if path.exists("/tmp/{domain_name}".key).format(domain_name=domain_name):
+	remove("/tmp/{domain_name}.key").format(domain_name=domain_name)	
 
 # Enter the required information about the company
 # Run the SSL command
