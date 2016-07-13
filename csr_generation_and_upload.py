@@ -30,8 +30,8 @@ out = subprocess.check_output(command.split(" "), stderr=subprocess.STDOUT)
 
 
 # Clean-up the local files
-remove("/tmp/{domain_name}.csr")
-remove("/tmp/{domain_name}.key")
+remove("/tmp/{domain_name}.csr").format(domain_name=domain_name)
+remove("/tmp/{domain_name}.key").format(domain_name=domain_name)
 
 # Input them into the nmdproxy/certs databag? TODO
 
