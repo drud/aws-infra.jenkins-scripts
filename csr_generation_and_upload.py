@@ -23,12 +23,12 @@ out = subprocess.check_output(command)
 print out
 
 # Upload the CSR file to EC2
-command="s3upload -l DEBUG -k {aws_access_key} -sk {aws_secret_key} -f -np 8 -s 100 /tmp/{domain_name}.csr s3://{bucket}/{domain_name}.csr".format(aws_access_key=aws_access_key,aws_secret_key=aws_secret_key,domain_name=domain_name, bucket=bucket)
+command="s3upload -l DEBUG -k {aws_access_key} -sk {aws_secret_key} -f -np 8 -s 100 /tmp/{domain_name}.csr s3://nmdarchive/{bucket}/{domain_name}.csr".format(aws_access_key=aws_access_key,aws_secret_key=aws_secret_key,domain_name=domain_name, bucket=bucket)
 out = subprocess.check_output(command.split(" "))
 print out
 
 # Upload the KEY file to EC2
-command="s3upload -l DEBUG -k {aws_access_key} -sk {aws_secret_key} -f -np 8 -s 100 /tmp/{domain_name}.key s3://{bucket}/{domain_name}.key".format(aws_access_key=aws_access_key,aws_secret_key=aws_secret_key,domain_name=domain_name, bucket=bucket)
+command="s3upload -l DEBUG -k {aws_access_key} -sk {aws_secret_key} -f -np 8 -s 100 /tmp/{domain_name}.key s3://nmdarchive/{bucket}/{domain_name}.key".format(aws_access_key=aws_access_key,aws_secret_key=aws_secret_key,domain_name=domain_name, bucket=bucket)
 out = subprocess.check_output(command.split(" "))
 print out
 
