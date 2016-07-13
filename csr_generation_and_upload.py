@@ -18,15 +18,15 @@ bucket=environ.get('Databag_Name')
 # Run the SSL command
 command='openssl req -new -newkey rsa:2048 -nodes -out /tmp/{domain_name}.csr -keyout /tmp/{domain_name}.key -subj'.format(domain_name=domain_name).split(" ")
 command+=['/C=US/ST={state}/L={city}/O={legal_name}/CN={domain_name}'.format(state=state, city=city, legal_name=legal_name, domain_name=domain_name)]
-out = subprocess.check_output(command)
+out = subprocess.check_output(command, stderr=subprocess.STDOUT)
 
 # Upload the CSR file to EC2
 command="s3upload -l DEBUG -k {aws_access_key} -sk {aws_secret_key} -f -np 8 -s 100 /tmp/{domain_name}.csr s3://nmdarchive/{bucket}/{domain_name}.csr".format(aws_access_key=aws_access_key,aws_secret_key=aws_secret_key,domain_name=domain_name, bucket=bucket)
-out = subprocess.check_output(command.split(" "))
+out = subprocess.check_output(command.split(" "), stderr=subprocess.STDOUT)
 
 # Upload the KEY file to EC2
 command="s3upload -l DEBUG -k {aws_access_key} -sk {aws_secret_key} -f -np 8 -s 100 /tmp/{domain_name}.key s3://nmdarchive/{bucket}/{domain_name}.key".format(aws_access_key=aws_access_key,aws_secret_key=aws_secret_key,domain_name=domain_name, bucket=bucket)
-out = subprocess.check_output(command.split(" "))
+out = subprocess.check_output(command.split(" "), stderr=subprocess.STDOUT)
 
 
 # Clean-up the local files
