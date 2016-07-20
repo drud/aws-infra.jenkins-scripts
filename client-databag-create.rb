@@ -19,6 +19,7 @@ new_site = to_boolean(ARGV[10])
 web_server_staging = ARGV[11]
 web_server_prod = ARGV[12]
 wp_active_theme = ARGV[13]
+wp_multisite = to_boolean(ARGV[14])
 
 # Use the same config as knife uses
 Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/knife.rb")
@@ -167,6 +168,7 @@ if type == 'wp'
         :nonce_salt => SecureRandom.base64(48).to_s,
         :url => 'http://localhost:1025',
         :active_theme => wp_active_theme,
+        :multisite => wp_multisite
     }
     type_keys_staging = {
         :auth_key => SecureRandom.base64(48).to_s,
@@ -179,6 +181,7 @@ if type == 'wp'
         :nonce_salt => SecureRandom.base64(48).to_s,
         :url => 'https://' + sitename + '.nmdev.us',
         :active_theme => wp_active_theme,
+        :multisite => wp_multisite
     }
     type_keys_production = {
         :auth_key => SecureRandom.base64(48).to_s,
@@ -191,6 +194,7 @@ if type == 'wp'
         :nonce_salt => SecureRandom.base64(48).to_s,
         :url => 'https://' + sitename + 'prod.nmdev.us',
         :active_theme => wp_active_theme,
+        :multisite => wp_multisite
     }
 elsif type == 'drupal'
     type_keys_default = {
