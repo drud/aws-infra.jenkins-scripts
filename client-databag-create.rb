@@ -18,8 +18,8 @@ admin_username = ARGV[9]
 new_site = to_boolean(ARGV[10])
 web_server_staging = ARGV[11]
 web_server_prod = ARGV[12]
-wp_active_theme = ARGV[13]
-wp_multisite = to_boolean(ARGV[14])
+wp_active_theme = ARGV[14]
+wp_multisite = to_boolean(ARGV[13])
 
 # Use the same config as knife uses
 Chef::Config.from_file("#{ENV['JENKINS_HOME']}/workspace/jenkins-scripts/.chef/knife.rb")
