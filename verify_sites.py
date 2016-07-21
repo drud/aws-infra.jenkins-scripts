@@ -84,7 +84,8 @@ def diagnose_url(url, success, redirect, error, inconsistencies, authentication)
 		elif "Connection refused" in str(e) and "https://" in url:
 		 	# If the connection was refused, try again with http
 		 	r3 = requests.get(url.replace("https://", "http://"), auth=(user, password))
-		 	if rprint "The URL {url} could not be reached by https, but was OK when trying with HTTP.".format(url)
+		 	if r3.status_code == 200:
+		 		print "The URL {url} could not be reached by https, but was OK when trying with HTTP.".format(url)
 				inconsistencies[url] = {'status': r.status_code, 'status1': r3.status_code}
 		 	else:
 		 		error['unknown'].append(url)
