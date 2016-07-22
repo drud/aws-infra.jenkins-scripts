@@ -92,7 +92,7 @@ def search_all(container, environment="_default", search_key="db_host", search_t
     if search_key not in env_bag:
       print "Key '%s' not found in %s/%s['%s']. Skipping..." % (search_key, container, bag_name, environment)
       continue
-    if not search_term.lower() in env_bag[search_key].lower():
+    if type(search_term) == type(str) and type(search_key) == type(str) and not search_term.lower() in env_bag[search_key].lower():
       print "Term '%s' not found in %s/%s['%s']['%s']" % (search_term, container, bag_name, environment, search_key)
       continue
     print "'%s' matches search of '%s' in %s/%s['%s']['%s']\n" % (env_bag[search_key], search_term, container, bag_name, environment, search_key)
