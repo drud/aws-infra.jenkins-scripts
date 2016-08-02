@@ -18,4 +18,4 @@ echo "Here"
 # The command expands to:
 # ssh -T -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=0 ubuntu@web03.nmdev.us 'sudo -Eib env bash -s --' < /var/jenkins_home/workspace/jenkins-scripts/rsync.sh $SRC_SERVER $DEST_SERVER UBUNTU
 # The '$' renders the SSH command, then you have a normal command that executes as part of the line's inherent exec call
-$(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh "rsync.sh $SRC_SERVER $DEST_SERVER" env)
+echo $(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh "rsync.sh $SRC_SERVER $DEST_SERVER" env)
