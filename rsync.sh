@@ -1,5 +1,11 @@
 #!/bin/bash
-
+if [ -z "$1" -o -z "$2" ]; then
+  echo "This script requires that you pass in the src server and dest server to run."
+  echo "Usage: ./rsync.sh SRC_SERVER DEST_SERVER"
+  exit 1;
+fi
+SRC_SERVER=$1
+DEST_SERVER=$2
 # Available variables
 #SRC_SERVER
 #DEST_SERVER
