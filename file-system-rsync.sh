@@ -7,7 +7,7 @@ fi
 SRC_SERVER=$1
 DEST_SERVER=$2
 # Place the SSH key on the DEST server for consumption by the rsync script
-rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' /var/jenkins_home/.ssh/aws.pem ubuntu@$DEST_SERVER:/tmp/aws.pem 
+rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' --rsync-path=\"sudo rsync\" /var/jenkins_home/.ssh/aws.pem ubuntu@$DEST_SERVER:/tmp/aws.pem 
 
 # Set the HOSTNAME for the ssh-generator
 HOSTNAME=$DEST_SERVER
