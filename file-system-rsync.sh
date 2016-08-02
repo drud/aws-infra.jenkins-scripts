@@ -13,11 +13,6 @@ rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' 
 HOSTNAME=$DEST_SERVER
 cp rsync.sh /var/jenkins_home/workspace/jenkins-scripts/
 chmod +x /var/jenkins_home/workspace/jenkins-scripts/rsync.sh
-# I know I get here because this echo works
-#echo "Here"
-
-# I know that the rsync script exists, because I can call it on this path
-#/var/jenkins_home/workspace/jenkins-scripts/rsync.sh
 
 # Call the script and record the results
 # The command expands to:
