@@ -3,7 +3,10 @@
 # Available variables
 #SRC_SERVER
 #DEST_SERVER
-
+echo "Source:"
+echo $SRC_SERVER
+echo "Dest:"
+echo $DEST_SERVER
 # Prerequisites
 # We are SSH-ed into a remote host and calling this script on that host
 # Communication on Port 22 is available
