@@ -39,10 +39,10 @@ for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
 	--progress \
 	--stats \
 	--rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' \
-	--rsync-path="sudo mkdir -p /var/www/$BAGNAME && sudo rsync" \
+	--rsync-path="sudo mkdir -p /var/www/$BAGNAME/releases && sudo rsync" \
 	--include */
 	--exclude .git/ \
-	$CURRENT_RELEASE ubuntu@DEST_SERVER:/var/www/$BAGNAME/
+	$CURRENT_RELEASE ubuntu@DEST_SERVER:/var/www/$BAGNAME/releases/
     # Copy (or recreate) the current symlink - remember, you are on the src host now
     ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no ubuntu@DEST_SERVER "ln -s $CURRENT_RELEASE /var/www/$BAGNAME/current"
 done
