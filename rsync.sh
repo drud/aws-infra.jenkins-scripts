@@ -27,10 +27,10 @@ chmod 0400 /tmp/aws.pem
 
 for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
     # Sample WEB_ROOT - /var/www/histco/current
-    echo $WEB_ROOT
     # Sample CURRENT_RELEASE - /var/www/histco/releases/20160722223438
     CURRENT_RELEASE="$(readlink -f $WEB_ROOT)"
     BAGNAME=$(echo $WEB_ROOT | sed 's|/var/www/||' | sed 's|/current||')
+    echo "Working on $BAGNAME..."
     # Copy the release
     rsync \
 	-F \
