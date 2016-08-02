@@ -11,6 +11,7 @@ rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' 
 
 # Set the HOSTNAME for the ssh-generator
 HOSTNAME=$DEST_SERVER
+
 # Call the script and record the results
-SCRIPT_RESULTS="`eval $(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh \"rsync.sh $SRC_SERVER $DEST_SERVER\" env)`"
+SCRIPT_RESULTS='`eval $(/var/jenkins_home/workspace/jenkins-scripts/ssh-generator.sh "rsync.sh $SRC_SERVER $DEST_SERVER" env)`'
 echo $SCRIPT_RESULTS
