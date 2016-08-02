@@ -20,9 +20,12 @@ echo $DEST_SERVER
 chmod 0400 /tmp/aws.pem
 
 # Call rsync on the different nodes.
+echo "Copying /etc/nginx/sites-enabled..."
 rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" ubuntu@$SRC_SERVER:/etc/nginx/sites-available /etc/nginx/
+echo "Copying /etc/nginx/sites-available..."
 rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" ubuntu@$SRC_SERVER:/etc/nginx/sites-enabled /etc/nginx/
-rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" ubuntu@$SRC_SERVER:/var/www/ /var/
+echo "Copying /var/www..."
+rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" ubuntu@$SRC_SERVER:/var/www /var/
 
 # Remove the SSH key
 rm -rf /tmp/aws.pem
