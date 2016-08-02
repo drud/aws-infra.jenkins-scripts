@@ -2,12 +2,33 @@
 import databag
 import click
 import sys
+import hvac
 
 debug=False
 
 proxy_container="nmdproxy"
 if debug:
   proxy_container="nmdtest"
+
+def get_vault_client():
+    vault_token = os.environ.get('GITHUB_TOKEN', "NO TOKEN FOUND") if 'GITHUB_TOKEN' in os.environ else os.environ.get('VAULT_TOKEN', "NO TOKEN FOUND")
+    if vault_token == "NO TOKEN FOUND":
+        print "Could not find GITHUB_TOKEN or VAULT_TOKEN in your environment. Have you run `drud secret auth`?"
+        sys.exit(1)
+    vault_client = hvac.Client(url='https://sanctuary.drud.io:8200', token=vault_token, verify=False)
+    
+    if vault_client.is_initialized() and vault_client.is_sealed():
+        try:
+            vault_client.unseal(os.getenv('VAULT_KEY_1', ''))
+            vault_client.unseal(os.getenv('VAULT_KEY_2', ''))
+            vault_client.unseal(os.getenv('VAULT_KEY_3', ''))
+        except:
+            pass
+    if vault_client.is_initialized() and not vault_client.is_sealed():
+        if not vault_client.is_authenticated():
+            vault_client.auth_github(vault_token)
+        if vault_client.is_authenticated():
+            return vault_client
 
 @click.command()
 @click.option('--url', prompt="What is the URL of the server you are trying to add?", help="URL of server you're trying to add")
@@ -23,7 +44,8 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   """
   Add or remove entries from a proxy-structured datBabag.
   """
-  proxy_databag = databag.get_databag(bag_name="upstream", container=proxy_container)
+  vault_client = get_vault_client()
+  proxy_databag = hvac.read("secret/globals/nmdproxy")['data']
   if environment=='production':
     site_entries = proxy_databag[environment]['webcluster01']['apps']
   elif environment=="staging":
@@ -54,10 +76,7 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   elif environment=="staging":
     proxy_databag[environment]['web01']['apps'] = site_entries
 
-  databag.save_databag(proxy_databag, bag_name="upstream", container=proxy_container)
+  vault_client.write('secret/globals/nmdproxy', **proxy_databag)
 
-# if __name__ == '__main__':
-#   site_proxy_entry("mytest.nmdev.us", "staging", operation="add")
-#   site_proxy_entry("mytestprod.nmdev.us", "production", operation="add")
 if __name__ == '__main__':
     site_proxy_entry()
