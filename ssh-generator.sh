@@ -39,6 +39,6 @@ if [ "$ENVOVERLOAD" = "NOFILE" ]; then
   SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOST \"$SCRIPTNAME\""
 else
   SSH_OPTIONS="-o StrictHostKeyChecking=no $PROXY_CMD -o NumberOfPasswordPrompts=0"
-  SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOST 'sudo -Eib $ENVOVERLOAD bash -s --' < $SCRIPTNAME $OS"
+  SSH_CMD="ssh -T -i /var/jenkins_home/.ssh/aws.pem $SSH_OPTIONS $USER@$HOST 'sudo -Eib $ENVOVERLOAD bash -s --' < $JENKINS_SCRIPTS/$SCRIPTNAME $OS"
 fi
 echo $SSH_CMD
