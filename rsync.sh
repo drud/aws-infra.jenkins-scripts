@@ -9,7 +9,7 @@ DEST_SERVER=$2
 # Available variables
 #SRC_SERVER
 #DEST_SERVER
-echo "Source:"
+echo "Source: (where we are)"
 echo $SRC_SERVER
 echo "Dest:"
 echo $DEST_SERVER
@@ -21,21 +21,31 @@ chmod 0400 /tmp/aws.pem
 
 # Call rsync on the different nodes.
 # echo "Copying /etc/nginx/sites-enabled..."
-# rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" ubuntu@$SRC_SERVER:/etc/nginx/sites-available /etc/nginx/
+# rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /etc/nginx/sites-available ubuntu@$DEST_SERVER:/etc/nginx/
 # echo "Copying /etc/nginx/sites-available..."
-# rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" ubuntu@$SRC_SERVER:/etc/nginx/sites-enabled /etc/nginx/
-echo "Copying /var/www..."
-rsync \
--F \
---compress \
---archive \
---progress \
---stats \
---rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' \
---rsync-path="sudo rsync" \
---include current/
---exclude .git/ \
-ubuntu@$SRC_SERVER:/var/www /var/
+# rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /etc/nginx/sites-enabled ubuntu@$DEST_SERVER:/etc/nginx/
+
+for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
+    # Sample WEB_ROOT - /var/www/histco/current
+    echo $WEB_ROOT
+    # Sample CURRENT_RELEASE - /var/www/histco/releases/20160722223438
+    CURRENT_RELEASE="$(readlink -f $WEB_ROOT)"
+    BAGNAME=$(echo $WEB_ROOT | sed 's|/var/www/||' | sed 's|/current||')
+    # Copy the release
+    rsync \
+	-F \
+	--compress \
+	--archive \
+	--progress \
+	--stats \
+	--rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' \
+	--rsync-path="sudo mkdir -p /var/www/$BAGNAME && sudo rsync" \
+	--include */
+	--exclude .git/ \
+	$CURRENT_RELEASE ubuntu@DEST_SERVER:/var/www/$BAGNAME/
+    # Copy (or recreate) the current symlink - remember, you are on the src host now
+    ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no ubuntu@DEST_SERVER "ln -s $CURRENT_RELEASE /var/www/$BAGNAME/current"
+done
 
 # Remove the SSH key
 rm -rf /tmp/aws.pem

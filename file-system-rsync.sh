@@ -7,10 +7,10 @@ fi
 SRC_SERVER=$1
 DEST_SERVER=$2
 # Place the SSH key on the DEST server for consumption by the rsync script
-rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /var/jenkins_home/.ssh/aws.pem ubuntu@$DEST_SERVER:/tmp/aws.pem 
+rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /var/jenkins_home/.ssh/aws.pem ubuntu@$SRC_SERVER:/tmp/aws.pem 
 
 # Set the HOSTNAME for the ssh-generator
-HOSTNAME=$DEST_SERVER
+HOSTNAME=$SRC_SERVER
 cp rsync.sh /var/jenkins_home/workspace/jenkins-scripts/
 chmod +x /var/jenkins_home/workspace/jenkins-scripts/rsync.sh
 
@@ -18,4 +18,4 @@ chmod +x /var/jenkins_home/workspace/jenkins-scripts/rsync.sh
 # The command expands to:
 # ssh -T -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no -o NumberOfPasswordPrompts=0 ubuntu@web03.nmdev.us 'sudo -Eib env bash -s --' < /var/jenkins_home/workspace/jenkins-scripts/rsync.sh UBUNTU
 # The '$' renders the SSH command, then you have a normal command that executes as part of the line's inherent exec call
-eval "$($JENKINS_SCRIPTS/ssh-generator.sh 'rsync.sh $SRC_SERVER $DEST_SERVER' env $DEST_SERVER 'UBUNTU')"
+eval "$($JENKINS_SCRIPTS/ssh-generator.sh 'rsync.sh $SRC_SERVER $DEST_SERVER' env $SRC_SERVER 'UBUNTU')"
