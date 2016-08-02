@@ -236,11 +236,8 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     bag_item['production'] = dict(common.items() + production.items() + xtradb.items() + type_keys_production.items())
     bag_item['client_metadata'] = client_metadata
 
-    import json
-    print(json.dumps(bag_item, indent=4))
-
     client = hvac.Client(url='https://sanctuary.drud.io:8200', token=os.environ['VAULT_TOKEN'])
-    client.write('shared/', **bag_item)
+    client.write('secret/nmdhosting/' + sitename, **bag_item)
     # # Encrypt and save new data bag
     # enc_hash = Chef::EncryptedDataBagItem.encrypt_data_bag_item(bag_item, secret)
     # ebag_item = Chef::DataBagItem.from_hash(enc_hash)
