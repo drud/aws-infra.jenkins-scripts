@@ -33,7 +33,7 @@ for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
     echo "Working on $BAGNAME..."
     # Copy the release
     rsync \
-    -aHAXxv \
+    -aHAXx \
     --numeric-ids \
     --delete \
     --stats \
