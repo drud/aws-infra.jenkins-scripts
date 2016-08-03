@@ -33,10 +33,11 @@ for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
     echo "Working on $BAGNAME..."
     # Copy the release
     rsync \
-	-F \
-	--archive \
-	--stats \
-	--rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' \
+    -aHAXxv \
+    --numeric-ids \
+    --delete \
+    --stats \
+    -e "ssh -T -o Compression=no -x -i /tmp/aws.pem -o StrictHostKeyChecking=no" \
 	--rsync-path="sudo mkdir -p /var/www/$BAGNAME/releases && sudo rsync" \
 	--exclude .git/ \
 	$CURRENT_RELEASE ubuntu@$DEST_SERVER:/var/www/$BAGNAME/releases/
