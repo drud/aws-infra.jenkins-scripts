@@ -21,9 +21,9 @@ chmod 0400 /tmp/aws.pem
 
 # Call rsync on the different nodes.
 echo "Copying /etc/nginx/sites-enabled..."
-rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /etc/nginx/sites-available ubuntu@$DEST_SERVER:/etc/nginx/
+rsync -F --archive --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /etc/nginx/sites-available ubuntu@$DEST_SERVER:/etc/nginx/
 echo "Copying /etc/nginx/sites-available..."
-rsync -F --compress --archive --progress --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /etc/nginx/sites-enabled ubuntu@$DEST_SERVER:/etc/nginx/
+rsync -F --archive --stats --rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /etc/nginx/sites-enabled ubuntu@$DEST_SERVER:/etc/nginx/
 
 for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
     # Sample WEB_ROOT - /var/www/histco/current
@@ -34,9 +34,7 @@ for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
     # Copy the release
     rsync \
 	-F \
-	--compress \
 	--archive \
-	--progress \
 	--stats \
 	--rsh 'ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no' \
 	--rsync-path="sudo mkdir -p /var/www/$BAGNAME/releases && sudo rsync" \
