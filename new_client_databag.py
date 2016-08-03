@@ -6,6 +6,26 @@ from pprint import pprint as p
 from collections import OrderedDict
 import hvac
 
+def get_vault_client():
+    vault_token = os.environ.get('GITHUB_TOKEN', "NO TOKEN FOUND") if 'GITHUB_TOKEN' in os.environ else os.environ.get('VAULT_TOKEN', "NO TOKEN FOUND")
+    if vault_token == "NO TOKEN FOUND":
+        print "Could not find GITHUB_TOKEN or VAULT_TOKEN in your environment. Have you run `drud secret auth`?"
+        sys.exit(1)
+    vault_client = hvac.Client(url='https://sanctuary.drud.io:8200', token=vault_token, verify=False)
+    
+    if vault_client.is_initialized() and vault_client.is_sealed():
+        try:
+            vault_client.unseal(os.getenv('VAULT_KEY_1', ''))
+            vault_client.unseal(os.getenv('VAULT_KEY_2', ''))
+            vault_client.unseal(os.getenv('VAULT_KEY_3', ''))
+        except:
+            pass
+    if vault_client.is_initialized() and not vault_client.is_sealed():
+        if not vault_client.is_authenticated():
+            vault_client.auth_github(vault_token)
+        if vault_client.is_authenticated():
+            return vault_client
+
 def to_boolean(x):
     return x == 'true' or x == "True"
 
@@ -236,7 +256,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     bag_item['production'] = dict(common.items() + production.items() + xtradb.items() + type_keys_production.items())
     bag_item['client_metadata'] = client_metadata
 
-    client = hvac.Client(url='https://sanctuary.drud.io:8200', token=os.environ['VAULT_TOKEN'])
+    client = get_vault_client()
     client.write('secret/nmdhosting/' + sitename, **bag_item)
     # # Encrypt and save new data bag
     # enc_hash = Chef::EncryptedDataBagItem.encrypt_data_bag_item(bag_item, secret)
