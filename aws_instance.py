@@ -67,11 +67,12 @@ def siteman():
 @click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy', 'percona', 'web']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
+@click.option('--primary-snapshot-id', default=None)
 @click.option('--debug', is_flag=True)
-def create_instance_like(host_to_mimic, image_type, new_instance_name, debug):
-  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, debug=debug)
+def create_instance_like(host_to_mimic, image_type, new_instance_name, primary_snapshot_id, debug):
+  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_snapshot_id=None, debug=debug)
 
-def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, debug=False):
+def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_snapshot_id=None, debug=False):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
@@ -111,6 +112,9 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
             'VolumeType': this_vol.volume_type
           }
         })
+      if primary_snapshot_id != None and ("xvda" in device_name or "sda1" in device_name):
+        device_map[-1]['Ebs']['SnapshotId'] = primary_snapshot_id
+    p(device_name)
 
     # "Upgrade" to the newest generation of servers
     if instance_to_replace.instance_type.startswith('m1'):
