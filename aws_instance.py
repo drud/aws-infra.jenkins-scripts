@@ -318,6 +318,109 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     gluster.peer_connect_fnc(gluster_user, gluster_host, peer=new_host)
     gluster.replace_brick_fnc(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
 
+@siteman.command()
+@click.option('--host-to-snap', prompt='Hostname of instance you would like to snap', help='Hostname that you would like to snap')
+def create_snapshot(host_to_snap):
+  ec2 = boto3.resource('ec2', region_name='us-west-2')
+  # Figure out the instance ID by hostname tags
+  host_to_snap_id, host_to_snap_dict = get_instance_by_tagged_name(host_to_snap)
+  if host_to_snap_id == None:
+    exit("Cannot continue without a valid instance to get the volume from")
+
+  # Get it's primary volume (should always be index value 0)
+  primary_vol_id = host_to_snap_dict['BlockDeviceMappings'][0]['Ebs']['VolumeId']
+  # Snapshot the primary volume
+  snapshot = ec2.Volume(primary_vol_id).create_snapshot()
+  # Wait for the snapshot to complete (indefinetely)
+  while snapshot.state != "completed":
+    print "Snapshot at {perc}...".format(perc=snapshot.progress)
+    time.sleep(10)
+    snapshot.reload()
+
+  environment = "staging" if "nmdev.us" in host_to_snap else "production"
+
+  # Label the snapshot
+  snapshot.create_tags(Tags=[
+    {
+      'Key': 'Type',
+      'Value': 'web'
+    },
+    {
+      'Key': 'Environment',
+      'Value': environment
+    }
+  ])
+
+def get_web_snaps(environment):
+  ec2 = boto3.client('ec2', region_name='us-west-2')
+  # Get all tag Type: web snaps
+  all_web_snaps = ec2.describe_snapshots(Filters=[{
+      'Name': 'status',
+      'Values': [
+        'completed'
+      ]
+    },
+    {
+      'Name': 'tag-value',
+      'Values': [
+        'web'
+      ]
+    },
+    {
+      'Name': 'tag-value',
+      'Values': [
+        environment
+      ]
+    }
+    ])['Snapshots']
+  all_web_snaps = sorted(all_web_snaps, key=lambda k: k['StartTime'])
+  return all_web_snaps
+
+@siteman.command()
+@click.option('--environment', prompt='What environment would you like to clean?', help="Environment to clean")
+@click.option('--number-to-keep', default=2, help='Number of web snapshots to keep')
+def cleanup_web_snapshots(environment, number_to_keep):
+  # Get the client
+  ec2 = boto3.client('ec2', region_name='us-west-2')
+  web_snaps = get_web_snaps(environment)
+  if len(web_snaps) == 0:
+    print "Found 0 snapshots matching the tag-value of 'web', tag-value of '{env}', with a status of 'completed'.".format(env=environment)
+    exit(0)
+  elif len(web_snaps) <= number_to_keep:
+    print "Found {num} snapshots matching the search critereon. Keeping all snapshots (since we only want to keep {keep_num}.".format(num=len(web_snaps), keep_num=number_to_keep)
+    exit(0)
+  else:
+    print "Found {num} snapshots matching the search critereon. Pruning total down to the {keep_num} most recent snaps.".format(num=len(web_snaps), keep_num=number_to_keep)
+  print "Current snapshot inventory:"
+  print "SnapID", "StartTime"
+  for index, snap in enumerate(web_snaps):
+    print index, snap['SnapshotId'], snap['StartTime']
+
+  print "Deleting all but {num} snapshots that are not in-use...".format(num=number_to_keep)
+  for index, snap in enumerate(web_snaps):
+    if len(web_snaps)-index > number_to_keep:
+      print "Deleting {i}: {id} {created}".format(i=index, id=snap['SnapshotId'], created=snap['StartTime'])
+      try:
+        ec2.delete_snapshot(SnapshotId=snap['SnapshotId'])
+      except botocore.exceptions.ClientError as e:
+        if "is currently in use" in str(e):
+          print "Could not delete {snap_id} because it is in use. Skipping...".format(snap_id=snap['SnapshotId'])
+    else:
+      print "Preserving {i}: {id} {created}".format(i=index, id=snap['SnapshotId'], created=snap['StartTime'])
+
+
+@siteman.command()
+@click.option('--host-to-mimic', prompt='The hostname to mimic', help="The hostname to mimic")
+@click.option('--new-instance-name', prompt='The hostname of the new instance', help='The hostname of the new instance')
+def create_web_from_snap(host_to_mimic, new_instance_name):
+  # Find the most recent snapshot ID
+  environment = "staging" if "nmdev.us" in host_to_mimic else "production"
+  all_web_snaps = get_web_snaps(environment)
+  p(all_web_snaps[-1])
+  exit("LINE 420")
+  # Pass it to create_instance_like_fnc
+  # Done
+  create_instance_like_fnc(host_to_mimic, image_type='web', new_instance_name=new_instance_name, recreate_all_volumes=True, primary_snapshot_id=all_web_snaps[-1]['SnapshotId'], debug=False)
 
 # instance.detech_volume(VolumeId="")
 if __name__ == '__main__':
