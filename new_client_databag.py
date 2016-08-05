@@ -65,7 +65,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'db_name': sitename,
         'db_username': sitename + '_db',
         'php': {
-          'version': "5.6"
+            'version': "5.6"
         },
         'docroot': '/var/www/' + sitename + '/current/docroot'
     }
@@ -79,7 +79,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'db_host': db_server_local,
         'db_user_password': rand_string(),
         'server_aliases': [
-          "localhost"
+            "localhost"
         ],
         'hosts': [
             "localhost"
@@ -93,7 +93,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'db_host': db_server_staging,
         'db_user_password': rand_string(),
         'server_aliases': [
-          sitename + '.nmdev.us'
+            sitename + '.nmdev.us'
         ],
         'hosts': [
             web_server_staging
@@ -107,7 +107,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'db_host': db_server_production,
         'db_user_password': rand_string(),
         'server_aliases': [
-          sitename + 'prod.nmdev.us'
+            sitename + 'prod.nmdev.us'
         ],
         'hosts': [
             web_server_prod
