@@ -6,6 +6,7 @@ if [ -z "$1" -o -z "$2" ]; then
 fi
 SRC_SERVER=$1
 DEST_SERVER=$2
+
 # Place the SSH key on the DEST server for consumption by the rsync script
 rsync --rsh 'ssh -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no' --rsync-path="sudo rsync" /var/jenkins_home/.ssh/aws.pem ubuntu@$SRC_SERVER:/tmp/aws.pem 
 
