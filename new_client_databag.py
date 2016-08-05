@@ -19,7 +19,7 @@ def get_vault_client():
             return vault_client
 
 def to_boolean(x):
-    return x == 'true' or x == "True"
+    return x.lower() == 'true'
 
 def rand_string(num_digits=16, string_type=string.hexdigits):
     if string_type == "base64":
