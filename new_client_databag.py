@@ -2,7 +2,6 @@ import random
 import string
 import sys
 import click
-from pprint import pprint as p
 from collections import OrderedDict
 import hvac
 
