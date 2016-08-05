@@ -67,7 +67,7 @@ def siteman():
 @click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy', 'percona', 'web']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
-@click.option('--primary-snapshot-id', default=None)
+@click.option('--primary-image-id', default=None)
 @click.option('--debug', is_flag=True)
 def create_instance_like(host_to_mimic, image_type, new_instance_name, primary_image_id, debug):
   create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_image_id=None, debug=debug)
@@ -390,7 +390,7 @@ def create_ami(host_to_image):
 
 def get_web_amis(environment):
   ec2 = boto3.client('ec2', region_name='us-west-2')
-  # Get all tag Type: web snaps
+  # Get all tag Type: web {env} amis
   all_web_amis = ec2.describe_images(Filters=[{
       'Name': 'state',
       'Values': [
