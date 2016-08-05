@@ -166,7 +166,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
 
 
     # new site
-    if new_site == True:
+    if new_site:
         new_site = {
             'new_site': True,
             'install_profile': sitename
