@@ -69,10 +69,10 @@ def siteman():
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
 @click.option('--primary-snapshot-id', default=None)
 @click.option('--debug', is_flag=True)
-def create_instance_like(host_to_mimic, image_type, new_instance_name, primary_snapshot_id, debug):
-  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_snapshot_id=None, debug=debug)
+def create_instance_like(host_to_mimic, image_type, new_instance_name, primary_image_id, debug):
+  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_image_id=None, debug=debug)
 
-def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_snapshot_id=None, debug=False):
+def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_image_id=None, debug=False):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
@@ -112,9 +112,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
             'VolumeType': this_vol.volume_type
           }
         })
-      if primary_snapshot_id != None and ("xvda" in device_name or "sda1" in device_name):
-        device_map[-1]['Ebs']['SnapshotId'] = primary_snapshot_id
-    p(device_name)
+      #if primary_image_id != None and ("xvda" in device_name or "sda1" in device_name):
+      #  device_map[-1]['Ebs']['SnapshotId'] = primary_image_id
 
     # "Upgrade" to the newest generation of servers
     if instance_to_replace.instance_type.startswith('m1'):
@@ -130,8 +129,19 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     # Connect to EC2
     ec2 = boto3.client('ec2', region_name='us-west-2')
 
-    # Get a list of all images that are close to the name passed in, made by us
-    possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
+    if image_type == "web":
+      # Get a list of all images that are close to the name passed in, made by us
+      possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{
+        "Name": "tag-value",
+        "Values": ['staging']
+      },
+      {
+        "Name": "tag-value",
+        "Values": ['web']
+      }])
+    else:
+      # Get a list of all images that are close to the name passed in, made by us
+      possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
     # Sort the images by creation date
     sorted_images = sorted(possible_images['Images'], key=lambda k: k['CreationDate'])
     # Select the last image in the list
@@ -160,7 +170,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       tags[i]["Value"] = new_instance_name
       break
   
-  if image_type in ['gluster', 'percona', 'proxy']:
+  if image_type in ['gluster', 'percona', 'proxy', 'web']:
     tags.append({
       "Key": "DeployUser",
       "Value": "ubuntu"
@@ -319,28 +329,55 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     gluster.replace_brick_fnc(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
 
 @siteman.command()
-@click.option('--host-to-snap', prompt='Hostname of instance you would like to snap', help='Hostname that you would like to snap')
-def create_snapshot(host_to_snap):
+@click.option('--host-to-image', prompt='Hostname of instance you would like to image', help='Hostname that you would like to image')
+def create_ami(host_to_image):
   ec2 = boto3.resource('ec2', region_name='us-west-2')
+  client = boto3.client('ec2', region_name='us-west-2')
   # Figure out the instance ID by hostname tags
-  host_to_snap_id, host_to_snap_dict = get_instance_by_tagged_name(host_to_snap)
-  if host_to_snap_id == None:
+  host_to_image_id, host_to_image_dict = get_instance_by_tagged_name(host_to_image)
+  if host_to_image_id == None:
     exit("Cannot continue without a valid instance to get the volume from")
+  environment = "staging" if "nmdev.us" in host_to_image else "production"
+  # # Get it's primary volume (should always be index value 0)
+  # primary_vol_id = host_to_image_dict['BlockDeviceMappings'][0]['Ebs']['VolumeId']
+  # # Snapshot the primary volume
+  # snapshot = ec2.Volume(primary_vol_id).create_snapshot()
+  # # Wait for the snapshot to complete (indefinetely)
+  # while snapshot.state != "completed":
+  #   print "Snapshot at {perc}...".format(perc=snapshot.progress)
+  #   time.sleep(10)
+  #   snapshot.reload()
 
-  # Get it's primary volume (should always be index value 0)
-  primary_vol_id = host_to_snap_dict['BlockDeviceMappings'][0]['Ebs']['VolumeId']
-  # Snapshot the primary volume
-  snapshot = ec2.Volume(primary_vol_id).create_snapshot()
-  # Wait for the snapshot to complete (indefinetely)
-  while snapshot.state != "completed":
-    print "Snapshot at {perc}...".format(perc=snapshot.progress)
+  ami_id = client.create_image(
+    InstanceId=host_to_image_id,
+    Name='web {env}'.format(env=environment),
+    Description='web {env} AMI'.format(env=environment),
+    NoReboot=True
+    # BlockDeviceMappings=[
+    #     {
+    #         'VirtualName': 'string',
+    #         'DeviceName': 'string',
+    #         'Ebs': {
+    #             'SnapshotId': 'string',
+    #             'VolumeSize': 123,
+    #             'DeleteOnTermination': True|False,
+    #             'VolumeType': 'standard'|'io1'|'gp2'|'sc1'|'st1',
+    #             'Iops': 123,
+    #             'Encrypted': True|False
+    #         }
+    #     },
+    # ]
+  )["ImageId"]
+  image = ec2.Image(ami_id)
+  print "Waiting for AMI to finish being created"
+  while "available" not in image.state:
     time.sleep(10)
-    snapshot.reload()
+    image.reload()
 
-  environment = "staging" if "nmdev.us" in host_to_snap else "production"
+  environment = "staging" if "nmdev.us" in host_to_image else "production"
 
   # Label the snapshot
-  snapshot.create_tags(Tags=[
+  image.create_tags(Tags=[
     {
       'Key': 'Type',
       'Value': 'web'
@@ -351,13 +388,13 @@ def create_snapshot(host_to_snap):
     }
   ])
 
-def get_web_snaps(environment):
+def get_web_amis(environment):
   ec2 = boto3.client('ec2', region_name='us-west-2')
   # Get all tag Type: web snaps
-  all_web_snaps = ec2.describe_snapshots(Filters=[{
-      'Name': 'status',
+  all_web_amis = ec2.describe_images(Filters=[{
+      'Name': 'state',
       'Values': [
-        'completed'
+        'available'
       ]
     },
     {
@@ -372,55 +409,52 @@ def get_web_snaps(environment):
         environment
       ]
     }
-    ])['Snapshots']
-  all_web_snaps = sorted(all_web_snaps, key=lambda k: k['StartTime'])
-  return all_web_snaps
+    ])['Images']
+  all_web_amis = sorted(all_web_amis, key=lambda k: k['CreationDate'])
+  return all_web_amis
 
 @siteman.command()
 @click.option('--environment', prompt='What environment would you like to clean?', help="Environment to clean")
-@click.option('--number-to-keep', default=2, help='Number of web snapshots to keep')
-def cleanup_web_snapshots(environment, number_to_keep):
+@click.option('--number-to-keep', default=2, help='Number of web AMIs to keep')
+def cleanup_web_amis(environment, number_to_keep):
   # Get the client
   ec2 = boto3.client('ec2', region_name='us-west-2')
-  web_snaps = get_web_snaps(environment)
-  if len(web_snaps) == 0:
-    print "Found 0 snapshots matching the tag-value of 'web', tag-value of '{env}', with a status of 'completed'.".format(env=environment)
+  web_amis = get_web_amis(environment)
+  if len(web_amis) == 0:
+    print "Found 0 AMIs matching the tag-value of 'web', tag-value of '{env}', with a status of 'completed'.".format(env=environment)
     exit(0)
-  elif len(web_snaps) <= number_to_keep:
-    print "Found {num} snapshots matching the search critereon. Keeping all snapshots (since we only want to keep {keep_num}.".format(num=len(web_snaps), keep_num=number_to_keep)
+  elif len(web_amis) <= number_to_keep:
+    print "Found {num} AMIs matching the search critereon. Keeping all AMIs (since we want to keep {keep_num}).".format(num=len(web_amis), keep_num=number_to_keep)
     exit(0)
   else:
-    print "Found {num} snapshots matching the search critereon. Pruning total down to the {keep_num} most recent snaps.".format(num=len(web_snaps), keep_num=number_to_keep)
+    print "Found {num} AMIs matching the search critereon. Pruning total down to the {keep_num} most recent snaps.".format(num=len(web_amis), keep_num=number_to_keep)
   print "Current snapshot inventory:"
-  print "SnapID", "StartTime"
-  for index, snap in enumerate(web_snaps):
-    print index, snap['SnapshotId'], snap['StartTime']
+  print "ImageId", "CreationDate"
+  for index, ami in enumerate(web_amis):
+    print index, ami['ImageId'], ami['CreationDate']
 
-  print "Deleting all but {num} snapshots that are not in-use...".format(num=number_to_keep)
-  for index, snap in enumerate(web_snaps):
-    if len(web_snaps)-index > number_to_keep:
-      print "Deleting {i}: {id} {created}".format(i=index, id=snap['SnapshotId'], created=snap['StartTime'])
+  print "Deleting all but {num} AMIs that are not in-use...".format(num=number_to_keep)
+  for index, ami in enumerate(web_amis):
+    if len(web_amis)-index > number_to_keep:
+      print "Deleting {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
       try:
-        ec2.delete_snapshot(SnapshotId=snap['SnapshotId'])
+        ec2.deregister_image(ImageId=snap['SnapshotId'])
       except botocore.exceptions.ClientError as e:
         if "is currently in use" in str(e):
-          print "Could not delete {snap_id} because it is in use. Skipping...".format(snap_id=snap['SnapshotId'])
+          print "Could not delete {ami_id} because it is in use. Skipping...".format(ami_id=ami['ImageId'])
     else:
-      print "Preserving {i}: {id} {created}".format(i=index, id=snap['SnapshotId'], created=snap['StartTime'])
+      print "Preserving {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
 
 
 @siteman.command()
 @click.option('--host-to-mimic', prompt='The hostname to mimic', help="The hostname to mimic")
 @click.option('--new-instance-name', prompt='The hostname of the new instance', help='The hostname of the new instance')
-def create_web_from_snap(host_to_mimic, new_instance_name):
-  # Find the most recent snapshot ID
+def create_web_from_ami(host_to_mimic, new_instance_name):
+  # Find the most recent snapshot ID (-1 is the last element in the list)
   environment = "staging" if "nmdev.us" in host_to_mimic else "production"
-  all_web_snaps = get_web_snaps(environment)
-  p(all_web_snaps[-1])
-  exit("LINE 420")
+  all_web_amis = get_web_amis(environment)
   # Pass it to create_instance_like_fnc
-  # Done
-  create_instance_like_fnc(host_to_mimic, image_type='web', new_instance_name=new_instance_name, recreate_all_volumes=True, primary_snapshot_id=all_web_snaps[-1]['SnapshotId'], debug=False)
+  create_instance_like_fnc(host_to_mimic, image_type='web', new_instance_name=new_instance_name, recreate_all_volumes=True, primary_image_id=all_web_amis[-1]['ImageId'], debug=False)
 
 # instance.detech_volume(VolumeId="")
 if __name__ == '__main__':
