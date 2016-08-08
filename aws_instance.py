@@ -131,7 +131,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
 
     # If we were given an imageid, just use it
     if primary_image_id != None:
-      possible_images = {"ImageId" : primary_image_id, "CreationDate": "recent"}
+      possible_images = {"Images": {"ImageId" : primary_image_id, "CreationDate": int(time.time())}}
     # Otherwise, dynamically ascertain the image if it's web
     elif image_type == "web":
       # Get a list of all web images that match our tags, made by us
@@ -147,8 +147,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       # Get a list of all images that are close to the name passed in, made by us
       possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
     # Sort the images by creation date
-    p(possible_images)
-    sorted_images = sorted(possible_images, key=lambda k: k['CreationDate'])
+    sorted_images = sorted(possible_images['Images'], key=lambda k: k['CreationDate'])
     # Select the last image in the list
     most_recent_image = sorted_images[-1]
 
