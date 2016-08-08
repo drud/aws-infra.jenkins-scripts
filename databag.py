@@ -34,7 +34,8 @@ def construct_cmd(op, container, bag_name, json_tmp_file_name):
   if local:
     cmd += "cd ~/cookbooks/chef; bundle exec"
   cmd += " knife data bag {op} {container} {bag_name}".format(op=op, container=container, bag_name=bag_name)
-  cmd += " --secret-file {secret}".format(secret=secret_file)
+  if op != "list":
+    cmd += " --secret-file {secret}".format(secret=secret_file)
   if not local:
     cmd += " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
   cmd += " -F json > {json_file}".format(json_file=json_tmp_file_name)
