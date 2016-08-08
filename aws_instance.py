@@ -28,6 +28,7 @@ import remote_fstab
 import time
 import click
 import gluster
+import time
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -112,8 +113,6 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
             'VolumeType': this_vol.volume_type
           }
         })
-      #if primary_image_id != None and ("xvda" in device_name or "sda1" in device_name):
-      #  device_map[-1]['Ebs']['SnapshotId'] = primary_image_id
 
     # "Upgrade" to the newest generation of servers
     if instance_to_replace.instance_type.startswith('m1'):
@@ -347,11 +346,11 @@ def create_ami(host_to_image):
   #   print "Snapshot at {perc}...".format(perc=snapshot.progress)
   #   time.sleep(10)
   #   snapshot.reload()
-
+  timestamp = int(time.time())
   ami_id = client.create_image(
     InstanceId=host_to_image_id,
-    Name='web {env}'.format(env=environment),
-    Description='web {env} AMI'.format(env=environment),
+    Name='web {env} {timestamp}'.format(env=environment, timestamp=),
+    Description='web {env} {timestamp} AMI'.format(env=environment, timestamp=),
     NoReboot=True
     # BlockDeviceMappings=[
     #     {
