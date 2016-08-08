@@ -131,7 +131,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
 
     # If we were given an imageid, just use it
     if primary_image_id != None:
-      possible_images = {"ImageId" : primary_image_id}
+      possible_images = {"ImageId" : primary_image_id, "CreationDate": "recent"}
     # Otherwise, dynamically ascertain the image if it's web
     elif image_type == "web":
       # Get a list of all web images that match our tags, made by us
