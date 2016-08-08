@@ -79,6 +79,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   """
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
+  environment = "staging" if "nmdev" in new_instance_name else "production"
   
   # Sanity checks before we get started
   new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_instance_name)
@@ -128,11 +129,15 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     # Connect to EC2
     ec2 = boto3.client('ec2', region_name='us-west-2')
 
-    if image_type == "web":
-      # Get a list of all images that are close to the name passed in, made by us
+    # If we were given an imageid for web, just set it up
+    if image_type == "web" and primary_image_id != None:
+      possible_images = {"ImageId" : primary_image_id}
+    # Otherwise, dynamically ascertain the image if it's web
+    elif image_type == "web":
+      # Get a list of all web images that match our tags, made by us
       possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{
         "Name": "tag-value",
-        "Values": ['staging']
+        "Values": [environment]
       },
       {
         "Name": "tag-value",
