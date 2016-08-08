@@ -147,6 +147,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       # Get a list of all images that are close to the name passed in, made by us
       possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
     # Sort the images by creation date
+    p(possible_images)
     sorted_images = sorted(possible_images, key=lambda k: k['CreationDate'])
     # Select the last image in the list
     most_recent_image = sorted_images[-1]
