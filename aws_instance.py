@@ -129,8 +129,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     # Connect to EC2
     ec2 = boto3.client('ec2', region_name='us-west-2')
 
-    # If we were given an imageid for web, just set it up
-    if image_type == "web" and primary_image_id != None:
+    # If we were given an imageid, just use it
+    if primary_image_id != None:
       possible_images = {"ImageId" : primary_image_id}
     # Otherwise, dynamically ascertain the image if it's web
     elif image_type == "web":
