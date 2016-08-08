@@ -13,8 +13,8 @@ def get_vault_client():
     """
     Return a vault client if possible.
     """
-    vault_addr = os.getenv("VAULT_ADDR", False)
-    vault_token = os.getenv('VAULT_TOKEN', False)
+    vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
+    vault_token = os.getenv('GITHUB_TOKEN', False)
     if not vault_addr or not vault_token:
         print "You must provide both VAULT_ADDR and VAULT_TOKEN environment variables."
         sys.exit(1)
