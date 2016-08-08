@@ -3,8 +3,10 @@
 import yaml
 import os
 import sys
-from subprocess import Popen, PIPE
 import hvac
+import databag
+import click
+from pprint import pprint as p
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -16,7 +18,8 @@ def get_vault_client():
     vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
     vault_token = os.getenv('GITHUB_TOKEN', False)
     if not vault_addr or not vault_token:
-        print "You must provide both VAULT_ADDR and VAULT_TOKEN environment variables."
+        print "You must provide both VAULT_ADDR and GITHUB_TOKEN environment variables."
+        print "(Have you authenticated with `drud secret auth` to create your GITHUB_TOKEN?)"
         sys.exit(1)
 
     vault_client = hvac.Client(url=vault_addr)
@@ -32,53 +35,72 @@ def get_vault_client():
 
     return vault_client
 
-
-def get_databag(query):
+@click.command()
+@click.option('--dest', default="secret/databags")
+@click.option('--debug', is_flag=True)
+def sync(dest, debug):
     """
-    Use Chef Knife to get databags
-
-    :param query: databag path
-    :return: dict of expected data
+    This is designed to sync databags by using the destination path.
+    If the destination is a container, it will sync the entire container
+    If the destination is a full bag path, it will sync the entire bag
     """
-
-    #bag_path = '/opt/.chef/nmd_encrypted_data_bag_secret'
-    bag_path = "/var/jenkins_home/.chef/nmd_encrypted_data_bag_secret"
-    command = 'knife data bag show {query} --secret-file {path} -F yaml'.format(
-        query=query,
-        path=bag_path,
-    )
-
-    #print command
-    p = Popen(command, stdout=PIPE, stderr=PIPE, shell=True)
-    response = p.communicate()[0]
-
-    return response
-
-
-def migrate(dest="secret/databags/nmdhosting", mock=False):
-    chef_sites = yaml.load(get_databag("nmdhosting"))
     vault_client = get_vault_client()
-    for site in chef_sites:
-        chef_path = "nmdhosting %s" % site
-        vault_path = os.path.join(dest, site)
-        if not mock:
-            databag = yaml.load(get_databag(chef_path))
-        #print yaml.dump(databag, indent=4)
-        # prefix vault path with 'secret/''
-        if not vault_path.startswith("secret/"):
-            vault_path = os.path.join("secret", vault_path)
+    containers = {}
+    # If they didn't pass in a secret/ path, prepend it
+    if not dest.startswith("secret/"):
+        dest = os.path.join("secret", dest)
+    # If the dest is 
+    if not dest.startswith('secret/databags'):
+        exit('The dest needs to start with "secret/databags" and is designed to sync by container, or even single bag name.')
+    # If we're just doing a single bag in nmdhosting
+    if len(dest.split('/')) == 4:
+        _, _, container, bag_name = dest.split('/')
+        # Construct the data structure we can use below
+        containers[container] = [bag_name]
+    # If we're doing a container's worth of databags
+    elif dest.startswith('secret/databags') and len(dest.split('/')) == 3:
+        _, _, container = dest.split('/')
+        containers[container] = []
 
-        print "Migrate chef databag '{0}' to vault '{1}'".format(
-            chef_path,
-            vault_path,
-        )
+    # If we're doing ALL containers
+    elif dest == "secret/databags":
+        containers = {x: [] for x in databag.run_cmd(op="list")}
+    # We're going to do something else
+    else:
+        exit("Need to add logic for migrating {dest}".format(dest=dest))
 
-        if not mock:
-            if isinstance(databag, basestring):
-                vault_client.write(vault_path, value=databag)
-            elif isinstance(databag, dict):
-                vault_client.write(vault_path, **databag)
+    
+    # There's only one container and one bag
+    if len(containers) == 1 and len(containers[0]) == 1:
+        pass
+    # If there's more than one container set, we need to get the bags for each container
+    else:
+        for container, bags in containers.iteritems():
+            bag_names = databag.run_cmd(op="show", container=container)
+            containers[container] = bag_names
+        
+    # For each container we found
+    for container, bag_names in containers.iteritems():
+        for bag_name in bag_names:
+            print "Migrate chef databag '{container}/{bag}' to vault path '{dest}'".format(
+                container=container,
+                bag_name=bag_name,
+                dest=dest
+            )
+            bag = databag.get_databag(bag_name, container)
+            if not debug:
+                if bag_name == "certs" and container == "nmdproxy":
+                    print "I haven't handled certs yet...skipping..."
+                elif isinstance(databag, dict):
+                    vault_client.write(dest, **bag)
+                elif isinstance(databag, basestring):
+                    print "The databag {bag} has no content...Creating an empty space...".format(bag=bag_name)
+                    vault_client.write(dest, value=databag)
+                else:
+                    print "We don't know what to do with this bag"
+            
+
 
 
 if __name__ == '__main__':
-    migrate()
+    sync()
