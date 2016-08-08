@@ -250,11 +250,6 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
 
     client = get_vault_client()
     client.write('secret/nmdhosting/' + sitename, **bag_item)
-    # # Encrypt and save new data bag
-    # enc_hash = Chef::EncryptedDataBagItem.encrypt_data_bag_item(bag_item, secret)
-    # ebag_item = Chef::DataBagItem.from_hash(enc_hash)
-    # ebag_item.data_bag('nmdhosting')
-    # ebag_item.save
 if __name__ == '__main__':
     create_bag()
 
