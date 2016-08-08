@@ -424,7 +424,7 @@ def cleanup_web_amis(environment, number_to_keep):
   # Get the client
   ec2 = boto3.client('ec2', region_name='us-west-2')
   web_amis = get_web_amis(environment)
-  if len(web_amis) == 0:
+  if not len(web_amis):
     print "Found 0 AMIs matching the tag-value of 'web', tag-value of '{env}', with a status of 'completed'.".format(env=environment)
     exit(0)
   elif len(web_amis) <= number_to_keep:
