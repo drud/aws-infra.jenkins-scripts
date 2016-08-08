@@ -349,8 +349,8 @@ def create_ami(host_to_image):
   timestamp = int(time.time())
   ami_id = client.create_image(
     InstanceId=host_to_image_id,
-    Name='web {env} {timestamp}'.format(env=environment, timestamp=),
-    Description='web {env} {timestamp} AMI'.format(env=environment, timestamp=),
+    Name='web {env} {timestamp}'.format(env=environment, timestamp=timestamp),
+    Description='web {env} {timestamp} AMI'.format(env=environment, timestamp=timestamp),
     NoReboot=True
     # BlockDeviceMappings=[
     #     {
