@@ -3,12 +3,9 @@ import databag
 import click
 import sys
 import hvac
+import requests.packages.urllib3
 
 debug=False
-
-proxy_container="nmdproxy"
-if debug:
-  proxy_container="nmdtest"
 
 def get_vault_client():
     """

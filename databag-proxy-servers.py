@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import databag
 import click
+import requests.packages.urllib3
 
 proxy_container="nmdproxy"
 
