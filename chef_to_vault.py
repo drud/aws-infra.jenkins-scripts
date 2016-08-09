@@ -13,7 +13,7 @@ def get_vault_client():
     """
     Return a vault client if possible.
     """
-    # Disable warnings?
+    # Disable warnings for the insecure calls
     requests.packages.urllib3.disable_warnings()
     vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
     vault_token = os.getenv('GITHUB_TOKEN', False)
@@ -103,10 +103,10 @@ def sync(dest, debug):
                             print vpath
                             vault_client.write(vpath, **bag[env][site])
                 elif isinstance(bag, dict):
-                    vault_client.write(dest, **bag)
+                    vault_client.write(os.path.join(dest, container, bag_name), **bag)
                 elif isinstance(bag, basestring):
                     print "The databag {bag} has no content...Creating an empty space...".format(bag=bag_name)
-                    vault_client.write(dest, value=bag)
+                    vault_client.write(os.path.join(dest, container, bag_name), value=bag)
                 else:
                     print "We don't know what to do with this bag"
                     p(bag)
