@@ -87,7 +87,16 @@ def sync(dest, debug):
             bag = databag.get_databag(bag_name, container)
             if not debug:
                 if bag_name == "certs" and container == "nmdproxy":
-                    print "I haven't handled certs yet...skipping..."
+                    # Since we're breaking this into multiple bags, just don't worry about it.
+                    del bag["id"]
+                    # For each environment's certs
+                    for env in bag.keys():
+                        # For each site in nmdcerts/
+                        for site in bag[env].keys():
+                            vpath = "secret/databags/nmdproxy/certs/{0}/{1}".format()
+                            print "\tCreating cert nmdproxy/{0}/{1}".format(env, site)
+                            print vpath
+                            vault_client.write(vpath, **bag[env][site])
                 elif isinstance(databag, dict):
                     vault_client.write(dest, **bag)
                 elif isinstance(databag, basestring):
