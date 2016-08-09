@@ -446,6 +446,8 @@ def cleanup_web_amis(environment, number_to_keep):
       except botocore.exceptions.ClientError as e:
         if "is currently in use" in str(e):
           print "Could not delete {ami_id} because it is in use. Skipping...".format(ami_id=ami['ImageId'])
+        else:
+          print repr(e)
     else:
       print "Preserving {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
 
