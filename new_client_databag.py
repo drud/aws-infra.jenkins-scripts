@@ -4,6 +4,7 @@ import sys
 import click
 from collections import OrderedDict
 import hvac
+import os
 
 def get_vault_client():
     vault_token = os.environ.get('GITHUB_TOKEN', "NO TOKEN FOUND")
