@@ -42,8 +42,8 @@ def get_instance_by_tagged_name(server_name):
     instance_id = ""
     instance_dict = None
     instance = None
-    ec2_connection = boto3.client('ec2', region_name='us-west-2')
-    ec2_instances = ec2_connection.describe_instances()["Reservations"]
+    client = boto3.client('ec2', region_name='us-west-2')
+    ec2_instances = client.describe_instances()["Reservations"]
     for instance in ec2_instances:
       for x in instance["Instances"]:
         if "Tags" in x:
@@ -79,6 +79,8 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
   """
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
+  # Connect to EC2
+  client = boto3.client('ec2', region_name='us-west-2')
   environment = "staging" if "nmdev" in new_instance_name else "production"
   
   # Sanity checks before we get started
@@ -126,8 +128,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     if debug:
       # If we're debugging, we don't need a large instance.
       new_instance_type = "t2.micro"
-    # Connect to EC2
-    ec2 = boto3.client('ec2', region_name='us-west-2')
+    
 
     # If we were given an imageid, just use it
     if primary_image_id != None:
@@ -135,7 +136,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     # Otherwise, dynamically ascertain the image if it's web
     elif image_type == "web":
       # Get a list of all web images that match our tags, made by us
-      possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{
+      possible_images = client.describe_images(Owners=['503809752978'], Filters=[{
         "Name": "tag-value",
         "Values": [environment]
       },
@@ -145,13 +146,12 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       }])
     else:
       # Get a list of all images that are close to the name passed in, made by us
-      possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
+      possible_images = client.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
     # Sort the images by creation date
     sorted_images = sorted(possible_images['Images'], key=lambda k: k['CreationDate'])
     # Select the last image in the list
     most_recent_image = sorted_images[-1]
 
-    ec2 = boto3.resource('ec2', region_name='us-west-2')
     # Create a new instance based on the AMI we just found
     instances = ec2.create_instances(ImageId=most_recent_image['ImageId'],
       MinCount=1,
@@ -166,7 +166,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     new_instance = instances[0]
   else:
     print "An instance named {name} already exists. Not re-creating instance, but running post-processor hooks.".format(name=new_instance_name)
-    new_instance = boto3.resource('ec2', region_name='us-west-2').Instance(new_instance_id)
+    new_instance = ec2.Instance(new_instance_id)
   # Get the tags figured out for the new instance
   tags = instance_to_replace.tags
   for i, tag in enumerate(instance_to_replace.tags):
@@ -214,7 +214,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     print "There was an error creating the A record. You will have to create it manually"
     print "Error: %s" % e
     exit(0)
-  user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
+  user = client.describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   user = "root" if len(user)<1 else str(user[0]['Value'])
   if "gluster" in image_type:
     print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after waiting for it to respond to a ping.\nNote: If this doesn't respond, you may need to manually intervene by restarting the server."
@@ -393,9 +393,9 @@ def create_ami(host_to_image):
   ])
 
 def get_web_amis(environment):
-  ec2 = boto3.client('ec2', region_name='us-west-2')
+  client = boto3.client('ec2', region_name='us-west-2')
   # Get all tag Type: web {env} amis
-  all_web_amis = ec2.describe_images(Filters=[{
+  all_web_amis = client.describe_images(Filters=[{
       'Name': 'state',
       'Values': [
         'available'
@@ -422,7 +422,7 @@ def get_web_amis(environment):
 @click.option('--number-to-keep', default=2, help='Number of web AMIs to keep')
 def cleanup_web_amis(environment, number_to_keep):
   # Get the client
-  ec2 = boto3.client('ec2', region_name='us-west-2')
+  client = boto3.client('ec2', region_name='us-west-2')
   web_amis = get_web_amis(environment)
   if not len(web_amis):
     print "Found 0 AMIs matching the tag-value of 'web', tag-value of '{env}', with a status of 'completed'.".format(env=environment)
@@ -442,7 +442,7 @@ def cleanup_web_amis(environment, number_to_keep):
     if len(web_amis)-index > number_to_keep:
       print "Deleting {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
       try:
-        ec2.deregister_image(ImageId=snap['SnapshotId'])
+        client.deregister_image(ImageId=snap['SnapshotId'])
       except botocore.exceptions.ClientError as e:
         if "is currently in use" in str(e):
           print "Could not delete {ami_id} because it is in use. Skipping...".format(ami_id=ami['ImageId'])
