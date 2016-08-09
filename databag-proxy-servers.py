@@ -4,8 +4,6 @@ import click
 import os
 import requests.packages.urllib3
 
-proxy_container="nmdproxy"
-
 #### Logic for taking servers in and out of rotation ####
 #Here's the servers array:
 # bag['production']['webcluster01']['servers'] = [
@@ -119,9 +117,6 @@ def modify_server_list(server, operation, debug):
   """
   Get the list of servers for an environment
   """
-  if debug:
-    global proxy_container
-    proxy_container="nmdtest"
   vault_client = get_vault_client()
   proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
   environment = "staging" if "nmdev.us" in server else "production"
