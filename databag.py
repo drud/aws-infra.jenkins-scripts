@@ -34,7 +34,8 @@ def construct_cmd(op, container, bag_name, json_tmp_file_name):
   if local:
     cmd += "cd ~/cookbooks/chef; bundle exec"
   cmd += " knife data bag {op} {container} {bag_name}".format(op=op, container=container, bag_name=bag_name)
-  cmd += " --secret-file {secret}".format(secret=secret_file)
+  if op != "list":
+    cmd += " --secret-file {secret}".format(secret=secret_file)
   if not local:
     cmd += " -c /var/jenkins_home/workspace/jenkins-scripts/.chef/knife.rb"
   cmd += " -F json > {json_file}".format(json_file=json_tmp_file_name)
@@ -56,7 +57,7 @@ def run_cmd(op="show", container="nmdhosting", bag_name="", clean_up=True):
   json_tmp_file = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
   json_tmp_file.close()
   # This will write out to a tmp json file
-  subprocess.call(construct_cmd(op, container, bag_name, json_tmp_file.name), shell=True)
+  subprocess.call(construct_cmd(op, container, bag_name, json_tmp_file.name), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   # Pull that clean data back in
   with open(json_tmp_file.name) as data_file:    
     data = json.load(data_file)
