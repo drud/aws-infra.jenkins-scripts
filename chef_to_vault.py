@@ -21,8 +21,6 @@ def get_vault_client():
         print "You must provide both VAULT_ADDR and GITHUB_TOKEN environment variables."
         print "(Have you authenticated with `drud secret auth` to create your GITHUB_TOKEN?)"
         sys.exit(1)
-    else:
-        print vault_addr, vault_token
 
     vault_client = hvac.Client(url=vault_addr, verify=False)
     vault_client.auth_github(vault_token)
