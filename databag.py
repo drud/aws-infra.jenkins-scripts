@@ -57,7 +57,7 @@ def run_cmd(op="show", container="nmdhosting", bag_name="", clean_up=True):
   json_tmp_file = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
   json_tmp_file.close()
   # This will write out to a tmp json file
-  subprocess.call(construct_cmd(op, container, bag_name, json_tmp_file.name), shell=True)
+  subprocess.call(construct_cmd(op, container, bag_name, json_tmp_file.name), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   # Pull that clean data back in
   with open(json_tmp_file.name) as data_file:    
     data = json.load(data_file)
