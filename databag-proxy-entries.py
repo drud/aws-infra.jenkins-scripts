@@ -3,6 +3,7 @@ import databag
 import click
 import sys
 import hvac
+import os
 import requests.packages.urllib3
 
 debug=False
