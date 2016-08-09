@@ -249,7 +249,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     bag_item['client_metadata'] = client_metadata
 
     client = get_vault_client()
-    client.write('secret/nmdhosting/' + sitename, **bag_item)
+    client.write('secret/databags/nmdhosting/' + sitename, **bag_item)
 if __name__ == '__main__':
     create_bag()
 
