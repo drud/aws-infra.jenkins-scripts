@@ -462,23 +462,5 @@ def create_web_from_ami(host_to_mimic, new_instance_name):
   # Pass it to create_instance_like_fnc
   create_instance_like_fnc(host_to_mimic, image_type='web', new_instance_name=new_instance_name, recreate_all_volumes=True, primary_image_id=all_web_amis[-1]['ImageId'], debug=False)
 
-# instance.detech_volume(VolumeId="")
 if __name__ == '__main__':
-  #ssh_exec_cmd = ['"umount', '{dev}'.format(dev=)]
-  #print subprocess.check_output(ssh_cmd)
-
-  # instance_id = 'i-318ca4c6' # gluster01.nmdev.us
-  # image_type = "gluster"
-  # old_host = "gluster01.nmdev.us"
-  # new_host = 'gluster0test.nmdev.us'
-  # new_instance_name = new_host
-  # user="root" if "nmdev.us" in host else "ubuntu"
-  
-  #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster03.nmdev.us')
-  #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster04.nmdev.us')
-  # gluster03.nmdev.us->10.0.3.153 in Z2WYJTE6C15CN4
-  # ec2.Instance(id='i-45854cea')
-  # gluster04.nmdev.us->10.0.3.27 in Z2WYJTE6C15CN4
-  # ec2.Instance(id='i-52854cfd')
-  #move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', device_name='/dev/xvdf')
   siteman()
