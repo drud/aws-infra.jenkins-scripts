@@ -82,7 +82,7 @@ def sync(dest, debug):
     # For each container we found
     for container, bag_names in containers.iteritems():
         for bag_name in bag_names:
-            print "Migrate chef databag '{container}/{bag}' to vault path '{dest}/{container}/{bag}'".format(
+            print "Migrating chef databag '{container}/{bag}' to vault path '{dest}/{container}/{bag}'".format(
                 container=container,
                 bag=bag_name,
                 dest=dest
