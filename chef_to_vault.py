@@ -8,9 +8,6 @@ import databag
 import click
 from pprint import pprint as p
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
-
 def get_vault_client():
     """
     Return a vault client if possible.
@@ -70,7 +67,7 @@ def sync(dest, debug):
         exit("Need to add logic for migrating {dest}".format(dest=dest))
 
     
-    # There's only one container and one bag
+    # There's only one container and one bag, we don't need to do anything
     if len(containers) == 1 and len(containers[0]) == 1:
         pass
     # If there's more than one container set, we need to get the bags for each container
