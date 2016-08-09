@@ -13,8 +13,8 @@ def get_vault_client():
     """
     Return a vault client if possible.
     """
-    # Disable warnings
-    #requests.packages.urllib3.disable_warnings()
+    # Disable warnings?
+    requests.packages.urllib3.disable_warnings()
     vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
     vault_token = os.getenv('GITHUB_TOKEN', False)
     if not vault_addr or not vault_token:
