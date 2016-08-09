@@ -51,7 +51,7 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   Add or remove entries from a proxy-structured datBabag.
   """
   vault_client = get_vault_client()
-  proxy_databag = hvac.read("secret/globals/nmdproxy")['data']
+  proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
   if environment=='production':
     site_entries = proxy_databag[environment]['webcluster01']['apps']
   elif environment=="staging":
@@ -82,7 +82,7 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   elif environment=="staging":
     proxy_databag[environment]['web01']['apps'] = site_entries
 
-  vault_client.write('secret/globals/nmdproxy', **proxy_databag)
+  vault_client.write('secret/databags/nmdproxy/upstream', **proxy_databag)
 
 if __name__ == '__main__':
     site_proxy_entry()

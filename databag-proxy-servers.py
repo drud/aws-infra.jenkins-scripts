@@ -71,7 +71,8 @@ def get_server_list(environment):
 
   :returns list of servers
   """
-  proxy_databag = databag.get_databag("upstream", container=proxy_container)
+  vault_client = get_vault_client()
+  proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
   if environment=='production':
     server_list = proxy_databag[environment]['webcluster01']['servers']
   elif environment=="staging":
@@ -93,7 +94,8 @@ def modify_server_list(server, operation, debug):
   if debug:
     global proxy_container
     proxy_container="nmdtest"
-  proxy_databag = databag.get_databag("upstream", container=proxy_container)
+  vault_client = get_vault_client()
+  proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
   environment = "staging" if "nmdev.us" in server else "production"
   if environment=="production":
     cluster='webcluster01'
@@ -114,7 +116,8 @@ def modify_server_list(server, operation, debug):
   # Put it all back together
   proxy_databag[environment][cluster]['servers'] = server_list
 
-  databag.save_databag(proxy_databag, bag_name="upstream", container=proxy_container)
+  vault_client.write("secret/databags/nmdproxy/upstream", **proxy_databag)
+
   return True
 
 # if __name__ == '__main__':
