@@ -86,7 +86,7 @@ def sync(dest, debug):
         for bag_name in bag_names:
             print "Migrate chef databag '{container}/{bag}' to vault path '{dest}'".format(
                 container=container,
-                bag_name=bag_name,
+                bag=bag_name,
                 dest=dest
             )
             bag = databag.get_databag(bag_name, container)
