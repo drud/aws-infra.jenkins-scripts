@@ -2,6 +2,7 @@
 import databag
 import click
 import os
+import hvac
 import requests.packages.urllib3
 
 #### Logic for taking servers in and out of rotation ####
