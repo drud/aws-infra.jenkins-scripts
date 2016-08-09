@@ -431,8 +431,8 @@ def cleanup_web_amis(environment, number_to_keep):
     print "Found {num} AMIs matching the search critereon. Keeping all AMIs (since we want to keep {keep_num}).".format(num=len(web_amis), keep_num=number_to_keep)
     exit(0)
   else:
-    print "Found {num} AMIs matching the search critereon. Pruning total down to the {keep_num} most recent snaps.".format(num=len(web_amis), keep_num=number_to_keep)
-  print "Current snapshot inventory:"
+    print "Found {num} AMIs matching the search critereon. Pruning total down to the {keep_num} most recent images.".format(num=len(web_amis), keep_num=number_to_keep)
+  print "Current AMI inventory:"
   print "ImageId", "CreationDate"
   for index, ami in enumerate(web_amis):
     print index, ami['ImageId'], ami['CreationDate']
@@ -442,7 +442,7 @@ def cleanup_web_amis(environment, number_to_keep):
     if len(web_amis)-index > number_to_keep:
       print "Deleting {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
       try:
-        client.deregister_image(ImageId=snap['SnapshotId'])
+        client.deregister_image(ImageId=ami['ImageId'])
       except botocore.exceptions.ClientError as e:
         if "is currently in use" in str(e):
           print "Could not delete {ami_id} because it is in use. Skipping...".format(ami_id=ami['ImageId'])
