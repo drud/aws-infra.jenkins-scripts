@@ -55,12 +55,12 @@ def sync(dest, debug):
     if not dest.startswith('secret/databags'):
         exit('The dest needs to start with "secret/databags" and is designed to sync by container, or even single bag name.')
     # If we're just doing a single bag in nmdhosting
-    if len(dest.split('/')) == 4:
+    if len(os.path.split(dest)) == 4:
         _, _, container, bag_name = dest.split('/')
         # Construct the data structure we can use below
         containers[container] = [bag_name]
     # If we're doing a container's worth of databags
-    elif dest.startswith('secret/databags') and len(dest.split('/')) == 3:
+    elif dest.startswith('secret/databags') and len(os.path.split(dest)) == 3:
         _, _, container = dest.split('/')
         containers[container] = []
 
@@ -102,13 +102,14 @@ def sync(dest, debug):
                             print "\tCreating cert nmdproxy/{0}/{1}".format(env, site)
                             print vpath
                             vault_client.write(vpath, **bag[env][site])
-                elif isinstance(databag, dict):
+                elif isinstance(bag, dict):
                     vault_client.write(dest, **bag)
-                elif isinstance(databag, basestring):
+                elif isinstance(bag, basestring):
                     print "The databag {bag} has no content...Creating an empty space...".format(bag=bag_name)
-                    vault_client.write(dest, value=databag)
+                    vault_client.write(dest, value=bag)
                 else:
                     print "We don't know what to do with this bag"
+                    p(bag)
 
 
 if __name__ == '__main__':
