@@ -82,7 +82,7 @@ def sync(dest, debug):
     # For each container we found
     for container, bag_names in containers.iteritems():
         for bag_name in bag_names:
-            print "Migrate chef databag '{container}/{bag}' to vault path '{dest}'".format(
+            print "Migrate chef databag '{container}/{bag}' to vault path '{dest}/{container}/{bag}'".format(
                 container=container,
                 bag=bag_name,
                 dest=dest
@@ -90,13 +90,14 @@ def sync(dest, debug):
             bag = databag.get_databag(bag_name, container)
             if not debug:
                 if bag_name == "certs" and container == "nmdproxy":
+                    print "Breaking up certs into individual secrets (b/c of space constraints)."
                     # Since we're breaking this into multiple bags, just don't worry about it.
                     del bag["id"]
                     # For each environment's certs
                     for env in bag.keys():
                         # For each site in nmdcerts/
                         for site in bag[env].keys():
-                            vpath = "secret/databags/nmdproxy/certs/{0}/{1}".format()
+                            vpath = "secret/databags/nmdproxy/certs/{0}/{1}".format(env, site)
                             print "\tCreating cert nmdproxy/{0}/{1}".format(env, site)
                             print vpath
                             vault_client.write(vpath, **bag[env][site])
