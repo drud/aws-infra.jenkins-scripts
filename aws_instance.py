@@ -28,6 +28,7 @@ import remote_fstab
 import time
 import click
 import gluster
+import time
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -41,8 +42,8 @@ def get_instance_by_tagged_name(server_name):
     instance_id = ""
     instance_dict = None
     instance = None
-    ec2_connection = boto3.client('ec2', region_name='us-west-2')
-    ec2_instances = ec2_connection.describe_instances()["Reservations"]
+    client = boto3.client('ec2', region_name='us-west-2')
+    ec2_instances = client.describe_instances()["Reservations"]
     for instance in ec2_instances:
       for x in instance["Instances"]:
         if "Tags" in x:
@@ -67,16 +68,20 @@ def siteman():
 @click.option('--host-to-mimic', prompt='Hostname of instance to mimic', help='Hostname of instance to mimic e.g. gluster05.newmediadenver.com')
 @click.option('--image-type', prompt='AMI search string', help='A basic search string that partially matches an AMI label', type=click.Choice(['gluster', 'proxy', 'percona', 'web']))
 @click.option('--new-instance-name', prompt='New instance name', help='The FQDN of the new instance e.g. gluster01.nmdev.us')
+@click.option('--primary-image-id', default=None)
 @click.option('--debug', is_flag=True)
-def create_instance_like(host_to_mimic, image_type, new_instance_name, debug):
-  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, debug=debug)
+def create_instance_like(host_to_mimic, image_type, new_instance_name, primary_image_id, debug):
+  create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_image_id=None, debug=debug)
 
-def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, debug=False):
+def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recreate_all_volumes=True, primary_image_id=None, debug=False):
   """
   Creates an instance with the same settings as the instance ID specified and provisions the machine with the most recent pre-built AMI specified in the search string.
   """
   # Connect to EC2
   ec2 = boto3.resource('ec2', region_name='us-west-2')
+  # Connect to EC2
+  client = boto3.client('ec2', region_name='us-west-2')
+  environment = "staging" if "nmdev" in new_instance_name else "production"
   
   # Sanity checks before we get started
   new_instance_id, new_instance_dict = get_instance_by_tagged_name(new_instance_name)
@@ -123,17 +128,30 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     if debug:
       # If we're debugging, we don't need a large instance.
       new_instance_type = "t2.micro"
-    # Connect to EC2
-    ec2 = boto3.client('ec2', region_name='us-west-2')
+    
 
-    # Get a list of all images that are close to the name passed in, made by us
-    possible_images = ec2.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
+    # If we were given an imageid, just use it
+    if primary_image_id != None:
+      possible_images = {"Images": [{"ImageId" : primary_image_id, "CreationDate": int(time.time())}]}
+    # Otherwise, dynamically ascertain the image if it's web
+    elif image_type == "web":
+      # Get a list of all web images that match our tags, made by us
+      possible_images = client.describe_images(Owners=['503809752978'], Filters=[{
+        "Name": "tag-value",
+        "Values": [environment]
+      },
+      {
+        "Name": "tag-value",
+        "Values": ['web']
+      }])
+    else:
+      # Get a list of all images that are close to the name passed in, made by us
+      possible_images = client.describe_images(Owners=['503809752978'], Filters=[{'Name': 'name', 'Values': ["*{image_type}*".format(image_type=image_type)]}])
     # Sort the images by creation date
     sorted_images = sorted(possible_images['Images'], key=lambda k: k['CreationDate'])
     # Select the last image in the list
     most_recent_image = sorted_images[-1]
 
-    ec2 = boto3.resource('ec2', region_name='us-west-2')
     # Create a new instance based on the AMI we just found
     instances = ec2.create_instances(ImageId=most_recent_image['ImageId'],
       MinCount=1,
@@ -148,7 +166,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     new_instance = instances[0]
   else:
     print "An instance named {name} already exists. Not re-creating instance, but running post-processor hooks.".format(name=new_instance_name)
-    new_instance = boto3.resource('ec2', region_name='us-west-2').Instance(new_instance_id)
+    new_instance = ec2.Instance(new_instance_id)
   # Get the tags figured out for the new instance
   tags = instance_to_replace.tags
   for i, tag in enumerate(instance_to_replace.tags):
@@ -156,7 +174,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
       tags[i]["Value"] = new_instance_name
       break
   
-  if image_type in ['gluster', 'percona', 'proxy']:
+  if image_type in ['gluster', 'percona', 'proxy', 'web']:
     tags.append({
       "Key": "DeployUser",
       "Value": "ubuntu"
@@ -196,7 +214,7 @@ def create_instance_like_fnc(host_to_mimic, image_type, new_instance_name, recre
     print "There was an error creating the A record. You will have to create it manually"
     print "Error: %s" % e
     exit(0)
-  user = boto3.client('ec2', region_name='us-west-2').describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
+  user = client.describe_tags(Filters=[{"Name":"resource-id","Values":[new_instance.instance_id]}, {"Name":"key","Values":["DeployUser"]}])['Tags']
   user = "root" if len(user)<1 else str(user[0]['Value'])
   if "gluster" in image_type:
     print "There are some Jenkins jobs that need to be run for gluster. Kicking them off after waiting for it to respond to a ping.\nNote: If this doesn't respond, you may need to manually intervene by restarting the server."
@@ -314,24 +332,135 @@ def move_volume(volume_id, old_host, new_host, device_name, volume_type):
     gluster.peer_connect_fnc(gluster_user, gluster_host, peer=new_host)
     gluster.replace_brick_fnc(old_host, old_user, fstab_entry[1], new_host, new_user, fstab_entry[1])
 
+@siteman.command()
+@click.option('--host-to-image', prompt='Hostname of instance you would like to image', help='Hostname that you would like to image')
+def create_ami(host_to_image):
+  ec2 = boto3.resource('ec2', region_name='us-west-2')
+  client = boto3.client('ec2', region_name='us-west-2')
+  # Figure out the instance ID by hostname tags
+  host_to_image_id, host_to_image_dict = get_instance_by_tagged_name(host_to_image)
+  if host_to_image_id == None:
+    exit("Cannot continue without a valid instance to get the volume from")
+  environment = "staging" if "nmdev.us" in host_to_image else "production"
+  # # Get it's primary volume (should always be index value 0)
+  # primary_vol_id = host_to_image_dict['BlockDeviceMappings'][0]['Ebs']['VolumeId']
+  # # Snapshot the primary volume
+  # snapshot = ec2.Volume(primary_vol_id).create_snapshot()
+  # # Wait for the snapshot to complete (indefinetely)
+  # while snapshot.state != "completed":
+  #   print "Snapshot at {perc}...".format(perc=snapshot.progress)
+  #   time.sleep(10)
+  #   snapshot.reload()
+  timestamp = int(time.time())
+  ami_id = client.create_image(
+    InstanceId=host_to_image_id,
+    Name='web {env} {timestamp}'.format(env=environment, timestamp=timestamp),
+    Description='web {env} {timestamp} AMI'.format(env=environment, timestamp=timestamp),
+    NoReboot=True
+    # BlockDeviceMappings=[
+    #     {
+    #         'VirtualName': 'string',
+    #         'DeviceName': 'string',
+    #         'Ebs': {
+    #             'SnapshotId': 'string',
+    #             'VolumeSize': 123,
+    #             'DeleteOnTermination': True|False,
+    #             'VolumeType': 'standard'|'io1'|'gp2'|'sc1'|'st1',
+    #             'Iops': 123,
+    #             'Encrypted': True|False
+    #         }
+    #     },
+    # ]
+  )["ImageId"]
+  image = ec2.Image(ami_id)
+  print "Waiting for AMI to finish being created"
+  while "available" not in image.state:
+    time.sleep(10)
+    image.reload()
 
-# instance.detech_volume(VolumeId="")
+  environment = "staging" if "nmdev.us" in host_to_image else "production"
+
+  # Label the snapshot
+  image.create_tags(Tags=[
+    {
+      'Key': 'Type',
+      'Value': 'web'
+    },
+    {
+      'Key': 'Environment',
+      'Value': environment
+    }
+  ])
+
+def get_web_amis(environment):
+  client = boto3.client('ec2', region_name='us-west-2')
+  # Get all tag Type: web {env} amis
+  all_web_amis = client.describe_images(Filters=[{
+      'Name': 'state',
+      'Values': [
+        'available'
+      ]
+    },
+    {
+      'Name': 'tag-value',
+      'Values': [
+        'web'
+      ]
+    },
+    {
+      'Name': 'tag-value',
+      'Values': [
+        environment
+      ]
+    }
+    ])['Images']
+  all_web_amis = sorted(all_web_amis, key=lambda k: k['CreationDate'])
+  return all_web_amis
+
+@siteman.command()
+@click.option('--environment', prompt='What environment would you like to clean?', help="Environment to clean")
+@click.option('--number-to-keep', default=2, help='Number of web AMIs to keep')
+def cleanup_web_amis(environment, number_to_keep):
+  # Get the client
+  client = boto3.client('ec2', region_name='us-west-2')
+  web_amis = get_web_amis(environment)
+  if not len(web_amis):
+    print "Found 0 AMIs matching the tag-value of 'web', tag-value of '{env}', with a status of 'completed'.".format(env=environment)
+    exit(0)
+  elif len(web_amis) <= number_to_keep:
+    print "Found {num} AMIs matching the search critereon. Keeping all AMIs (since we want to keep {keep_num}).".format(num=len(web_amis), keep_num=number_to_keep)
+    exit(0)
+  else:
+    print "Found {num} AMIs matching the search critereon. Pruning total down to the {keep_num} most recent images.".format(num=len(web_amis), keep_num=number_to_keep)
+  print "Current AMI inventory:"
+  print "ImageId", "CreationDate"
+  for index, ami in enumerate(web_amis):
+    print index, ami['ImageId'], ami['CreationDate']
+
+  print "Deleting all but {num} AMIs that are not in-use...".format(num=number_to_keep)
+  for index, ami in enumerate(web_amis):
+    if len(web_amis)-index > number_to_keep:
+      print "Deleting {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
+      try:
+        client.deregister_image(ImageId=ami['ImageId'])
+      except botocore.exceptions.ClientError as e:
+        if "is currently in use" in str(e):
+          print "Could not delete {ami_id} because it is in use. Skipping...".format(ami_id=ami['ImageId'])
+        else:
+          print repr(e)
+    else:
+      print "Preserving {i}: {id} {created}".format(i=index, id=ami['ImageId'], created=ami['CreationDate'])
+
+
+@siteman.command()
+@click.option('--host-to-mimic', prompt='The hostname to mimic', help="The hostname to mimic")
+@click.option('--new-instance-name', prompt='The hostname of the new instance', help='The hostname of the new instance')
+def create_web_from_ami(host_to_mimic, new_instance_name):
+  # Find the most recent snapshot ID (-1 is the last element in the list)
+  environment = "staging" if "nmdev.us" in host_to_mimic else "production"
+  all_web_amis = get_web_amis(environment)
+  # Pass it to create_instance_like_fnc
+  create_instance_like_fnc(host_to_mimic, image_type='web', new_instance_name=new_instance_name, recreate_all_volumes=True, primary_image_id=all_web_amis[-1]['ImageId'], debug=False)
+
 if __name__ == '__main__':
-  #ssh_exec_cmd = ['"umount', '{dev}'.format(dev=)]
-  #print subprocess.check_output(ssh_cmd)
-
-  # instance_id = 'i-318ca4c6' # gluster01.nmdev.us
-  # image_type = "gluster"
-  # old_host = "gluster01.nmdev.us"
-  # new_host = 'gluster0test.nmdev.us'
-  # new_instance_name = new_host
-  # user="root" if "nmdev.us" in host else "ubuntu"
-  
-  #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster03.nmdev.us')
-  #create_instance_like(instance_id='i-318ca4c6', image_type="gluster", new_instance_name='gluster04.nmdev.us')
-  # gluster03.nmdev.us->10.0.3.153 in Z2WYJTE6C15CN4
-  # ec2.Instance(id='i-45854cea')
-  # gluster04.nmdev.us->10.0.3.27 in Z2WYJTE6C15CN4
-  # ec2.Instance(id='i-52854cfd')
-  #move_volume(volume_id='vol-bf658d36', old_instance_id='i-45854cea', new_instance_id='i-52854cfd', device_name='/dev/xvdf')
   siteman()
