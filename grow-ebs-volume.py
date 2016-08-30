@@ -205,6 +205,18 @@ def grow_ebs_volume(server_name, new_size, device_name):
     tags = {x['Key']: x['Value'] for x in instance.tags}
     user=tags['DeployUser']
     host=tags['Name']
+
+    print "Waiting for SSH..."
+    try:
+        # SSH into the old instance and try to resize the volume.
+        ret = subprocess.check_output("/var/jenkins_home/workspace/jenkins-scripts/wait_for_ssh.sh {serv}".format(serv=server_name).split(" "), stderr=subprocess.STDOUT)
+        print ret
+        sys.exit(0)
+    except subprocess.CalledProcessError as e:
+        print e
+        sys.exit(1)
+
+    print "Resizing the device."
     resize2fs(user, host, vol_device_name)
     
 if __name__ == '__main__':
