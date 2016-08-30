@@ -122,8 +122,6 @@ def grow_ebs_volume(server_name, new_size, device_name):
 
     # Get the device mappings for that instance and find the volume's ID
     mapping = instance.block_device_mappings
-    print mapping
-    sys.exit(1)
     if len(mapping) <= 0:
         print "No map found. Please check the instance manually to ensure there is at least one valid volume currently attached"
         exit(1)
