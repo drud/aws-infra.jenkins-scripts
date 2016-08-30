@@ -94,7 +94,7 @@ def resize2fs(user, host, device_name):
     print ret
     sys.exit(0)
   except subprocess.CalledProcessError as e:
-    print ret
+    print e
     sys.exit(1)
 
 # @siteman.command()
