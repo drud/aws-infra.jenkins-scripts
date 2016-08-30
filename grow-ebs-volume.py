@@ -129,7 +129,7 @@ def grow_ebs_volume(server_name, new_size, device_name):
     devices = {m["DeviceName"]: m["Ebs"]["VolumeId"] for m in mapping}
     devices_by_id= {m["Ebs"]["VolumeId"]: m["DeviceName"] for m in mapping}
     vol_device_name = ""
-    if len(devices) != 1:
+    if len(devices) > 1:
         print "More than 1 device found."
         if device_name in devices.keys():
             show_attached_volumes(instance)
@@ -165,7 +165,7 @@ def grow_ebs_volume(server_name, new_size, device_name):
     while snapshot.state != "completed":
         time.sleep(5)
         snapshot.reload()
-        print "Creating snapshot: {progress}%% complete".format(progress=snapshot.progress)
+        print "Creating snapshot: {progress} complete".format(progress=snapshot.progress)
     # This "waiter" will only wait 10 minutes and error out...which is far too short.
     # snapshot.wait_until_completed()
 
