@@ -97,6 +97,15 @@ def resize2fs(user, host, device_name):
     print e
     sys.exit(1)
 
+def wait_for_ssh(server_name):
+    try:
+        # SSH into the old instance and try to resize the volume.
+        ret = subprocess.check_output("/var/jenkins_home/workspace/jenkins-scripts/wait_for_ssh.sh {serv}".format(serv=server_name).split(" "), stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print e
+        sys.exit(1)
+
+
 # @siteman.command()
 # @click.option('--user', help="Login user")
 # @click.option('--host', help="Host to SSH to")
@@ -206,15 +215,8 @@ def grow_ebs_volume(server_name, new_size, device_name):
     user=tags['DeployUser']
     host=tags['Name']
 
-    print "Waiting for SSH..."
-    try:
-        # SSH into the old instance and try to resize the volume.
-        ret = subprocess.check_output("/var/jenkins_home/workspace/jenkins-scripts/wait_for_ssh.sh {serv}".format(serv=server_name).split(" "), stderr=subprocess.STDOUT)
-        print ret
-        sys.exit(0)
-    except subprocess.CalledProcessError as e:
-        print e
-        sys.exit(1)
+    print "Waiting for SSH to become available..."
+    wait_for_ssh(server_name)
 
     print "Resizing the device."
     resize2fs(user, host, vol_device_name)
