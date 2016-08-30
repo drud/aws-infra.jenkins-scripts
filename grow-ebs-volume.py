@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import click
-import os
+import os, sys
 import requests
 import time
 import boto
@@ -83,6 +83,26 @@ def show_attached_volumes(instance):
     for name, vol_id in devices.iteritems():
         vol = boto3.resource('ec2').Volume(vol_id)
         print "\t{name}:\t{vol_id}\t{vol_size} GiB".format(name=name, vol_id=vol_id, vol_size=vol.size)
+
+def resize2fs(user, host, device_name):
+  # Setup the SSH commands
+  ssh_cmd = "ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {user}@{host}".format(user=user, host=host)
+  resize_cmd = ssh_cmd + " sudo resize2fs {device_name}".format(device_name=device_name)
+  try:
+    # SSH into the old instance and try to resize the volume.
+    ret = subprocess.check_output(resize_cmd.split(" "), stderr=subprocess.STDOUT)
+    print ret
+    sys.exit(0)
+  except subprocess.CalledProcessError as e:
+    print ret
+    sys.exit(1)
+
+# @siteman.command()
+# @click.option('--user', help="Login user")
+# @click.option('--host', help="Host to SSH to")
+# @click.option('--device-name', help="The device path, e.g. /dev/sda1")
+# def resize2fs(user, host, device_name):
+#   _resize2fs(user, host, device_name)
 
 @click.command()
 @click.option('--server-name', prompt='Server name', help='The FQDN of the server (e.g. web01.newmediadenver.com')
@@ -182,12 +202,10 @@ def grow_ebs_volume(server_name, new_size, device_name):
     print "Instance restarted. Here are the devices -"
     show_attached_volumes(instance)
 
-    # tags = {x['Key']: x['Value'] for x in instance.tags}
-    # user=tags['DeployUser']
-    # host=tags['Name']
-    # # ssh -p22 -i /var/jenkins_home/.ssh/aws.pem -o StrictHostKeyChecking=no {{ USERNAME }}@{{ HOST }} "resize2fs "
-    # ssh_cmd = ['ssh', '-p22', '-i', '/var/jenkins_home/.ssh/aws.pem', '-o', 'StrictHostKeyChecking=no', "{user}@{host}".format(user=user,host=host), "\"sudo", "-i", "resize2fs", "{dev}\"".format(dev=device_name)]
-    # print subprocess.check_output(ssh_cmd)
+    tags = {x['Key']: x['Value'] for x in instance.tags}
+    user=tags['DeployUser']
+    host=tags['Name']
+    resize2fs(user, host, vol_device_name)
     
 if __name__ == '__main__':
     grow_ebs_volume()
