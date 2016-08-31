@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import databag
 import click
-
-proxy_container="nmdproxy"
+import os
+import hvac
+import requests.packages.urllib3
 
 #### Logic for taking servers in and out of rotation ####
 #Here's the servers array:
@@ -11,6 +12,32 @@ proxy_container="nmdproxy"
 #   "server web02.newmediadenver.com:80;",
 #   "server web04.newmediadenver.com:80;"
 # ]
+def get_vault_client():
+    """
+    Return a vault client if possible.
+    """
+    # Disable warnings for the insecure calls
+    requests.packages.urllib3.disable_warnings()
+    vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
+    vault_token = os.getenv('GITHUB_TOKEN', False)
+    if not vault_addr or not vault_token:
+        print "You must provide both VAULT_ADDR and GITHUB_TOKEN environment variables."
+        print "(Have you authenticated with `drud secret auth` to create your GITHUB_TOKEN?)"
+        sys.exit(1)
+
+    vault_client = hvac.Client(url=vault_addr, verify=False)
+    vault_client.auth_github(vault_token)
+
+    if vault_client.is_initialized() and vault_client.is_sealed():
+        print "Vault is initialized but sealed."
+        sys.exit(1)
+
+    if not vault_client.is_authenticated():
+        print "Could not get auth."
+        sys.exit(1)
+
+    return vault_client
+
 def remove_server(servers, server_to_remove, cluster):
   """
   Removes a server from the list.
@@ -71,7 +98,8 @@ def get_server_list(environment):
 
   :returns list of servers
   """
-  proxy_databag = databag.get_databag("upstream", container=proxy_container)
+  vault_client = get_vault_client()
+  proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
   if environment=='production':
     server_list = proxy_databag[environment]['webcluster01']['servers']
   elif environment=="staging":
@@ -90,10 +118,8 @@ def modify_server_list(server, operation, debug):
   """
   Get the list of servers for an environment
   """
-  if debug:
-    global proxy_container
-    proxy_container="nmdtest"
-  proxy_databag = databag.get_databag("upstream", container=proxy_container)
+  vault_client = get_vault_client()
+  proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
   environment = "staging" if "nmdev.us" in server else "production"
   if environment=="production":
     cluster='webcluster01'
@@ -114,7 +140,8 @@ def modify_server_list(server, operation, debug):
   # Put it all back together
   proxy_databag[environment][cluster]['servers'] = server_list
 
-  databag.save_databag(proxy_databag, bag_name="upstream", container=proxy_container)
+  vault_client.write("secret/databags/nmdproxy/upstream", **proxy_databag)
+
   return True
 
 # if __name__ == '__main__':
