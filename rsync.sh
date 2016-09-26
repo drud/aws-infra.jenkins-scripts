@@ -42,7 +42,7 @@ for WEB_ROOT in $(find /var/www -maxdepth 2 -type l -name current -print); do
 	--exclude .git/ \
 	$CURRENT_RELEASE ubuntu@$DEST_SERVER:/var/www/$BAGNAME/releases/
     # Copy (or recreate) the current symlink - remember, you are on the src host now
-    ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no ubuntu@$DEST_SERVER "sudo ln -s $CURRENT_RELEASE /var/www/$BAGNAME/current"
+    ssh -i /tmp/aws.pem -o StrictHostKeyChecking=no ubuntu@$DEST_SERVER "sudo ln -s $CURRENT_RELEASE /var/www/$BAGNAME/current && sudo ln -s /mnt/gluster/$BAGNAME /var/www/$BAGNAME/shared"
 done
 
 # Remove the SSH key
