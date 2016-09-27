@@ -7,20 +7,19 @@ import argparse
 import logging
 import operator
 import re
+import time
 from collections import OrderedDict as Dict
 from boto.s3.connection import S3Connection
 
 debug = True
 
-parser = argparse.ArgumentParser(description="Get the key for the latest S3 Object matching a prefix.", prog="s3trim")
+parser = argparse.ArgumentParser(description="Prune all files in S3. Note: Staging and _Default environments will only retain a single back-up.", prog="s3trim")
 parser.add_argument("bucket", help="S3 bucket.")
-parser.add_argument("prefix", help="S3 Object key prefix.")
-parser.add_argument("-c", "--count", help="Number of files to leave.", dest='aws_bucket_count')
+parser.add_argument("-c", "--count", help="Number of days of files to leave in production.", dest='aws_bucket_count')
 parser.add_argument("-k", "--key", help="Your amazon access key.", dest='aws_access_key')
 parser.add_argument("-sk", "--secret", help="Your amazon secret key.", dest='aws_secret_key')
 parser.add_argument("-l", "--log", help="Sets the log level. Defaults to INFO.", default='INFO')
-
-def main(bucket, prefix, aws_access_key='', aws_secret_key='', log='info', aws_bucket_count=5):
+def main(bucket, aws_access_key='', aws_secret_key='', log='info', aws_bucket_count=5):
     global aws_key
     aws_key = aws_access_key
 
@@ -31,7 +30,12 @@ def main(bucket, prefix, aws_access_key='', aws_secret_key='', log='info', aws_b
     bucket = s3.get_bucket(bucket)
 
     sorted_results = get_results(bucket)
+
+    trim_by_day(bucket, sorted_results, aws_bucket_count)
+    #trim_by_count(bucket, sorted_results)
     
+
+def trim_by_count(bucket, sorted_results):
     for env, bags in sorted_results.items():
       logger.info("Working on the {env} environment.".format(env=env))
       for name, bag in bags.items():
@@ -54,6 +58,55 @@ def main(bucket, prefix, aws_access_key='', aws_secret_key='', log='info', aws_b
             bucket.delete_key(file_name)
           logger.info("Removed %s" % (file_name))
       
+
+# Retain 2 weeks of S3 data in prod and the most recent back-up in staging and sefault
+def trim_by_day(bucket,sorted_results,aws_bucket_count):
+    now = int(time.time())
+    num_days = aws_bucket_count
+    num_secs = int(num_days) * 24 * 60 * 60
+    oldest_timestamp = int(now - num_secs)
+    total_removed_files = 0
+    total_files = 0
+    #counts = {e:0 for e in sorted_results.keys()}
+    
+    for env, bags in sorted_results.items():
+      logger.info("Working on the {env} environment.".format(env=env))
+
+      for name, bag in bags.items():
+        logger.info("Working on the {name} bag.".format(name=name))
+        if env in ['_default', 'staging']:
+          logger.info("This is a {env} environment, overriding retention to a single back-up.".format(env=env))
+          removal_count = len(bag) - 1
+        else:
+          removal_count = len(bag) - int(aws_bucket_count) # Set a boundary in case there's less backups than days
+        count = 0
+
+        for timestamp, file_name in bag:
+          # If the timestamp on the file is older than our limit
+          # Majority of cases will fall here
+          if int(timestamp) < oldest_timestamp:
+            count+=1
+            if not debug:
+              bucket.delete_key(file_name)
+            logger.info("Removed %s" % (file_name))
+            continue
+
+          # If we've got an entry from a non-prod env, we need to wipe out all but 1
+          if env in ['_default', 'staging'] and count < removal_count:
+            count+=1
+            if not debug:
+              bucket.delete_key(file_name)
+            logger.info("Removed %s" % (file_name))
+            continue
+        total_removed_files+=count
+        total_files+=len(bag)
+        logger.info("Previous file count: {count}".format(count=len(bag)))
+        logger.info("Removed files: {total}".format(total=count))
+        logger.info("New file count: {count}".format(count=(len(bag)-count)))
+        logger.info("")
+    logger.info("Previous total file count: %d" % total_files)
+    logger.info("Total removed files: %d" % total_removed_files)
+    logger.info("New total file count: %d" % (total_files-total_removed_files))
 
 
 def get_results(bucket):
@@ -87,7 +140,6 @@ def get_results(bucket):
         results[env] = {}
       if bag not in results[env]:
         results[env][bag] = {}
-      #if timestamp not in results[env][bag]:
       results[env][bag][timestamp] = item
 
     sorted_results = {e: {b: Dict() for b in results[e].keys()} for e in results.keys()}
@@ -102,7 +154,7 @@ def get_results(bucket):
 
 if __name__ == "__main__":
   args = parser.parse_args()
-
+  logging.basicConfig(filename='s3trim_dryrun.log',level=logging.INFO)
   logger = logging.getLogger()
   exec("logger.setLevel(logging." + args.log.upper() + ")")
 
