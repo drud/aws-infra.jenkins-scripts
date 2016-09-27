@@ -74,6 +74,8 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
 
       for name, bag in bags.items():
         logger.info("Working on the {name} bag.".format(name=name))
+        
+        # Setup the counters
         if env in ['_default', 'staging']:
           logger.info("This is a {env} environment, overriding retention to a single back-up.".format(env=env))
           removal_count = len(bag) - 1
@@ -82,6 +84,10 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
         count = 0
 
         for timestamp, file_name in bag:
+          # If there's only our removal count left, bail, keep these always always
+          if count == removal_count:
+            break
+
           # If the timestamp on the file is older than our limit
           # Majority of cases will fall here
           if int(timestamp) < oldest_timestamp:
