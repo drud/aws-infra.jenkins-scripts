@@ -10,6 +10,7 @@ import re
 import time
 from collections import OrderedDict as Dict
 from boto.s3.connection import S3Connection
+import sys
 
 debug = True
 
@@ -85,7 +86,7 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
 
         for timestamp, file_name in bag:
           # If there's only our removal count left, bail, keep these always always
-          if count == removal_count:
+          if count+1 >= removal_count:
             break
 
           # If the timestamp on the file is older than our limit
@@ -110,6 +111,9 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
         logger.info("Removed files: {total}".format(total=count))
         logger.info("New file count: {count}".format(count=(len(bag)-count)))
         logger.info("")
+        if len(bag)-count <= 0:
+          logger.error("There were 0 files remaining on this removal. Something went wrong here. Bailing.")
+          sys.exit(1)
     logger.info("Previous total file count: %d" % total_files)
     logger.info("Total removed files: %d" % total_removed_files)
     logger.info("New total file count: %d" % (total_files-total_removed_files))
