@@ -84,15 +84,16 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
           removal_count = len(bag) - int(aws_bucket_count) # Set a boundary in case there's less backups than days
         count = 0
 
+        if len(bag) == 1:
+          continue
         for timestamp, file_name in bag:
-          # If there's only our removal count left, bail, keep these always always
-          if count+1 >= removal_count:
-            break
-
           # If the timestamp on the file is older than our limit
           # Majority of cases will fall here
           if int(timestamp) < oldest_timestamp:
             count+=1
+            # If there's only our removal count left, bail, keep these always always
+            if count >= removal_count:
+              break
             if not debug:
               bucket.delete_key(file_name)
             logger.info("Removed %s" % (file_name))
