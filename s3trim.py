@@ -90,10 +90,10 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
           # If the timestamp on the file is older than our limit
           # Majority of cases will fall here
           if int(timestamp) < oldest_timestamp:
-            count+=1
             # If there's only our removal count left, bail, keep these always always
             if count >= removal_count:
               break
+            count+=1
             if not debug:
               bucket.delete_key(file_name)
             logger.info("Removed %s" % (file_name))
@@ -104,7 +104,7 @@ def trim_by_day(bucket,sorted_results,aws_bucket_count):
             count+=1
             if not debug:
               bucket.delete_key(file_name)
-            logger.info("Removed %s" % (file_name))
+            logger.info("S Removed %s" % (file_name))
             continue
         total_removed_files+=count
         total_files+=len(bag)
