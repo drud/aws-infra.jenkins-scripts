@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Example usage:
-# python s3trim.py --count 14 --key=AKIAJXWDNYTONJLIGLYQ --secret=bELjuG3LfAAVT5pj1xmc5/6j8Ze8Yjn9fU9xquJK nmdarchive christest/production
+# python s3trim.py --count 14 --key=AWS_KEY --secret=AWS_SECRET_KEY nmdarchive christest/production
 
 import argparse
 import logging
