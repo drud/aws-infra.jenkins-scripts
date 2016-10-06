@@ -44,6 +44,6 @@ remove("/tmp/{domain_name}.key".format(domain_name=domain_name))
 print "Your cert files have been uploaded to the nmdarchive. To download them, copy paste the following text into iTerm:\n"
 print "mkdir ~/Downloads/{bucket} &&".format(bucket=bucket)
 print "cd ~/Downloads/{bucket} &&".format(bucket=bucket)
-print "nmd file get {bucket}/{domain_name}.key &&".format(bucket=bucket, domain_name=domain_name)
-print "nmd file get {bucket}/{domain_name}.csr &&".format(bucket=bucket, domain_name=domain_name)
-print "open ."
+print "drud file get {bucket}/{domain_name}.key &&".format(bucket=bucket, domain_name=domain_name)
+print "drud file get {bucket}/{domain_name}.csr &&".format(bucket=bucket, domain_name=domain_name)
+print "open .\n\n"
