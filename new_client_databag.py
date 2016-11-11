@@ -153,6 +153,12 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
             'provider': '',
             'username': '',
             'password': ''
+        },
+        'theme_license': {
+            'item_title': '',
+            'item_url': '',
+            'item_purchase_code': '',
+            'purchase_date': ''
         }
     }
     # Override the production hosts directive if we need to expand a group
@@ -251,7 +257,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         type_keys_default = {}
         type_keys_staging = {}
         type_keys_production = {}
-        
+
 
     # # Construct a new data bag
     # bag_item = Chef::DataBagItem.new
@@ -272,6 +278,3 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
 
 if __name__ == '__main__':
     create_bag()
-
-
-    
