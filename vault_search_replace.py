@@ -78,8 +78,7 @@ def find_and_replace(environment="staging", key="db_host", term="fake_db", new_t
 
   print "Searching for '{term}' in databags/nmdhosting/* and replacing matches with '{new_term}'".format(term=term, new_term=new_term)
   vault = get_vault_client()
-  #for site in vault.list('secret/databags/nmdhosting')['data']['keys']:
-  for site in ['christest']:
+  for site in vault.list('secret/databags/nmdhosting')['data']['keys']:
     site_data = vault.read("secret/databags/nmdhosting/{site}".format(site=site))['data']
     if key in site_data[environment] and site_data[environment][key] == term:
       print "Match in {site}[{env}][{key}]".format(site=site,env=environment, key=key)
