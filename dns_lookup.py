@@ -6,6 +6,7 @@ import time
 import dns.resolver
 import dns.query
 import dns.zone
+import sys
 
 @click.command()
 @click.option('--host', prompt="What host would you like to query?")
@@ -19,10 +20,12 @@ def dns_lookup(host, record_type, desired_value):
     answers = dns.resolver.query(host, record_type)
   except dns.resolver.NXDOMAIN:
     print "'{host}' did not have any '{type}' records associated with it".format(host=host, type=record_type)
-    return False
+    get_all_records(host)
+    sys.exit(1)
   except dns.resolver.NoAnswer:
     print "'{host}' did not have any '{type}' records associated with it".format(host=host, type=record_type)
-    return False
+    get_all_records(host)
+    sys.exit(1)
   
   if len(answers) == 1:
     record_value = answers[0]
@@ -33,18 +36,19 @@ def dns_lookup(host, record_type, desired_value):
   match_found = False
   for value in values:
     if str(value) == desired_value:
-      print "The {type} record for {host} is configured correctly. It is pointing to {desired_value}.".format(type=record_type, host=host, desired_value=desired_value)
+      print "The {type} record for {host} IS CONFIGURED CORRECLY. It is pointing to {desired_value}.".format(type=record_type, host=host, desired_value=desired_value)
       match_found = True
-      return True
+      sys.exit(0)
     else:
       print "There is a {type} record for {host}. It is pointing to {value}".format(type=record_type, host=host, value=str(value))
 
   if not match_found:
-    print "No matching record. Here are the current A and CNAME values for {host}:".format(host=host)
+    print "\nThis DNS record IS NOT CONFIGURED correctly".format(host=host)
     get_all_records(host)
-    return False
+    sys.exit(1)
 
 def get_all_records(host):
+  print "\nHere are the current A and CNAME values for {host}:".format(host=host)
   try:
     a_records = dns.resolver.query(host, 'A')
   except dns.resolver.NXDOMAIN:
