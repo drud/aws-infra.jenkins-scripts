@@ -124,13 +124,26 @@ $browser.get("%s").then(function(){
     print "\tSuccessfully added script to monitor with id {id}".format(id=monitor_id)
     return True
 
-def build_monitor(monitor_name, monitor_type, monitor_url=None, frequency=60, locations=["AWS_US_WEST_2"]):
+def build_monitor(monitor_name, 
+  monitor_type="SIMPLE", 
+  monitor_url=None, 
+  frequency=1, 
+  locations=[u'AWS_AP_NORTHEAST_1', u'AWS_AP_SOUTHEAST_1', u'AWS_AP_SOUTHEAST_2', u'AWS_EU_CENTRAL_1', u'AWS_EU_WEST_1', u'AWS_SA_EAST_1', u'AWS_US_EAST_1', u'AWS_US_WEST_1', u'AWS_US_WEST_2', u'LINODE_EU_WEST_1', u'LINODE_US_CENTRAL_1', u'LINODE_US_EAST_1', u'LINODE_US_SOUTH_1', u'LINODE_US_WEST_1'],
+  status="ENABLED",
+  validation_string="",
+  verify_ssl=""):
+  if verify_ssl == "":
+    verify_ssl = "true" if "https" in monitor_url else "false"
   monitor = {
     "name": monitor_name,
     "type": monitor_type,
     "frequency": frequency,
     "locations": locations,
-    "status": "ENABLED"
+    "status": status,
+    "options": {
+      "validationString": validation_string,
+      "verifySSL": verify_ssl
+    }
   }
   if monitor_url != None:
     monitor["uri"] = monitor_url

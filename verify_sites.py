@@ -1,9 +1,7 @@
-import databag
+import proxy as proxy_lib
 import requests
 import os
 import re
-
-
 
 def recompute_proxy_data(deploy_env):
     """
@@ -14,7 +12,7 @@ def recompute_proxy_data(deploy_env):
     variable. This function takes the proxy data and reorganizes
     it into something more digestible by ansible Jinja2 templates
     """
-    nmdproxy = databag.get_databag('upstream', 'nmdproxy')
+    nmdproxy = proxy_lib.get_proxy()
     proxy = {}
     for env_name, env in nmdproxy.items():
         if env_name == "id":
@@ -37,7 +35,7 @@ def recompute_proxy_data(deploy_env):
                             proxy[app_name]['env_name'] = env_name
                             proxy[app_name]['servers'] = '_redirect' if env_name == "_redirect" else top_level_app['servers']
                             proxy[app_name]['dest'] = '' if 'dest' not in app else app['dest']
-                            proxy[app_name]['protocol'] = 'https' if 'ssl' in app else 'http'
+                            proxy[app_name]['protocol'] = 'https' if 'ssl_force' in app else 'http'
                 else:
                     print "Could not process {app}".format(app=pool_name)
     return proxy
@@ -97,8 +95,8 @@ def diagnose_url(url, success, redirect, error, inconsistencies, authentication)
 
 if __name__ == '__main__':
 	deploy_env = "production"
-	user=os.environ.get("JENKINS_SERVICE_USERNAME")
-	password=os.environ.get("JENKINS_SERVICE_PASSWORD")
+	user=os.environ.get("GUEST_USER")
+	password=os.environ.get("GUEST_PASSWORD")
 	success = []
 	redirect = []
 	error = {403 : [], 500: [], 503: [], 504: [], 'cert': [], 'offline': [], 'unknown': []}
@@ -112,6 +110,8 @@ if __name__ == '__main__':
 		count += 1
 		# if count == 6:
 		# 	break
+		if url.endswith("nmdev.us"):
+			continue
 		diagnose_url(url, success, redirect, error, inconsistencies, authentication)
 
 	print "\nRECAP:"
