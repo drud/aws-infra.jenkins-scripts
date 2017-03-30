@@ -7,21 +7,38 @@ import hvac
 import os
 import requests.packages.urllib3
 
+file_name = "vault_token.txt"
+
 def get_vault_client():
     """
     Return a vault client if possible.
     """
     # Disable warnings for the insecure calls
     requests.packages.urllib3.disable_warnings()
+    token_type = "GITHUB|SANCTUARY"
     vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
-    vault_token = os.getenv('GITHUB_TOKEN', False)
+    sanctuary_token_path = os.path.join('/var/jenkins_home/workspace/ops-create-sanctuary-token/', file_name)
+    if os.path.exists(sanctuary_token_path):
+        with open(sanctuary_token_path, 'r') as fp:
+            vault_token = fp.read()
+            token_type = "SANCTUARY"
+    else:
+        vault_token = os.getenv("GITHUB_TOKEN")
+        token_type = "GITHUB"
+
     if not vault_addr or not vault_token:
-        print "You must provide both VAULT_ADDR and GITHUB_TOKEN environment variables."
-        print "(Have you authenticated with `drud secret auth` to create your GITHUB_TOKEN?)"
+        print "You must provide a GITHUB_TOKEN environment variables."
+        print "(Have you authenticated with drud using `drud auth github` to create your GITHUB_TOKEN?)"
         sys.exit(1)
 
-    vault_client = hvac.Client(url=vault_addr, verify=False)
-    vault_client.auth_github(vault_token)
+    if token_type == "SANCTUARY":
+        vault_client = hvac.Client(url=vault_addr, token=vault_token, verify=False)
+    elif token_type == "GITHUB":
+        vault_client = hvac.Client(url=vault_addr, verify=False)
+        vault_client.auth_github(vault_token)
+    else: # The token value was not overridden
+        print "Something went wrong."
+        sys.exit(1)
 
     if vault_client.is_initialized() and vault_client.is_sealed():
         print "Vault is initialized but sealed."
@@ -31,6 +48,7 @@ def get_vault_client():
         print "Could not get auth."
         sys.exit(1)
 
+    print "Using {t_type} for authentication.".format(t_type=token_type.lower())
     return vault_client
 
 def to_boolean(x):
