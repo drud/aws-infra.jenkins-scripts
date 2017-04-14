@@ -106,7 +106,7 @@ def diagnose_url(url, success, redirect, error, inconsistencies, authentication)
         elif r.status_code == 401:
             print "The credentials for {url} did not work. A 401 error was recieved. Please fix the credentials for the site.".format(url=url)
             logging.debug(p(r.headers))
-            sys.exit("Discontinuing run as it could lock out a user account.")
+            #sys.exit("Discontinuing run as it could lock out a user account.")
         else:
             error[r.status_code].append(url)
             # If we can get an actual error message, let's do it
@@ -223,7 +223,8 @@ if __name__ == '__main__':
         print "And of course, all the sites that are fine:"
         print "\t"+"\n\t".join(success)
 
-    print "\nA full trace including headers and errors can be found at file://{fpath}".format(pwd=os.path.join(os.getcwd(), 'trace.log'))
+    build_url=os.environ.get('BUILD_URL',os.path.join(os.getcwd(), 'trace.log'))
+    print "\nA full trace including headers and errors can be found at {build_url}".format(build_url=build_url)
 
 
 
