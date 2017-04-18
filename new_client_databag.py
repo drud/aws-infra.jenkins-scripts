@@ -16,7 +16,7 @@ def get_vault_client():
     # Disable warnings for the insecure calls
     requests.packages.urllib3.disable_warnings()
     token_type = "GITHUB|SANCTUARY"
-    vault_addr = os.getenv("VAULT_ADDR", "https://sanctuary.drud.io:8200")
+    vault_addr = os.getenv("VAULT_ADDR", "https://vault.drud.com:8200")
     sanctuary_token_path = os.path.join('/var/jenkins_home/workspace/ops-create-sanctuary-token/', file_name)
     if os.path.exists(sanctuary_token_path):
         with open(sanctuary_token_path, 'r') as fp:
@@ -127,9 +127,6 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'db_user_password': rand_string(),
         'server_aliases': [
             sitename + '.nmdev.us'
-        ],
-        'hosts': [
-            web_server_staging
         ]
     }
     production = {
@@ -141,9 +138,6 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'db_user_password': rand_string(),
         'server_aliases': [
             sitename + 'prod.nmdev.us'
-        ],
-        'hosts': [
-            web_server_prod
         ]
     }
     client_metadata = {
@@ -179,20 +173,6 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
             'purchase_date': ''
         }
     }
-    # Override the production hosts directive if we need to expand a group
-    if web_server_prod == 'webcluster01':
-        production['hosts'] = [
-            'web02.newmediadenver.com',
-            'web03.newmediadenver.com',
-            'web04.newmediadenver.com'
-        ]
-
-    # Override the staging hosts directive if we need to expand a group
-    if web_server_staging == 'webstagingcluster01':
-        staging['hosts'] = [
-            'web01.nmdev.us',
-            'web02.nmdev.us'
-        ]
 
     # xtradb specifics
     if db_server_production == 'mysql.newmediadenver.com':
