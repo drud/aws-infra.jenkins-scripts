@@ -67,13 +67,19 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   """
   vault_client = get_vault_client()
   proxy_databag = vault_client.read("secret/databags/nmdproxy/upstream")['data']
+
+  # Figure out if this is the DRUD or the NM Jenkins instance that this is running on
+  is_drud_jenkins = bool(int(os.getenv("IS_DRUD_JENKINS", "0")))
+
   if environment=='production':
-    site_entries = proxy_databag[environment]['webcluster01']['apps']
+    cluster_target = "drud-elb" if is_drud_jenkins else "webcluster01"
   elif environment=="staging":
-    site_entries = proxy_databag[environment]['web01']['apps']
+    cluster_target = "drud-elb" if is_drud_jenkins else "web01"
   else:
     raise Exception("Unrecognized environment of '{environment}. Available options are 'production' and 'development'".format(environment=environment))
     sys.exit(1)
+
+  site_entries = proxy_databag[environment][cluster_target]['apps']
 
   if operation == "add":
     site_entries[url] = {}
@@ -91,11 +97,8 @@ def site_proxy_entry(url, environment, operation, auth, www_force, ssl_force, ss
   else:
     print "Unrecognized operation of '{operation}'".format(operation=operation)
 
-  # Put it all back together
-  if environment=='production':
-    proxy_databag[environment]['webcluster01']['apps'] = site_entries
-  elif environment=="staging":
-    proxy_databag[environment]['web01']['apps'] = site_entries
+  # Put it all back together and write it out
+  proxy_databag[environment][cluster_target]['apps'] = site_entries
 
   vault_client.write('secret/databags/nmdproxy/upstream', **proxy_databag)
 
