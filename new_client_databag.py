@@ -67,8 +67,6 @@ def rand_string(num_digits=16, string_type=string.hexdigits):
 # admin_username = sys.argv[9]
 # #production_domain = sys.argv[10]
 # new_site = to_boolean(sys.argv[10])
-# web_server_staging = sys.argv[11]
-# web_server_prod = sys.argv[12]
 # wp_active_theme = sys.argv[14]
 # wp_multisite = to_boolean(sys.argv[13])
 
@@ -80,11 +78,11 @@ def rand_string(num_digits=16, string_type=string.hexdigits):
 @click.option('--db-server-production', type=click.STRING)
 @click.option('--admin-username', type=click.STRING)
 @click.option('--new-site', type=click.BOOL)
-@click.option('--web-server-staging', type=click.STRING)
-@click.option('--web-server-prod', type=click.STRING)
 @click.option('--wp-active-theme', type=click.STRING)
 @click.option('--wp-multisite', type=click.BOOL)
-def create_bag(sitename, site_type, db_server_local, db_server_staging, db_server_production, admin_username, new_site, web_server_staging, web_server_prod, wp_active_theme, wp_multisite):
+@click.option('--staging-url', type=click.STRING)
+@click.option('--production-url', type=click.STRING)
+def create_bag(sitename, site_type, db_server_local, db_server_staging, db_server_production, admin_username, new_site, wp_active_theme, wp_multisite, staging_url, production_url):
     if site_type == 'd7' or site_type == 'd8':
         site_type = 'drupal'
 
@@ -125,8 +123,11 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'revision': 'staging',
         'db_host': db_server_staging,
         'db_user_password': rand_string(),
+        'search_replace': [
+            'http://localhost:1025',
+        ],
         'server_aliases': [
-            sitename + '.nmdev.us'
+            staging_url
         ]
     }
     production = {
@@ -136,8 +137,12 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'revision': 'master',
         'db_host': db_server_production,
         'db_user_password': rand_string(),
+        'search_replace': [
+            'http://'+staging_url,
+            'https://'+staging_url
+        ],
         'server_aliases': [
-            sitename + 'prod.nmdev.us'
+            production_url
         ]
     }
     client_metadata = {
@@ -221,7 +226,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
             'secure_auth_salt': rand_string(48, 'base64'),
             'logged_in_salt': rand_string(48, 'base64'),
             'nonce_salt': rand_string(48, 'base64'),
-            'url': 'https://' + sitename + '.nmdev.us',
+            'url': 'https://' + staging_url,
             'active_theme': wp_active_theme,
             'multisite': wp_multisite
         }
@@ -234,7 +239,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
             'secure_auth_salt': rand_string(48, 'base64'),
             'logged_in_salt': rand_string(48, 'base64'),
             'nonce_salt': rand_string(48, 'base64'),
-            'url': 'https://' + sitename + 'prod.nmdev.us',
+            'url': 'https://' + production_url,
             'active_theme': wp_active_theme,
             'multisite': wp_multisite
         }
