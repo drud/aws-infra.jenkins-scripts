@@ -6,7 +6,7 @@ if [ -d $JENKINS_HOME/.git ]; then
 else
   cd $JENKINS_HOME
   git init
-  git remote add origin git@github.com:newmediadenver/jenkins.git
+  git remote add origin git@github.com:drud/aws-infra.jenkins-config-backup.git
 fi;
 
 # Move into the jenkins directory
@@ -26,7 +26,7 @@ git add users/*/config.xml
 git add userContent/*
 
 # Add plugins.
-git add plugins/*.hpi
+git add plugins/*.jpi
 
 # Commit the differences
 git status
@@ -40,6 +40,6 @@ git push origin master
 #   git log --pretty=format: --name-only --diff-filter=D | xargs git rm -f
 #   git commit -a -m "Automated removal of files."
 # fi
-# 
+#
 # Push the commit up to the remote repository.
 # git push origin master
