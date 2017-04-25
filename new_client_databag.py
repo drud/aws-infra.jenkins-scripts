@@ -20,7 +20,7 @@ def get_vault_client():
     sanctuary_token_path = os.path.join('/var/jenkins_home/workspace/ops-create-sanctuary-token/', file_name)
     if os.path.exists(sanctuary_token_path):
         with open(sanctuary_token_path, 'r') as fp:
-            vault_token = fp.read()
+            vault_token = fp.read().strip()
             token_type = "SANCTUARY"
     else:
         vault_token = os.getenv("GITHUB_TOKEN")
@@ -273,11 +273,14 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     bag_item['client_metadata'] = client_metadata
 
     client = get_vault_client()
-    secret = client.read('secret/databags/nmdhosting/' + sitename)
+    is_drud_jenkins = bool(int(os.getenv("IS_DRUD_JENKINS", "0")))
+    folder = 'drudhosting' if is_drud_jenkins else 'nmdhosting'
+    secret_path = 'secret/databags/{folder}/{site}'.format(folder=folder,site=sitename)
+    secret = client.read(secret_path)
     if secret and 'data' in secret:
-        raise Exception("A secret already exists at path: databags/nmdhosting/{site}. Please run this job again with a new site name.".format(site=sitename))
+        raise Exception("A secret already exists at path: {path}. Please run this job again with a new site name.".format(path=secret_path))
 
-    client.write('secret/databags/nmdhosting/' + sitename, **bag_item)
+    client.write(secret_path, **bag_item)
 
 if __name__ == '__main__':
     create_bag()
