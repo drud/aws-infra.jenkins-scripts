@@ -31,7 +31,7 @@ git add plugins/*.hpi
 # Commit the differences
 git status
 git commit -a -m "Automated commit of jenkins chaos"
-git merge -s ours origin/master
+#git merge -s ours origin/master
 git push origin master
 # Remove files from the remote repo that have been removed locally.
 # git log --pretty=format: --name-only --diff-filter=D
