@@ -26,7 +26,7 @@ git add users/*/config.xml
 git add userContent/*
 
 # Add plugins.
-git add plugins/*.hpi
+git add plugins/*.jpi
 
 # Commit the differences
 git status
