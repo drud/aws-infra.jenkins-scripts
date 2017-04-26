@@ -29,6 +29,12 @@ git add fingerprints/*/*/*.xml
 # Add plugins.
 git add plugins/*.jpi
 
+# Back-up the workspace directory
+git add workspace/*/*.xml
+
+# Capture known_hosts
+git add .ssh/known_hosts
+
 # Commit the differences
 git status
 git commit -a -m "Automated commit of jenkins chaos"
