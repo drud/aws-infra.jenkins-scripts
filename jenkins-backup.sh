@@ -1,6 +1,5 @@
 #!/bin/bash -xe
-env
-whoami
+
 if [ -d $JENKINS_HOME/.git ]; then
   cd $JENKINS_HOME
 else
@@ -25,6 +24,8 @@ git add users/*/config.xml
 # Add all user content files.
 git add userContent/*
 
+git add fingerprints/*/*/*.xml
+
 # Add plugins.
 git add plugins/*.jpi
 
@@ -40,6 +41,6 @@ git push origin master
 #   git log --pretty=format: --name-only --diff-filter=D | xargs git rm -f
 #   git commit -a -m "Automated removal of files."
 # fi
-# 
+#
 # Push the commit up to the remote repository.
 # git push origin master
