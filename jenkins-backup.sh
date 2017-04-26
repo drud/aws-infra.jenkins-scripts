@@ -1,12 +1,12 @@
 #!/bin/bash -xe
 env
-
+whoami
 if [ -d $JENKINS_HOME/.git ]; then
   cd $JENKINS_HOME
 else
   cd $JENKINS_HOME
   git init
-  git remote add origin git@github.com:drud/aws-infra-jenkins-config-backup.git
+  git remote add origin git@github.com:drud/aws-infra.jenkins-backup.git
 fi;
 
 # Move into the jenkins directory
@@ -26,12 +26,12 @@ git add users/*/config.xml
 git add userContent/*
 
 # Add plugins.
-git add plugins/*
+git add plugins/*.jpi
 
 # Commit the differences
 git status
 git commit -a -m "Automated commit of jenkins chaos"
-git merge -s ours origin/master
+#git merge -s ours origin/master
 git push origin master
 # Remove files from the remote repo that have been removed locally.
 # git log --pretty=format: --name-only --diff-filter=D
