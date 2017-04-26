@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 env
-
+whoami
 if [ -d $JENKINS_HOME/.git ]; then
   cd $JENKINS_HOME
 else
