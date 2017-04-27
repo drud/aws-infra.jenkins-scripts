@@ -1,6 +1,5 @@
 #!/bin/bash -xe
-env
-whoami
+
 if [ -d $JENKINS_HOME/.git ]; then
   cd $JENKINS_HOME
 else
@@ -25,8 +24,16 @@ git add users/*/config.xml
 # Add all user content files.
 git add userContent/*
 
+git add fingerprints/*/*/*.xml
+
 # Add plugins.
 git add plugins/*.jpi
+
+# Back-up the workspace directory
+git add workspace/*/*.xml
+
+# Capture known_hosts
+git add .ssh/known_hosts
 
 # Commit the differences
 git status
