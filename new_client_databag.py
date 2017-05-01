@@ -82,7 +82,22 @@ def rand_string(num_digits=16, string_type=string.hexdigits):
 @click.option('--wp-multisite', type=click.BOOL)
 @click.option('--staging-url', type=click.STRING)
 @click.option('--production-url', type=click.STRING)
-def create_bag(sitename, site_type, db_server_local, db_server_staging, db_server_production, admin_username, new_site, wp_active_theme, wp_multisite, staging_url, production_url):
+@click.option('--admin-mail', type=click.STRING)
+@click.option('--github-org', type=click.STRING)
+def create_bag(sitename,
+    site_type,
+    db_server_local,
+    db_server_staging,
+    db_server_production,
+    admin_username,
+    new_site,
+    wp_active_theme,
+    wp_multisite,
+    staging_url,
+    production_url,
+    admin_mail,
+    github_org):
+
     if site_type == 'd7' or site_type == 'd8':
         site_type = 'drupal'
 
@@ -92,7 +107,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
         'site_type': site_type,
         'apache_owner': 'nginx',
         'apache_group': 'nginx',
-        'admin_mail': 'accounts@newmediadenver.com',
+        'admin_mail': admin_mail,
         'db_name': sitename,
         'db_username': sitename + '_db',
         'php': {
@@ -105,7 +120,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     default = {
         'admin_username': admin_username,
         'admin_password': rand_string(),
-        'repository': 'git@github.com:newmediadenver/' + sitename + '.git',
+        'repository': 'git@github.com:{org}/{site}.git'.format(org=github_org, site=sitename),
         'revision': 'staging',
         'db_host': db_server_local,
         'db_user_password': rand_string(),
@@ -119,7 +134,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     staging = {
         'admin_username': admin_username,
         'admin_password': rand_string(),
-        'repository': 'git@github.com:newmediadenver/' + sitename + '.git',
+        'repository': 'git@github.com:{org}/{site}.git'.format(org=github_org, site=sitename),
         'revision': 'staging',
         'db_host': db_server_staging,
         'db_user_password': rand_string(),
@@ -133,7 +148,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     production = {
         'admin_username': admin_username,
         'admin_password': rand_string(),
-        'repository': 'git@github.com:newmediadenver/' + sitename + '.git',
+        'repository': 'git@github.com:{org}/{site}.git'.format(org=github_org, site=sitename),
         'revision': 'master',
         'db_host': db_server_production,
         'db_user_password': rand_string(),
@@ -178,15 +193,6 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
             'purchase_date': ''
         }
     }
-
-    # xtradb specifics
-    if db_server_production == 'mysql.newmediadenver.com':
-        xtradb = {
-            'db_port': '3307',
-            'custom_port': 'enabled'
-        }
-    else:
-        xtradb = {}
 
 
     # new site
@@ -269,7 +275,7 @@ def create_bag(sitename, site_type, db_server_local, db_server_staging, db_serve
     bag_item['id'] = sitename
     bag_item['_default'] = dict(common.items() + default.items() + type_keys_default.items())
     bag_item['staging'] = dict(common.items() + staging.items() + type_keys_staging.items())
-    bag_item['production'] = dict(common.items() + production.items() + xtradb.items() + type_keys_production.items())
+    bag_item['production'] = dict(common.items() + production.items() + type_keys_production.items())
     bag_item['client_metadata'] = client_metadata
 
     client = get_vault_client()
