@@ -9,17 +9,17 @@ import os
 import requests
 
 @click.command()
+@click.option('--jenkins-url', help="The URL of the Jenkins instance to connect to")
 @click.option('--environment', prompt='Environment', help='Environment e.g. production, staging')
 @click.option('--chef-action', prompt='Chef action', help='e.g. update, backup', type=click.Choice(['update', 'delete', 'backup']))
 @click.option('--bag-name', default=None, help="If set, will only trigger the job on the single bag specified")
-def trigger_web_jobs(environment, chef_action, bag_name):
+def trigger_web_jobs(jenkins_url, environment, chef_action, bag_name):
     """
     Trigger a mass web job based on environment
     :param environment - Which environment would you like to try executing this job on?
     :param chef_action - What would you like to perform on this environment?
     :param bag_name - Optional - what bag woud you specifically like to work on in this environment?
     """
-    jenkins_url = 'https://leroy.nmdev.us'
 
     print "Connecting to Jenkins..."
     try:
